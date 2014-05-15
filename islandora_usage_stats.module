@@ -1,0 +1,162 @@
+<?php
+
+/**
+ * @file
+ * 
+ */
+
+
+/**
+ * Implementation of hook_menu().
+ */
+function islandora_usage_stats_menu() {
+
+  $items = array();
+
+  $items['download_ds/%/%'] = array(
+    'title' => 'Download datastream',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_usage_stats_download_ds_form', 1, 2),
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/settings/islandora_usage_stats'] = array(
+    'title' => 'Islandora Usage Tracking Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_usage_stats_admin_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('manage tracking'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+function islandora_usage_stats_permission() {
+  return array(
+  		'Manage usage stats' => array(
+		  	'title' => t('Manage usage tracking'),
+		    'description' => t('Manage usage tracking for the Islandora Usage Stats module'),
+  		),
+  );
+}
+
+function islandora_usage_stats_download_ds_form(array &$form_state, $pid, $dsid) {
+  global $base_url;
+  module_load_include('inc', 'islandora_usage_stats', 'islandora_usage_stats');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $track = new islandora_usage_stats($pid);
+  $result = $track->add_ds_count($dsid);
+  $url = $base_url . '/fedora/repository/' . $pid . '/' . $dsid . '/content';
+  $object = new Fedora_Item($pid);
+  $info = $object->get_datastream_info($dsid);
+  $mime_type = $info->datastream->MIMEType;
+  $extension = system_mime_type_extension($mime_type);
+  $file = $object->get_datastream_dissemination($dsid);
+  $ds_name = $info->datastream->ID;
+  if ($file != NULL) {
+    drupal_add_http_header("Content-type: application/x-unknown; utf-8");
+    drupal_add_http_header("Content-Disposition: attachment; filename=" . $pid . '-' . $ds_name . '.' . $extension);
+    echo $file;
+    exit;
+  }
+  else {
+    drupal_set_message(t('Specified file does not exist!'));
+  }
+}
+
+function system_mime_type_extensions() {
+  // Returns the system MIME type mapping of MIME types to extensions, as defined in /etc/mime.types (considering the first
+  // extension listed to be canonical).
+  $out = array();
+  $file = fopen('/etc/mime.types', 'r');
+  while (($line = fgets($file)) !== FALSE) {
+    $line = trim(preg_replace('/#.*/', '', $line));
+    if (!$line)
+      continue;
+    $parts = preg_split('/\s+/', $line);
+    if (count($parts) == 1)
+      continue;
+    $type = array_shift($parts);
+    if (!isset($out[$type]))
+      $out[$type] = array_shift($parts);
+  }
+  fclose($file);
+  return $out;
+}
+
+function system_mime_type_extension($type) {
+  // Returns the canonical file extension for the MIME type specified, as defined in /etc/mime.types (considering the first
+  // extension listed to be canonical).
+  //
+    // $type - the MIME type
+  static $exts;
+  if (!isset($exts))
+    $exts = system_mime_type_extensions();
+  return isset($exts[$type]) ? $exts[$type] : NULL;
+}
+
+function islandora_usage_stats_admin_settings() {
+  module_load_include('inc', 'islandora_usage_stats', 'islandora_usage_stats.admin');
+  $form = array();
+
+  $form['tracking'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Omit IPs'),
+    '#description' => t('Add IP addresses that you want to omit from the tracking'),
+  );
+
+  $form['tracking']['islandora_usage_stats_ip_list'] = array(
+    '#type' => 'textarea',
+    '#description' => t('Add IPs separated by spaces'),
+    '#default_value' => variable_get('islandora_usage_stats_ip_list', 'localhost 127.0.0.1'),
+  );
+  
+  $form['clear'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Clear values'),
+  );
+  
+  $form['clear']['options'] = array(
+    '#value' => drupal_get_form('islandora_usage_stats_admin_form'),
+  );
+
+  return system_settings_form($form);
+}
+
+
+// function scholar_tracking_islandora_view_object($object, $user, $page_number) {
+
+// 	$track = new islandora_scholar_tracking($object->id);
+// 	$track->add_page_count();
+// 	$read = $track->read_page_count();
+// 	$time_last_viewed = $read[($read['count'] - 1)];
+// 	if ($time_last_viewed == NULL) {
+// 		$time_last_viewed = 'Never';
+// 	}
+	
+// // 	$variables = array(
+// // 			'times_read' => $read['count'],
+// // 	);
+// 	drupal_set_message(t('Object has been accessed ' . $read['count'] . ' times'));
+
+// }
+
+function islandora_usage_stats_preprocess_islandora_pdf(&$variables) {
+	$islandora_object = $variables['islandora_object'];
+	$id = $islandora_object->id;
+	
+	$track = new islandora_usage_stats($id);
+	$track->add_page_count();
+	$read = $track->read_page_count();
+	
+	$time_last_viewed = $read[($read['count'] - 1)];
+	if ($time_last_viewed == NULL) {
+		$time_last_viewed = 'Never';
+	}
+	
+	$variables['times_read'] = $read['count'];
+}
+

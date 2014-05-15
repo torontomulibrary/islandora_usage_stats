@@ -1,0 +1,77 @@
+<?php
+
+/**
+ * @file
+ */
+
+function islandora_usage_stats_schema() {
+    $schema['islandora_usage_stats_page_tracking'] = array(
+      'description' => 'This table is used to store the usage information for fedora objects',
+      'fields' => array(
+        'id' => array(
+          'type' => 'serial',
+          'not null' => TRUE,
+        ),
+        'pid' => array(
+          'description' => 'PID of the object',
+          'type' => 'varchar',
+          'length' => 64,
+          'not null' => TRUE,
+        ),
+        'time' => array(
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'user' => array(
+          'description' => 'Drupal user that accessed the object',
+          'type' => 'varchar',
+          'length' => 64,
+          'not null' => TRUE,
+        ),
+      ),
+      'primary key' => array('id'),
+      'indexes' => array(
+        'pid' => array('pid'),
+      ),
+    );
+    
+    $schema['islandora_usage_stats_ds_tracking'] = array(
+      'description' => 'This table is used to store the tracking information for fedora datastreams',
+      'fields' => array(
+        'id' => array(
+          'type' => 'serial',
+          'not null' => TRUE,
+        ),
+        'pid' => array(
+          'description' => 'PID of the object',
+          'type' => 'varchar',
+          'length' => 64,
+          'not null' => TRUE,
+        ),
+        'dsid' => array(
+          'description' => 'Datastream ID',
+          'type' => 'varchar',
+          'length' => 64,
+          'not null' => TRUE,
+        ),
+        'time' => array(
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'user' => array(
+          'description' => 'Drupal user that accessed the object',
+          'type' => 'varchar',
+          'length' => 64,
+          'not null' => TRUE,
+        ),
+      ),
+      'primary key' => array('id'),
+      'indexes' => array(
+        'pid' => array('pid'),
+        'dsid' => array('dsid'),
+      ),
+    );
+    return $schema;
+}
