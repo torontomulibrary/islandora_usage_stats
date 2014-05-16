@@ -23,6 +23,12 @@ function islandora_usage_stats_schema() {
           'not null' => TRUE,
           'default' => 0,
         ),
+        'ip' => array(
+        	'description' => 'IP of user that accessed the object',
+          'type' => 'varchar',
+          'length' => 64,
+          'not null' => TRUE,
+        ),
         'user' => array(
           'description' => 'Drupal user that accessed the object',
           'type' => 'varchar',
@@ -59,6 +65,12 @@ function islandora_usage_stats_schema() {
           'type' => 'int',
           'not null' => TRUE,
           'default' => 0,
+        ),
+        'ip' => array(
+          'description' => 'IP of user that accessed the object',
+          'type' => 'varchar',
+          'length' => 64,
+          'not null' => TRUE,
         ),
         'user' => array(
           'description' => 'Drupal user that accessed the object',

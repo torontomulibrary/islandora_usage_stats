@@ -22,13 +22,34 @@ function islandora_usage_stats_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $items['admin/settings/islandora_usage_stats'] = array(
-    'title' => 'Islandora Usage Tracking Settings',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('islandora_usage_stats_admin_settings'),
-    'access callback' => 'user_access',
-    'access arguments' => array('manage tracking'),
-    'type' => MENU_NORMAL_ITEM,
+//   $items['admin/settings/islandora_usage_stats'] = array(
+//     'title' => 'Islandora Usage Tracking Settings',
+//     'page callback' => 'drupal_get_form',
+//     'page arguments' => array('islandora_usage_stats_admin_settings'),
+//     'access callback' => 'user_access',
+//     'access arguments' => array('manage tracking'),
+//     'type' => MENU_NORMAL_ITEM,
+//   );
+  
+  $items['admin/config/islandora_usage_stats'] = array(
+  	'title' => 'Islandora Usage Stats',
+  	'description' => 'Adjust viewing stats options',
+    'position' => 'right',
+  	'weight' => -5,
+  	'page callback' => 'system_admin_menu_block_page',
+  	'access arguments' => array('Manage usage tracking'),
+  	'file' => 'system.admin.inc',
+  	'file path' => drupal_get_path('module', 'system'),
+  );
+  
+  $items['admin/config/islandora_usage_stats/settings'] = array(
+  	'title' => 'Islandora Usage Stats settings',
+  	'description' => 'Change how usage stats behave.',
+  	'page callback' => 'drupal_get_form',
+  	'page arguments' => array('islandora_usage_stats_admin_settings'),
+  	'access arguments' => array('Manage usage tracking'),
+  	'type' => MENU_NORMAL_ITEM,
+  	'file' => 'islandora_usage_stats.admin.inc',
   );
 
   return $items;
@@ -42,6 +63,7 @@ function islandora_usage_stats_permission() {
   		),
   );
 }
+
 
 function islandora_usage_stats_download_ds_form(array &$form_state, $pid, $dsid) {
   global $base_url;
@@ -98,33 +120,7 @@ function system_mime_type_extension($type) {
   return isset($exts[$type]) ? $exts[$type] : NULL;
 }
 
-function islandora_usage_stats_admin_settings() {
-  module_load_include('inc', 'islandora_usage_stats', 'islandora_usage_stats.admin');
-  $form = array();
 
-  $form['tracking'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Omit IPs'),
-    '#description' => t('Add IP addresses that you want to omit from the tracking'),
-  );
-
-  $form['tracking']['islandora_usage_stats_ip_list'] = array(
-    '#type' => 'textarea',
-    '#description' => t('Add IPs separated by spaces'),
-    '#default_value' => variable_get('islandora_usage_stats_ip_list', 'localhost 127.0.0.1'),
-  );
-  
-  $form['clear'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Clear values'),
-  );
-  
-  $form['clear']['options'] = array(
-    '#value' => drupal_get_form('islandora_usage_stats_admin_form'),
-  );
-
-  return system_settings_form($form);
-}
 
 
 // function scholar_tracking_islandora_view_object($object, $user, $page_number) {
@@ -144,19 +140,33 @@ function islandora_usage_stats_admin_settings() {
 
 // }
 
-function islandora_usage_stats_preprocess_islandora_pdf(&$variables) {
-	$islandora_object = $variables['islandora_object'];
-	$id = $islandora_object->id;
-	
-	$track = new islandora_usage_stats($id);
-	$track->add_page_count();
-	$read = $track->read_page_count();
-	
-	$time_last_viewed = $read[($read['count'] - 1)];
-	if ($time_last_viewed == NULL) {
-		$time_last_viewed = 'Never';
-	}
-	
-	$variables['times_read'] = $read['count'];
+function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
+{
+    $islandora_object = $variables['islandora_object'];
+    $id = $islandora_object->id;
+    
+    $track = new islandora_usage_stats($id);
+    
+    $usersLastViewedTime = $track->get_last_view_time_for_ip();
+    
+    if (!$usersLastViewedTime) { // user has never viewed item before
+        $track->add_page_count();
+    } else {
+        // was the last time viewed more than 5 minutes ago?
+        if ($usersLastViewedTime + (5 * 60) < time()) {
+            // count it
+            $track->add_page_count();
+        }
+    }
+    
+    // $track->add_page_count();
+    $read = $track->read_page_count();
+    
+    $time_last_viewed = $read[($read['count'] - 1)];
+    if ($time_last_viewed == NULL) {
+        $time_last_viewed = 'Never';
+    }
+    
+    $variables['times_read'] = $read['count'];
 }
 

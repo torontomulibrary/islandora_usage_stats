@@ -1,5 +1,45 @@
 <?php
 
+/**
+ * @file
+ * Administration page callbacks for the islandora usage stats module.
+ */
+
+
+/**
+ * Form builder. Configure usage stats.
+ *
+ * @ingroup forms
+ * @see system_settings_form().
+ */
+function islandora_usage_stats_admin_settings() {
+	$form = array();
+
+	$form['tracking'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('Omit IPs'),
+			'#description' => t('Add IP addresses that you want to omit from the tracking'),
+	);
+
+	$form['tracking']['islandora_usage_stats_ip_list'] = array(
+			'#type' => 'textarea',
+			'#description' => t('Add IPs separated by spaces'),
+			'#default_value' => variable_get('islandora_usage_stats_ip_list', 'localhost 127.0.0.1'),
+	);
+
+	$form['clear'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('Clear values'),
+	);
+
+	$form['clear']['options'] = array(
+			'#value' => drupal_get_form('islandora_usage_stats_admin_form'),
+	);
+
+	return system_settings_form($form);
+}
+
+
 function islandora_usage_stats_admin_form($form_state) {
 
   $form['tracking']['page'] = array(
@@ -51,13 +91,13 @@ function islandora_usage_stats_admin_form_submit($form, &$form_state) {
   switch ($button) {
     case 'edit-clear-page-by-pid-submit':
       $pid = $form_state['values']['clear_page_by_pid'];
-      $result = islandora_usage_stats_clear_tracking('islandora_scholar_page_tracking', $pid);
+      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_page_tracking', $pid);
       if ($result) {
         drupal_set_message(t("Page tracking for PID '@pid' deleted!", array('@pid' => $pid)));
       }
       break;
     case 'edit-clear-page-all':
-      $result = islandora_usage_stats_clear_tracking('islandora_scholar_page_tracking');
+      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_page_tracking');
       if ($result) {
         drupal_set_message(t('All page tracking deleted!'));
       }
@@ -83,10 +123,14 @@ function islandora_usage_stats_admin_form_submit($form, &$form_state) {
 function islandora_usage_stats_clear_tracking($table, $pid = NULL) {
   $result = '';
   if ($pid == NULL) {
-    $result = db_query("TRUNCATE TABLE %s", $table);
+    //$result = db_query("TRUNCATE TABLE %s", $table);
+		$result = db_truncate($table)->execute();
   }
   else {
-    $result = db_query("DELETE FROM {%s} WHERE pid = '%s'", $table, $pid);
+    //$result = db_query("DELETE FROM {%s} WHERE pid = '%s'", $table, $pid);
+    $result = db_delete($table)
+    						->condition('pid', $pid)
+    						->execute();
   }
   return $result;
 }
