@@ -191,8 +191,8 @@ function scholar_tracking_islandora_view_object($object, $user, $page_number) {
   if (!$usersLastViewedTime) { // user has never viewed item before
       $track->add_page_count();
   } else {
-      $cooldown_time = variable_get('islandora_usage_stats_cooldown_seconds', 3000); // 5 minute default
-      // was the last time viewed more than X minutes ago?
+      $cooldown_time = variable_get('islandora_usage_stats_cooldown_seconds', 300); // 5 minute default
+      // was the last time viewed more than X seconds ago?
       if ($usersLastViewedTime + ($cooldown_time) < time()) {
           // count it
           $track->add_page_count();

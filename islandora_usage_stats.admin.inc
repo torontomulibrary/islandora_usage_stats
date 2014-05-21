@@ -31,7 +31,7 @@ function islandora_usage_stats_admin_settings() {
 		  '#type' => 'textfield',
 	    '#title' => 'Cooldown time (in seconds)',
 	    '#description' => t('The number of seconds to wait before counting a repeated view request from the same IP'),
-	    '#default_value' => variable_get('islandora_usage_stats_cooldown_seconds', '3000'),
+	    '#default_value' => variable_get('islandora_usage_stats_cooldown_seconds', '300'),
 	);
 	
 	$form['clear'] = array(
