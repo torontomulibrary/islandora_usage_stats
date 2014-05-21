@@ -47,6 +47,7 @@ Creates new variables in the $variables array to allow templates to display view
 ```
 
 ##Variables available:
+- islandora_download_link: rewritten to redirect to a transparent page to track downloads
 - times_viewed: How many times the item has been viewed
 - time_last_viewed: The datetime of the last recorded view
 - times_downloaded: How many times the item has been downloaded
