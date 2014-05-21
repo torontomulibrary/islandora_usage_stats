@@ -27,6 +27,13 @@ function islandora_usage_stats_admin_settings() {
 			'#default_value' => variable_get('islandora_usage_stats_ip_list', 'localhost 127.0.0.1'),
 	);
 
+	$form['tracking']['islandora_usage_stats_cooldown_seconds'] = array(
+		  '#type' => 'textfield',
+	    '#title' => 'Cooldown time (in seconds)',
+	    '#description' => t('The number of seconds to wait before counting a repeated view request from the same IP'),
+	    '#default_value' => variable_get('islandora_usage_stats_cooldown_seconds', '3000'),
+	);
+	
 	$form['clear'] = array(
 			'#type' => 'fieldset',
 			'#title' => t('Clear values'),

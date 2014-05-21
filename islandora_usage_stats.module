@@ -5,11 +5,6 @@
  * 
  */
 
-/** Number of minutes to wait between counting consecutive views of an item
- * from the same IP
- */
-define('USAGE_TRACKING_IP_COOLDOWN', 5);
-
 /**
  * Implementation of hook_menu().
  */
@@ -196,8 +191,9 @@ function scholar_tracking_islandora_view_object($object, $user, $page_number) {
   if (!$usersLastViewedTime) { // user has never viewed item before
       $track->add_page_count();
   } else {
+      $cooldown_time = variable_get('islandora_usage_stats_cooldown_seconds', 3000); // 5 minute default
       // was the last time viewed more than X minutes ago?
-      if ($usersLastViewedTime + (USAGE_TRACKING_IP_COOLDOWN * 60) < time()) {
+      if ($usersLastViewedTime + ($cooldown_time) < time()) {
           // count it
           $track->add_page_count();
       }
