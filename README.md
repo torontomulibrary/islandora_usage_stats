@@ -47,7 +47,7 @@ Creates new variables in the $variables array to allow templates to display view
 ```
 
 ##Variables available:
-- times_read: How many times the item has been viewed
+- times_viewed: How many times the item has been viewed
 - time_last_viewed: The datetime of the last recorded view
 - times_downloaded: How many times the item has been downloaded
 - time_last_downloaded:  The datetime of the last download
