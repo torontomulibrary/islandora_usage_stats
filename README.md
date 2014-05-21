@@ -7,10 +7,10 @@ Work based on code from https://github.com/roblib/islandora_scholar_upei and the
 
 Creates new variables in the $variables array to allow templates to display view count and download count of Islandora items.
 
-##Example without tracking:
+##Example template file without tracking:
 ```php
 <div class="islandora-pdf-content-wrapper clearfix">
-	<?php if (isset($islandora_content)): ?>
+  <?php if (isset($islandora_content)): ?>
   <div class="islandora-pdf-content">
     <?php print $islandora_content; ?>
   </div>
@@ -21,10 +21,10 @@ Creates new variables in the $variables array to allow templates to display view
 </div>
 ```
 
-##Example with tracking
+##Example template file with tracking
 ```php
 <div class="islandora-pdf-content-wrapper clearfix">
-	<?php if (isset($islandora_content)): ?>
+  <?php if (isset($islandora_content)): ?>
   <div class="islandora-pdf-content">
     <?php print $islandora_content; ?>
   </div>
