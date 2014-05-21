@@ -53,9 +53,6 @@ class islandora_usage_stats {
   			)
   	);
   	$lastViewTime = $result->fetchField(0);
-  	if (!$lastViewTime) {
-  		return false;
-  	}
   	return $lastViewTime;
   }
   
@@ -83,6 +80,7 @@ class islandora_usage_stats {
 					    					':dsid' => $dsid,
 					    		)
     );
+    $array = array();
 		foreach ($result as $record) {
       if ($record->time == '') {
         $array[] = 'Never';

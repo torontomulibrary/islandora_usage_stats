@@ -13,13 +13,25 @@ function islandora_usage_stats_menu() {
 
   $items = array();
 
+  /**
+   * Internal route with 2 wildcard matches
+   */
+//   $items['download_ds/%/%'] = array(
+//     'title' => 'Download datastream',
+//     'page callback' => 'drupal_get_form',
+//     'page arguments' => array('islandora_usage_stats_download_ds_form', 1, 2),
+//     'access callback' => 'user_access',
+//     'access arguments' => array('access content'),
+//     'type' => MENU_CALLBACK,
+//   );
+  
   $items['download_ds/%/%'] = array(
-    'title' => 'Download datastream',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('islandora_usage_stats_download_ds_form', 1, 2),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
+      'title' => 'Download datastream',
+      'page callback' => 'islandora_usage_stats_download_ds_form',
+      'page arguments' => array(1, 2),
+      'access callback' => 'user_access',
+      'access arguments' => array('access content'),
+      'type' => MENU_CALLBACK,
   );
 
 //   $items['admin/settings/islandora_usage_stats'] = array(
@@ -64,23 +76,65 @@ function islandora_usage_stats_permission() {
   );
 }
 
-
-function islandora_usage_stats_download_ds_form(array &$form_state, $pid, $dsid) {
+/**
+ * Form called when paths with link 'download_ds/$pid/$dsid' are clicked
+ */ 
+// function islandora_usage_stats_download_ds_form(array &$form_state, $pid, $dsid) {
+function islandora_usage_stats_download_ds_form($pid, $dsid) {
+  //drupal_set_message('Recieved $pid: ' . $pid . ' and $dsid: ' . $dsid);
   global $base_url;
-  module_load_include('inc', 'islandora_usage_stats', 'islandora_usage_stats');
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  $track = new islandora_usage_stats($pid);
-  $result = $track->add_ds_count($dsid);
-  $url = $base_url . '/fedora/repository/' . $pid . '/' . $dsid . '/content';
-  $object = new Fedora_Item($pid);
-  $info = $object->get_datastream_info($dsid);
-  $mime_type = $info->datastream->MIMEType;
+  //module_load_include('inc', 'islandora_usage_stats', 'islandora_usage_stats');
+  //module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  
+  //$object = new Fedora_Item($pid);
+  $object = islandora_object_load($pid);
+  
+//   $url = $base_url . '/fedora/repository/' . $pid . '/' . $dsid . '/content';
+  
+  if (!$object) {
+    drupal_set_message(t('Object could not be loaded from islandora!'));
+    return;
+  }
+  
+  $sanitized_label = preg_replace('/[^A-Za-z0-9_\-]|\.pdf$/', '_', $object->label);
+  $download_url = 'islandora/object/' . $object->id . '/datastream/OBJ/download/' . $sanitized_label . '.pdf';
+  
+  //$info = $object->get_datastream_info($dsid);
+//   $datastream = $object->getDatastream($dsid); // same as $object['DSID']
+  $datastream = $object[$dsid];
+  
+  if (!$datastream) {
+      drupal_set_message(t('Could not get datastream, id: ' . $pid . ' , dsid: ' . $dsid));
+      return;
+  }
+  
+  //$mime_type = $info->datastream->MIMEType;
+  $mime_type = $datastream->mimeType;
+  
+  if (!$mime_type) {
+    drupal_set_message(t('Could not get mimetype'));
+    return;
+  }
+  
   $extension = system_mime_type_extension($mime_type);
-  $file = $object->get_datastream_dissemination($dsid);
-  $ds_name = $info->datastream->ID;
-  if ($file != NULL) {
-    drupal_add_http_header("Content-type: application/x-unknown; utf-8");
-    drupal_add_http_header("Content-Disposition: attachment; filename=" . $pid . '-' . $ds_name . '.' . $extension);
+  
+  //$file = $object->get_datastream_dissemination($dsid);
+  $file = '';
+  $file = $datastream->getContent($file);
+  
+  //$ds_name = $info->datastream->ID;
+  $ds_name = $datastream->id;
+  
+  // track the download 
+  $track = new islandora_usage_stats($pid);
+  $result = $track->add_ds_count($ds_name); // increase data stream tracking number by 1
+//   $result = $track->add_ds_count($dsid); // increase data stream tracking number by 1
+  
+  // redirect to the file or error
+  if ($file) {
+    drupal_add_http_header('Content-type', 'application/x-unknown; utf-8');
+//     drupal_add_http_header("Content-Disposition: attachment; filename=" . $pid . '-' . $ds_name . '.' . $extension);
+    drupal_add_http_header('Content-Disposition', 'attachment; filename' . $sanitized_label);
     echo $file;
     exit;
   }
@@ -122,23 +176,35 @@ function system_mime_type_extension($type) {
 
 
 
+/**
+ * Implements hook_islandora_view_object to track usage stats 
+ * 
+ * @param unknown $object the islandora object
+ * @param unknown $user the user accessing the object
+ * @param unknown $page_number
+ */
+function scholar_tracking_islandora_view_object($object, $user, $page_number) {
 
-// function scholar_tracking_islandora_view_object($object, $user, $page_number) {
-
-// 	$track = new islandora_scholar_tracking($object->id);
-// 	$track->add_page_count();
-// 	$read = $track->read_page_count();
-// 	$time_last_viewed = $read[($read['count'] - 1)];
-// 	if ($time_last_viewed == NULL) {
-// 		$time_last_viewed = 'Never';
-// 	}
+  $track = new islandora_usage_stats($object->id);
 	
-// // 	$variables = array(
-// // 			'times_read' => $read['count'],
-// // 	);
+  $usersLastViewedTime = $track->get_last_view_time_for_ip();
+  
+  if (!$usersLastViewedTime) { // user has never viewed item before
+      $track->add_page_count();
+  } else {
+      // was the last time viewed more than 5 minutes ago?
+      if ($usersLastViewedTime + (5 * 60) < time()) {
+          // count it
+          $track->add_page_count();
+      }
+  }
+  
+  // to be removed, for testing
+//   $read = $track->read_page_count();
 // 	drupal_set_message(t('Object has been accessed ' . $read['count'] . ' times'));
+  // end of removed
+}
 
-// }
 
 function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
 {
@@ -146,27 +212,25 @@ function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
     $id = $islandora_object->id;
     
     $track = new islandora_usage_stats($id);
-    
-    $usersLastViewedTime = $track->get_last_view_time_for_ip();
-    
-    if (!$usersLastViewedTime) { // user has never viewed item before
-        $track->add_page_count();
-    } else {
-        // was the last time viewed more than 5 minutes ago?
-        if ($usersLastViewedTime + (5 * 60) < time()) {
-            // count it
-            $track->add_page_count();
-        }
-    }
-    
-    // $track->add_page_count();
+
     $read = $track->read_page_count();
-    
     $time_last_viewed = $read[($read['count'] - 1)];
     if ($time_last_viewed == NULL) {
         $time_last_viewed = 'Never';
     }
+    $downloaded = $track->read_ds_count('OBJ');
+    $time_last_downloaded = @$downloaded[($downloaded['count'] - 1)];
+    if ($time_last_downloaded == NULL || $time_last_downloaded <= 0) {
+        $time_last_downloaded = 'Never';
+    }
     
     $variables['times_read'] = $read['count'];
+    $variables['time_last_viewed'] = $time_last_viewed;
+    
+    $variables['islandora_download_link'] = l(t('Download PDF'), 'download_ds/' . $id . '/OBJ/'. $islandora_object->label);
+    $variables['times_downloaded'] = $downloaded['count'];
+    $variables['time_last_downloaded'] = $time_last_downloaded;
+        
 }
+
 
