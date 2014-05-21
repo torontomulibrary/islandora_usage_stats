@@ -36,7 +36,7 @@ Creates new variables in the $variables array to allow templates to display view
   </br>
   <div>
     <p>
-      Viewed: <span class="badge"><?php print $times_read ?></span> Last viewed: <?php print date('M d, Y',strtotime($time_last_viewed)); ?></span>
+      Viewed: <span class="badge"><?php print $times_viewed ?></span> Last viewed: <?php print date('M d, Y',strtotime($time_last_viewed)); ?></span>
     </p>
     <p>
     Downloaded: <span class="badge"><?php print $times_downloaded ?></span>
