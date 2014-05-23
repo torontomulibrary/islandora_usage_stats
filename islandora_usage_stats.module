@@ -172,7 +172,7 @@ function system_mime_type_extension($type) {
  * @param unknown $user the user accessing the object
  * @param unknown $page_number
  */
-function scholar_tracking_islandora_view_object($object, $user, $page_number) {
+function islandora_usage_stats_islandora_view_object($object, $user, $page_number) {
   $track = new islandora_usage_stats($object->id);
   $track->add_page_count();
 }
@@ -202,5 +202,3 @@ function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
     $variables['islandora_download_link'] = l(t('Download PDF'), 'download_ds/' . $id . '/OBJ/'. $label);
         
 }
-
-
