@@ -80,12 +80,8 @@ function islandora_usage_stats_permission() {
  */ 
 // function islandora_usage_stats_download_ds_form(array &$form_state, $pid, $dsid) {
 function islandora_usage_stats_download_ds_form($pid, $dsid) {
-  //drupal_set_message('Recieved $pid: ' . $pid . ' and $dsid: ' . $dsid);
   global $base_url;
-  //module_load_include('inc', 'islandora_usage_stats', 'islandora_usage_stats');
-  //module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   
-  //$object = new Fedora_Item($pid);
   $object = islandora_object_load($pid);
   
 //   $url = $base_url . '/fedora/repository/' . $pid . '/' . $dsid . '/content';
@@ -98,8 +94,6 @@ function islandora_usage_stats_download_ds_form($pid, $dsid) {
   $sanitized_label = preg_replace('/[^A-Za-z0-9_\-]|\.pdf$/', '_', $object->label);
   $download_url = 'islandora/object/' . $object->id . '/datastream/OBJ/download/' . $sanitized_label . '.pdf';
   
-  //$info = $object->get_datastream_info($dsid);
-//   $datastream = $object->getDatastream($dsid); // same as $object['DSID']
   $datastream = $object[$dsid];
   
   if (!$datastream) {
@@ -107,7 +101,6 @@ function islandora_usage_stats_download_ds_form($pid, $dsid) {
       return;
   }
   
-  //$mime_type = $info->datastream->MIMEType;
   $mime_type = $datastream->mimeType;
   
   if (!$mime_type) {
@@ -117,17 +110,14 @@ function islandora_usage_stats_download_ds_form($pid, $dsid) {
   
   $extension = system_mime_type_extension($mime_type);
   
-  //$file = $object->get_datastream_dissemination($dsid);
   $file = '';
   $file = $datastream->getContent($file);
   
-  //$ds_name = $info->datastream->ID;
   $ds_name = $datastream->id;
   
   // track the download 
   $track = new islandora_usage_stats($pid);
   $result = $track->add_ds_count($ds_name); // increase data stream tracking number by 1
-//   $result = $track->add_ds_count($dsid); // increase data stream tracking number by 1
   
   // redirect to the file or error
   if ($file) {
@@ -183,23 +173,15 @@ function system_mime_type_extension($type) {
  * @param unknown $page_number
  */
 function scholar_tracking_islandora_view_object($object, $user, $page_number) {
-
   $track = new islandora_usage_stats($object->id);
-	
-  $usersLastViewedTime = $track->get_last_view_time_for_ip();
-  
-  if (!$usersLastViewedTime) { // user has never viewed item before
-      $track->add_page_count();
-  } else {
-      $cooldown_time = variable_get('islandora_usage_stats_cooldown_seconds', 300); // 5 minute default
-      // was the last time viewed more than X seconds ago?
-      if ($usersLastViewedTime + ($cooldown_time) < time()) {
-          $track->add_page_count(); // count it
-      }
-  }
+  $track->add_page_count();
 }
 
-
+/**
+ * Sets up tracking variables for the Islandora PDF module
+ * 
+ * @param array $variables
+ */
 function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
 {
     $islandora_object = $variables['islandora_object'];

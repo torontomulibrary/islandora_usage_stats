@@ -1,9 +1,9 @@
 islandora_usage_stats
 =====================
 
-A simple module for Drupal 7 to track views of islandora items
+A simple module for Drupal 7 to track views of islandora items in the Ryerson Digital Repository.
 
-Work based on code from https://github.com/roblib/islandora_scholar_upei and the scholar_tracking module for Drupal 6
+Work based on code from https://github.com/roblib/islandora_scholar_upei and the scholar_tracking module for Drupal 6.
 
 Creates new variables in the $variables array to allow templates to display view count and download count of Islandora items.
 
@@ -22,6 +22,7 @@ Creates new variables in the $variables array to allow templates to display view
 ##How to use:
 - Place the downloaded module in your sites/all/modules folder and enable it
 - Configure any excluded IP addresses under Admin > Config > Islandora Usage Stats
+- The function ```islandora_usage_stats_preprocess_islandora_pdf``` can be altered to affect other templates, but currently affects only the Islandora PDF module 
 - In your theme template files, follow the example below to display tracking information
 
 ##Example template file without tracking:
