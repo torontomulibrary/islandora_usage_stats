@@ -47,7 +47,7 @@ function islandora_usage_stats_admin_settings() {
 }
 
 
-function islandora_usage_stats_admin_form($form_state) {
+function islandora_usage_stats_admin_form($form, &$form_state) {
 
   $form['tracking']['page'] = array(
     '#type' => 'fieldset',

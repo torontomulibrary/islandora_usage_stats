@@ -30,24 +30,32 @@ class islandora_usage_stats {
     return $result;
   }
 
+//   function read_page_count() {
+//     $result = db_query("SELECT time FROM {islandora_usage_stats_page_tracking} WHERE pid = :pid", array(':pid' => $this->pid));
+// 		foreach ($result as $record) {
+//       if ($record->time == '') {
+//         $array[] = 'Never';
+//       }
+//       else {
+//         $array[] = date('H:i:s Y-m-d', $record->time);
+//       }
+//     }
+//     $array['count'] = count($array);
+//     return $array;
+//   }
+  
   function read_page_count() {
-    $result = db_query("SELECT time FROM {islandora_usage_stats_page_tracking} WHERE pid = :pid", array(':pid' => $this->pid));
-		foreach ($result as $record) {
-      if ($record->time == '') {
-        $array[] = 'Never';
-      }
-      else {
-        $array[] = date('H:i:s Y-m-d', $record->time);
-      }
-    }
-    $array['count'] = count($array);
-    return $array;
+      $result = db_query("SELECT count(*) as count, max(time) as time from {islandora_usage_stats_page_tracking} WHERE pid = :pid", array(':pid' => $this->pid));
+      $record = $result->fetch();
+      $array['count'] = $record->count;
+      $array['time']  = $record->time;
+      return $array;
   }
 
   function get_last_view_time_for_ip() {
   	global $user;
   	$ip = ip_address();
-  	$result = db_query("SELECT time from {islandora_usage_stats_page_tracking} WHERE pid = :pid AND ip = :ip ORDER BY time desc limit 1", 
+  	$result = db_query("SELECT max(time) from {islandora_usage_stats_page_tracking} WHERE pid = :pid AND ip = :ip", 
   			array(':pid' => $this->pid,
   						':ip' => $ip,
   			)
@@ -62,34 +70,46 @@ class islandora_usage_stats {
     $ip = $_SERVER['REMOTE_ADDR'];
     if (!in_array($ip, $ip_list)) {
       $result = db_insert('islandora_usage_stats_ds_tracking')
-						      ->fields(array(
-						      		'pid' => $this->pid,
-						      		'dsid' => $dsid,
-						      		'time' => REQUEST_TIME,
-						          'ip'   => $ip,
-						      		'user' => $user->name,
-						      ))
-						      ->execute();
+                  ->fields(array(
+                  		'pid' => $this->pid,
+                  		'dsid' => $dsid,
+                  		'time' => REQUEST_TIME,
+                      'ip'   => $ip,
+                  		'user' => $user->name,
+                  ))
+                  ->execute();
     }
     return $result;
   }
 
+//   function read_ds_count($dsid) {
+//     $result = db_query("SELECT time FROM {islandora_usage_stats_ds_tracking} WHERE pid = :pid AND dsid = :dsid",
+// 					    		array(':pid' => $this->pid, 
+// 					    					':dsid' => $dsid,
+// 					    		)
+//     );
+//     $array = array();
+// 		foreach ($result as $record) {
+//       if ($record->time == '') {
+//         $array[] = 'Never';
+//       }
+//       else {
+//         $array[] = date('H:i:s Y-m-d', $record->time);
+//       }
+//     }
+//     $array['count'] = count($array);
+//     return $array;
+//   }
+  
   function read_ds_count($dsid) {
-    $result = db_query("SELECT time FROM {islandora_usage_stats_ds_tracking} WHERE pid = :pid AND dsid = :dsid",
-					    		array(':pid' => $this->pid, 
-					    					':dsid' => $dsid,
-					    		)
+    $result = db_query("SELECT count(*) as count, max(time) as time from {islandora_usage_stats_ds_tracking} WHERE pid = :pid and dsid = :dsid",
+        array(':pid' => $this->pid,
+              ':dsid' => $dsid,
+        )
     );
-    $array = array();
-		foreach ($result as $record) {
-      if ($record->time == '') {
-        $array[] = 'Never';
-      }
-      else {
-        $array[] = date('H:i:s Y-m-d', $record->time);
-      }
-    }
-    $array['count'] = count($array);
+    $record = $result->fetch();
+    $array['count'] = $record->count;
+    $array['time']  = $record->time;
     return $array;
   }
 

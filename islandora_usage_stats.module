@@ -194,15 +194,9 @@ function scholar_tracking_islandora_view_object($object, $user, $page_number) {
       $cooldown_time = variable_get('islandora_usage_stats_cooldown_seconds', 300); // 5 minute default
       // was the last time viewed more than X seconds ago?
       if ($usersLastViewedTime + ($cooldown_time) < time()) {
-          // count it
-          $track->add_page_count();
+          $track->add_page_count(); // count it
       }
   }
-  
-  // to be removed, for testing
-//   $read = $track->read_page_count();
-// 	drupal_set_message(t('Object has been accessed ' . $read['count'] . ' times'));
-  // end of removed
 }
 
 
@@ -210,26 +204,20 @@ function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
 {
     $islandora_object = $variables['islandora_object'];
     $id = $islandora_object->id;
+    $label = $islandora_object->label;
     
     $track = new islandora_usage_stats($id);
 
-    $viewed = $track->read_page_count();
-    $time_last_viewed = $viewed[($viewed['count'] - 1)];
-    if ($time_last_viewed == NULL) {
-        $time_last_viewed = 'Never';
-    }
+    $viewed     = $track->read_page_count();
     $downloaded = $track->read_ds_count('OBJ');
-    $time_last_downloaded = @$downloaded[($downloaded['count'] - 1)];
-    if ($time_last_downloaded == NULL || $time_last_downloaded <= 0) {
-        $time_last_downloaded = 'Never';
-    }
+
+    $variables['times_viewed']      = $viewed['count'];
+    $variables['time_last_viewed']  = $viewed['time'];
     
-    $variables['times_viewed'] = $viewed['count'];
-    $variables['time_last_viewed'] = $time_last_viewed;
+    $variables['times_downloaded']      = $downloaded['count'];
+    $variables['time_last_downloaded']  = $downloaded['time'];
     
-    $variables['islandora_download_link'] = l(t('Download PDF'), 'download_ds/' . $id . '/OBJ/'. $islandora_object->label);
-    $variables['times_downloaded'] = $downloaded['count'];
-    $variables['time_last_downloaded'] = $time_last_downloaded;
+    $variables['islandora_download_link'] = l(t('Download PDF'), 'download_ds/' . $id . '/OBJ/'. $label);
         
 }
 
