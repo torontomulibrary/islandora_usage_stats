@@ -25,37 +25,46 @@ Creates new variables in the $variables array to allow templates to display view
 - In your theme template files, follow the example below to display tracking information
 
 ##Example template file without tracking:
-```php
+islandora-pdf.tpl.php
+```html
 <div class="islandora-pdf-content-wrapper clearfix">
 <?php if (isset($islandora_content)): ?>
+  
   <div class="islandora-pdf-content">
     <?php print $islandora_content; ?>
   </div>
+  
   <?php if (isset($islandora_download_link)): ?>
   <div class="islandora-download-link">
     <?php print $islandora_download_link; ?>
   </div>
   <?php endif; ?>
+  
 <?php endif; ?>
 </div>
 ```
 
 ##Example template file with tracking
-```php
+islandora-pdf.tpl.php
+```html
 <div class="islandora-pdf-content-wrapper clearfix">
 <?php if (isset($islandora_content)): ?>
+  
   <div class="islandora-pdf-content">
     <?php print $islandora_content; ?>
   </div>
+  
   <?php if (isset($islandora_download_link)): ?>
   <div class="islandora-download-link">
     <?php print $islandora_download_link; ?>
   </div>
   <?php endif; ?>
+  
 <?php endif; ?>
 </div>
+
+<!-- usage stats -->
 <?php if (module_exists('islandora_usage_stats')): ?>
-</br>
 <div class="islandora-usage-stats">
   <p>
     Viewed: <span class="badge"><?php print $times_viewed ?></span> Last viewed: <?php print $time_last_viewed==NULL ? 'Never' : date('g:ia, M d, Y', $time_last_viewed); ?></span>
@@ -65,6 +74,7 @@ Creates new variables in the $variables array to allow templates to display view
   </p>
 </div>  <!-- /.islandora-usage-stats -->
 <?php endif; ?>
+<!-- end usage stats -->
 ```
 
 
