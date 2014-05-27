@@ -22,8 +22,9 @@ Creates new variables in the $variables array to allow templates to display view
 ##How to use:
 - Place the downloaded module in your sites/all/modules folder and enable it
 - Configure any excluded IP addresses under Admin > Config > Islandora Usage Stats
-- The function ```islandora_usage_stats_preprocess_islandora_pdf``` can be altered to affect other templates, but currently affects only the Islandora PDF module 
-- In your theme template files, follow the example below to display tracking information
+- Add a function with the naming convention ```islandora_usage_stats_preprocess_yourTemplateFileName``` at the end of the islandora_usage_stats.module file (and replace ```yourTemplateFileName``` with the name of a template you want to override)
+- The function ```islandora_usage_stats_preprocess_islandora_pdf``` included in the ```islandora_usage_stats.module``` file is an example and can be altered/duplicated to affect other templates, but currently affects only the Islandora PDF module 
+- Copy the template file you want to override to you theme's ```templates``` directory and follow the example below to display tracking information
 
 ##Example template file without tracking:
 islandora-pdf.tpl.php
@@ -68,12 +69,12 @@ islandora-pdf.tpl.php
 <?php if (module_exists('islandora_usage_stats')): ?>
 <div class="islandora-usage-stats">
   <p>
-    Viewed: <span class="badge"><?php print $times_viewed ?></span> Last viewed: <?php print $time_last_viewed==NULL ? 'Never' : date('g:ia, M d, Y', $time_last_viewed); ?></span>
+    Viewed: <span class="badge"><?php print $times_viewed ?></span> Last viewed: <?php print $time_last_viewed==NULL ? 'Never' : date('g:ia, M d, Y', $time_last_viewed); ?>
   </p>
   <p>
-    Downloaded: <span class="badge"><?php print $times_downloaded ?></span>
+    Downloaded: <span class="badge"><?php print $times_downloaded ?></span> Last downloaded: <?php print $time_last_downloaded==NULL ? 'Never' : date('g:ia, M d, Y', $time_last_downloaded); ?>
   </p>
-</div>  <!-- /.islandora-usage-stats -->
+</div>
 <?php endif; ?>
 <!-- end usage stats -->
 ```
