@@ -29,7 +29,7 @@ function islandora_usage_stats_menu()
         'type' => MENU_CALLBACK
     );
     
-    $items['admin/settings/islandora_usage_stats/settings'] = array(
+    $items['admin/settings/islandora_usage_stats'] = array(
         'title' => 'Islandora Usage Stats settings',
         'description' => 'Change how usage stats behave.',
         'page callback' => 'drupal_get_form',
@@ -39,7 +39,7 @@ function islandora_usage_stats_menu()
         'access arguments' => array(
             'Manage usage tracking'
         ),
-        'type' => MENU_NORMAL_ITEM,
+        'type' => MENU_CALLBACK,
         'file' => 'islandora_usage_stats.admin.inc'
     );
     
