@@ -8,3 +8,4 @@ files[] = islandora_usage_stats.inc
 files[] = islandora_usage_stats.module
 files[] = islandora_usage_stats.install
 dependencies[] = islandora
+configure = admin/settings/islandora_usage_stats/settings
