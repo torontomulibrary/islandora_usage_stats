@@ -75,7 +75,7 @@ Navigate to your site's themes directory and copy the Islandora PDF template fil
 ###Step 4
 Edit the copied template file to output our new tracking variables 
 ####Before
-**islandora-pdf.tpl.php**
+**/var/www/<your_Drupal_Site>/sites/themes/<yourtheme>/islandora-pdf.tpl.php**
 ```html
 <!------- SNIP ---------->
 <div class="islandora-pdf-content-wrapper clearfix">
@@ -96,7 +96,7 @@ Edit the copied template file to output our new tracking variables
 ```
 
 ####After
-**islandora-pdf.tpl.php**
+**/var/www/<your_Drupal_Site>/sites/themes/<yourtheme>/islandora-pdf.tpl.php**
 ```html
 <!------- SNIP ---------->
 <div class="islandora-pdf-content-wrapper clearfix">
