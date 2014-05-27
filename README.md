@@ -34,10 +34,13 @@ We will add view and download stats to items in our Islandora PDF collection
 ###Step 1
 Navigate to your Drupal site's modules directory and clone the latest version of the module
 ```$ cd /var/www/<your_Drupal_Site>/sites/all/modules```
+
 ```$ git clone https://github.com/paulwc/islandora_usage_stats```
+
 ###Step 2
 Open the ```islandora_usage_stats.module``` file in a text editor and create the template preprocess function necessary to modify the Islandora PDF collection
 ```$ vim islandora_usage_stats/islandora_usage_stats.module```
+
 ```php
 function islandora_usage_stats_preprocess_islandora_pdf($&variables)
 {
@@ -63,7 +66,9 @@ function islandora_usage_stats_preprocess_islandora_pdf($&variables)
 ###Step 3
 Navigate to your site's themes directory and copy the Islandora PDF template file so we can make changes to it and override it
 ```$ cd /var/www/<your_Drupal_Site>/sites/themes/<yourtheme>```
+
 ```$ cp /var/www/<your_Drupal_Site>/sites/all/islandora_solution_pack_pdf/theme/islandora-pdf.tpl.php .```
+
 ###Step 4
 Edit the copied template file to output our new tracking variables 
 ####Before
@@ -87,8 +92,8 @@ Edit the copied template file to output our new tracking variables
 </div>
 ```
 
-##Example template file with tracking
-islandora-pdf.tpl.php
+####After
+**islandora-pdf.tpl.php**
 ```html
 <!------- SNIP ---------->
 <div class="islandora-pdf-content-wrapper clearfix">
