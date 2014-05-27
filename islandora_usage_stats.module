@@ -137,7 +137,7 @@ function system_mime_type_extensions()
 /**
  * Returns the canonical file extension for the MIME type specified, as defined in /etc/mime.types
  * (considering the first extension listed to be canonical).
- * 
+ *
  * @param string $type
  *            - The MIME type
  * @return Ambigous <NULL, unknown>
