@@ -21,7 +21,7 @@ Creates new variables in the $variables array to allow templates to display view
 
 ##How to use:
 - Place the downloaded module in your sites/all/modules folder and enable it
-- Configure any excluded IP addresses under Admin > Config > Islandora Usage Stats
+- Configure any excluded IP addresses under Modules > Islandora Tools > Islandora Usage Stats > Configure
 
 ##How to display tracking data on your template files:
 - In order to display tracking data for Islandora objects we need to modify your site's theme files
