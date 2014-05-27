@@ -13,22 +13,63 @@ Creates new variables in the $variables array to allow templates to display view
 - IP Exclusion list to prevent artifically inflating counts while testing/developing
 
 ##Variables available:
-- **islandora_download_link:** rewritten to redirect to a transparent page to track downloads
 - **times_viewed:** How many times the item has been viewed
 - **time_last_viewed:** The datetime of the last recorded view in seconds since the unix epoch, format with a call to date()
 - **times_downloaded:** How many times the item has been downloaded
 - **time_last_downloaded:**  The datetime of the last download in seconds since the unix epoch, format with a call to date()
+- *islandora_download_link:* Altered for the Islandora PDF module only. Redirects the download request to allow tracking of PDF downloads
 
 ##How to use:
 - Place the downloaded module in your sites/all/modules folder and enable it
 - Configure any excluded IP addresses under Admin > Config > Islandora Usage Stats
-- Add a function with the naming convention ```islandora_usage_stats_preprocess_yourTemplateFileName``` at the end of the islandora_usage_stats.module file (and replace ```yourTemplateFileName``` with the name of a template you want to override)
-- The function ```islandora_usage_stats_preprocess_islandora_pdf``` included in the ```islandora_usage_stats.module``` file is an example and can be altered/duplicated to affect other templates, but currently affects only the Islandora PDF module 
-- Copy the template file you want to override to you theme's ```templates``` directory and follow the example below to display tracking information
 
-##Example template file without tracking:
-islandora-pdf.tpl.php
+##How to display tracking data on your template files:
+- In order to display tracking data for Islandora objects we need to modify your site's theme files
+- Add a function with the naming convention ```islandora_usage_stats_preprocess_yourTemplateFileName``` at the end of the islandora_usage_stats.module file (and replace ```yourTemplateFileName``` with the name of a template you want to override).
+- The function ```islandora_usage_stats_preprocess_islandora_pdf``` included in the ```islandora_usage_stats.module``` file can be used as an example and should be duplicated and renamed to affect other templates
+- Copy the template file you want to override to your theme's ```templates``` directory and follow the example below to display tracking information
+
+##An example:
+We will add view and download stats to items in our Islandora PDF collection
+###Step 1
+Navigate to your Drupal site's modules directory and clone the latest version of the module
+```$ cd /var/www/<your_Drupal_Site>/sites/all/modules```
+```$ git clone https://github.com/paulwc/islandora_usage_stats```
+###Step 2
+Open the ```islandora_usage_stats.module``` file in a text editor and create the template preprocess function necessary to modify the Islandora PDF collection
+```$ vim islandora_usage_stats/islandora_usage_stats.module```
+```php
+function islandora_usage_stats_preprocess_islandora_pdf($&variables)
+{
+  $islandora_object = $variables['islandora_object'];
+  $id = $islandora_object->id;
+  $label = $islandora_object->label;
+  
+  $track = new islandora_usage_stats($id);
+  
+  $viewed = $track->read_page_count();
+  $downloaded = $track->read_ds_count('OBJ');
+  
+  $variables['times_viewed'] = $viewed['count'];
+  $variables['time_last_viewed'] = $viewed['time'];
+  
+  $variables['times_downloaded'] = $downloaded['count'];
+  $variables['time_last_downloaded'] = $downloaded['time'];
+  
+  $variables['islandora_download_link'] = l(t('Download PDF'), 'download_ds/' . $id . '/OBJ/' . $label);
+}
+
+```
+###Step 3
+Navigate to your site's themes directory and copy the Islandora PDF template file so we can make changes to it and override it
+```$ cd /var/www/<your_Drupal_Site>/sites/themes/<yourtheme>```
+```$ cp /var/www/<your_Drupal_Site>/sites/all/islandora_solution_pack_pdf/theme/islandora-pdf.tpl.php .```
+###Step 4
+Edit the copied template file to output our new tracking variables 
+####Before
+**islandora-pdf.tpl.php**
 ```html
+<!------- SNIP ---------->
 <div class="islandora-pdf-content-wrapper clearfix">
 <?php if (isset($islandora_content)): ?>
   
@@ -49,6 +90,7 @@ islandora-pdf.tpl.php
 ##Example template file with tracking
 islandora-pdf.tpl.php
 ```html
+<!------- SNIP ---------->
 <div class="islandora-pdf-content-wrapper clearfix">
 <?php if (isset($islandora_content)): ?>
   
