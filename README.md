@@ -5,10 +5,8 @@ A simple module for Drupal 7 to track views of islandora items in the Ryerson Di
 
 Work based on code from https://github.com/roblib/islandora_scholar_upei and the scholar_tracking module for Drupal 6.
 
-Creates new variables in the $variables array to allow templates to display view count and download count of Islandora items.
-
 ##Features
-- View count is based on IP and comes default with a 5 minute cooldown for repeated requests from the same IP
+- View count is based on IP, and defaults to a 5 minute cooldown for repeated requests
 - Tracks views of all types of objects in the repository
 - IP Exclusion list to prevent artifically inflating counts while testing/developing
 - Drupal hook to allow other modules to fire events based on datastream download
@@ -24,6 +22,7 @@ Creates new variables in the $variables array to allow templates to display view
 - Place the downloaded module in your sites/all/modules folder and enable it
 - Configure any excluded IP addresses under Admin > Config > Islandora Usage Stats
 - *Optional*: use the hook_islandora_datastream_download to add functionality based on a datastream download
+
 
 ##How to display tracking data on your template files:
 - In order to display tracking data for Islandora objects we need to modify your site's theme files
