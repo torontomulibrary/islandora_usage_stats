@@ -98,8 +98,22 @@ function islandora_usage_stats_download_ds_form($pid, $dsid)
     
     // track the download
     $track = new islandora_usage_stats($pid);
-    $result = $track->add_ds_count($ds_name); // increase data stream tracking number by 1
-                                              
+    $result = $track->add_download($ds_name); // increase data stream tracking number by 1
+
+    $object_array = array(
+        'object'        => $object,
+        'label'         => $sanitized_label,
+        'download_url'  => $download_url,
+        'datastream'    => $datastream,
+        'ds_name'       => $ds_name,
+        'mime_type'     => $mime_type,
+        'extension'     => $extension,
+        'tracking'      => $result,
+    );
+    
+    // create custom hook that other modules can implement
+    module_invoke_all('islandora_datastream_download', $object_array);
+    
     // redirect to the file or error
     if ($file) {
         drupal_add_http_header('Content-type', 'application/x-unknown; utf-8');
@@ -110,6 +124,24 @@ function islandora_usage_stats_download_ds_form($pid, $dsid)
         drupal_set_message(t('Specified file does not exist!'));
     }
 }
+
+/**
+ * Implements HOOK_islandora_datastream_download
+ * 
+ * @param array $object_array
+ *      'object'       
+ *      'label'        
+ *      'download_url' 
+ *      'datastream'   
+ *      'ds_name'      
+ *      'mime_type'    
+ *      'extension'    
+ *      'tracking'     
+ */
+function islandora_usage_stats_islandora_datastream_download($object_array) {
+//    drupal_set_message('Datastream with object id: ' . $object_array['object']->id . ' downloaded');
+}
+
 
 /**
  * Returns the system MIME type mapping of MIME types to extensions, as defined in /etc/mime.types
@@ -162,7 +194,7 @@ function system_mime_type_extension($type)
 function islandora_usage_stats_islandora_view_object($object, $user, $page_number)
 {
     $track = new islandora_usage_stats($object->id);
-    $track->add_page_count();
+    $track->add_view();
 }
 
 /**
@@ -178,13 +210,13 @@ function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
     
     $track = new islandora_usage_stats($id);
     
-    $viewed = $track->read_page_count();
-    $downloaded = $track->read_ds_count('OBJ');
+    $viewed = $track->get_views();
+    $downloaded = $track->get_downloads('OBJ');
     
-    $variables['times_viewed'] = $viewed['count'];
+    $variables['times_viewed'] = $viewed['views'];
     $variables['time_last_viewed'] = $viewed['time'];
     
-    $variables['times_downloaded'] = $downloaded['count'];
+    $variables['times_downloaded'] = $downloaded['downloads'];
     $variables['time_last_downloaded'] = $downloaded['time'];
     
     $variables['islandora_download_link'] = l(t('Download PDF'), 'download_ds/' . $id . '/OBJ/' . $label);

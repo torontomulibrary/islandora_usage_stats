@@ -36,6 +36,12 @@ function islandora_usage_stats_admin_settings()
         '#default_value' => variable_get('islandora_usage_stats_cooldown_seconds', '300')
     );
     
+    $form['tracking']['islandora_usage_stats_use_access_log'] = array(
+        '#type' => 'checkbox',
+        '#description' => t('Keep a log of all object view/download activity'),
+        '#default_value' => variable_get('islandora_usage_stats_use_access_log', '1'),
+    );
+    
     $form['clear'] = array(
         '#type' => 'fieldset',
         '#title' => t('Clear values')
