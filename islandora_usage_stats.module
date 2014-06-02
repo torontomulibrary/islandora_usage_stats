@@ -33,12 +33,8 @@ function islandora_usage_stats_menu()
         'title' => 'Islandora Usage Stats settings',
         'description' => 'Change how usage stats behave.',
         'page callback' => 'drupal_get_form',
-        'page arguments' => array(
-            'islandora_usage_stats_admin_settings'
-        ),
-        'access arguments' => array(
-            'Manage usage tracking'
-        ),
+        'page arguments' => array('islandora_usage_stats_admin_settings'),
+        'access arguments' => array('Manage usage tracking'),
         'type' => MENU_CALLBACK,
         'file' => 'islandora_usage_stats.admin.inc'
     );
@@ -113,7 +109,7 @@ function islandora_usage_stats_download_ds_form($pid, $dsid)
     
     // create custom hook that other modules can implement
     module_invoke_all('islandora_datastream_download', $object_array);
-    
+        
     // redirect to the file or error
     if ($file) {
         drupal_add_http_header('Content-type', 'application/x-unknown; utf-8');

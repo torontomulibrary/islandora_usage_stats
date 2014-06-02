@@ -130,7 +130,7 @@ function islandora_usage_stats_schema()
     );
     
     $schema['islandora_usage_stats_object_ds_access_log'] = array(
-        'description' => 'This table is used to store the tracking information for fedora datastreams',
+        'description' => 'This table is used to store the usage information for fedora datastreams',
         'fields' => array(
             'id' => array(
                 'type' => 'serial',
