@@ -36,7 +36,6 @@ class islandora_usage_stats
      */
     function add_view()
     {
-        global $user;
         $result = '';
         
         $logging = variable_get('islandora_usage_stats_use_access_log', 1);
@@ -94,9 +93,7 @@ class islandora_usage_stats
      * @return number of views
      */
     function increase_object_view_counter()
-    {
-        global $user;
-        
+    {      
         $current_views = $this->get_views();
         
         if ($current_views['views']) {
@@ -130,7 +127,6 @@ class islandora_usage_stats
      */
     function add_download($dsid)
     {
-        global $user;
         $result = '';
        
         $logging = variable_get('islandora_usage_stats_use_access_log', 1);
@@ -177,8 +173,6 @@ class islandora_usage_stats
      */
     function increase_object_ds_download_counter($dsid)
     {
-        global $user;
-
         $current_info = $this->get_downloads($dsid);
         
         if ($current_info['downloads']) {
@@ -217,7 +211,7 @@ class islandora_usage_stats
             'pid' => $this->pid,
             'time' => REQUEST_TIME,
             'ip' => $ip,
-            'user' => $user->name
+            'user' => ($user==NULL) ? $user->name : 'Anonymous'
         ))->execute();
         
         return $result;
@@ -238,7 +232,7 @@ class islandora_usage_stats
             'time' => REQUEST_TIME,
             'ip' => $ip,
             'dsid' => $dsid,
-            'user' => $user->name
+            'user' => ($user==NULL) ? $user->name : 'Anonymous'
         ))->execute();
         
         return $result;
@@ -251,7 +245,6 @@ class islandora_usage_stats
      */
     function get_last_view_time_for_ip()
     {
-        global $user;
         $ip = ip_address();
         $result = db_query("SELECT max(time) from {islandora_usage_stats_object_access_log} WHERE pid = :pid AND ip = :ip", array(
             ':pid' => $this->pid,
@@ -269,7 +262,6 @@ class islandora_usage_stats
      */
     function get_last_download_time_for_ip($dsid)
     {
-        global $user;
         $ip = ip_address();
         $result = db_query("SELECT max(time) as time from {islandora_usage_stats_object_ds_access_log} WHERE pid = :pid AND dsid = :dsid AND ip = :ip", array(
             ':pid' => $this->pid,
@@ -287,7 +279,6 @@ class islandora_usage_stats
      */
     function get_last_view_time_for_visitor()
     {
-        global $user;
         $time = @$_SESSION['islandora_usage_stats'][ip_address()][$this->pid];
         if (! $time) { // user has NOT requested item in this session
             return NULL;
