@@ -38,7 +38,7 @@ Navigate to your Drupal site's modules directory and clone the latest version of
 
 ```$ cd /var/www/<your_Drupal_Site>/sites/all/modules```
 
-```$ git clone https://github.com/paulwc/islandora_usage_stats```
+```$ git clone https://github.com/ryersonlibrary/islandora_usage_stats```
 
 ###Step 2
 Open the ```islandora_usage_stats.module``` file in a text editor and create the template preprocess function necessary to modify the Islandora PDF collection
