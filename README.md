@@ -11,6 +11,7 @@ Work based on code from https://github.com/roblib/islandora_scholar_upei and the
 - Access log for all views and downloads, can be disabled
 - IP Exclusion list to prevent artifically inflating counts while testing/developing
 - Drupal hook to allow other modules to fire events based on datastream download (hook_islandora_datastream_download)
+- Custom block to display most viewed items
 
 ##Variables available:
 - **times_viewed:** How many times the item has been viewed
