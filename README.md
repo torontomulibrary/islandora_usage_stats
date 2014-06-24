@@ -12,6 +12,8 @@ Work based on code from https://github.com/roblib/islandora_scholar_upei and the
 - IP Exclusion list to prevent artifically inflating counts while testing/developing
 - Drupal hook to allow other modules to fire events based on datastream download (hook_islandora_datastream_download)
 - Custom block to display most viewed items
+- Permissions to view usage data on an item page
+- Permissions to view most popular items block
 
 ##Variables available:
 - **times_viewed:** How many times the item has been viewed
@@ -23,6 +25,7 @@ Work based on code from https://github.com/roblib/islandora_scholar_upei and the
 ##How to use:
 - Place the downloaded module in your sites/all/modules folder and enable it
 - Configure any excluded IP addresses under Admin > Config > Islandora Usage Stats
+- Make sure user permissions are set appropriately under People > Permissions
 - *Optional*: use the hook_islandora_datastream_download to add functionality based on a datastream download
 
 
