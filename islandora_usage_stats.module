@@ -32,13 +32,27 @@ function islandora_usage_stats_block_configure($delta)
     
     switch ($delta) {
         case 'top_usage':
-            $form['islandora_usage_stats_block_display_rows'] = array(
-                '#type' => 'textfield',
-                '#title' => t('Configure Number of Rows to Display'),
-                '#size' => 5,
-                '#description' => t('Enter the number of rows to display in the block.'),
-                '#default_value' => variable_get('islandora_usage_stats_block_display_rows', 5)
-            );
+            if (user_access('manage usage stats')) {
+                $form['islandora_usage_stats_block_display_rows'] = array(
+                    '#type' => 'textfield',
+                    '#title' => t('Configure Number of Rows to Display'),
+                    '#size' => 5,
+                    '#description' => t('Enter the number of rows to display in the block.'),
+                    '#default_value' => variable_get('islandora_usage_stats_block_display_rows', 5)
+                );
+                
+                $form['islandora_usage_stats_block_exclusion'] = array(
+                    '#type' => 'fieldset',
+                    '#title' => t('Omit PIDs from block display'),
+                    '#description' => t('Add Islandora PIDs that you want to omit from being displayed in the block')
+                );
+                
+                $form['islandora_usage_stats_block_exclusion']['islandora_usage_stats_exclusion_list'] = array(
+                    '#type' => 'textarea',
+                    '#description' => t('Add Islandora PIDs separated by spaces'),
+                    '#default_value' => variable_get('islandora_usage_stats_block_exclusion_list', 'islandora:root')
+                );
+            }
             break;
     }
     
@@ -56,6 +70,8 @@ function islandora_usage_stats_block_save($delta = '', $edit = array())
     switch ($delta) {
         case 'top_usage':
             variable_set('islandora_usage_stats_block_display_rows', (int) $edit['islandora_usage_stats_block_display_rows']);
+            variable_set('islandora_usage_stats_block_exclusion_list', $edit['islandora_usage_stats_exclusion_list']);
+            break;
     }
     return;
 }
@@ -90,9 +106,15 @@ function islandora_usage_stats_block_contents($delta)
                 $connection = islandora_get_tuque_connection($user);
                 $repository = $connection->repository;
                 
+                $excludedPIDlist = explode(' ', variable_get('islandora_usage_stats_block_exclusion_list'));
+                $excludeString = "('" . implode("','", $excludedPIDlist) . "')";
+                
+                // TODO: use a placeholder for this query to tighten up injection attacks
+                // NB: tried using a placeholder but drupal wouldn't play nicely
                 $nbr_rows = variable_get('islandora_usage_stats_block_display_rows');
                 $result = db_query_range("SELECT pid, views 
-	                               FROM {islandora_usage_stats_object_views} 
+	                               FROM {islandora_usage_stats_object_views}
+                                 WHERE pid not in $excludeString
     	                           ORDER BY views DESC", 0, $nbr_rows);
                 $items = array();
                 foreach ($result as $row) {
