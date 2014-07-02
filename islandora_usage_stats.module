@@ -120,8 +120,10 @@ function islandora_usage_stats_block_contents($delta)
                 foreach ($result as $row) {
                     
                     $object = islandora_object_load($row->pid);
+                    $view_suffix = ((int)$row->views > 1) ? 'views' : 'view';
+                    $viewcount = "$row->views $view_suffix";
                     $items[] = array(
-                        'data' => l($object->label . " ($row->views)", 'islandora/object/' . urlencode($row->pid)),
+                        'data' => l($object->label, 'islandora/object/' . urlencode($row->pid)) . " <span class='label label-default'>". $viewcount . '</span>',
                         'class' => array(
                             'list-group-item'
                         )
