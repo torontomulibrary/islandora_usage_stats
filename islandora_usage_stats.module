@@ -176,7 +176,7 @@ function islandora_usage_stats_menu()
             'islandora_usage_stats_admin_settings'
         ),
         'access arguments' => array(
-            'Manage usage tracking'
+            'manage usage stats'
         ),
         'type' => MENU_CALLBACK,
         'file' => 'islandora_usage_stats.admin.inc'
@@ -188,11 +188,11 @@ function islandora_usage_stats_menu()
 function islandora_usage_stats_permission()
 {
     return array(
-        'Manage usage stats' => array(
+        'manage usage stats' => array(
             'title' => t('Manage usage tracking'),
             'description' => t('Manage usage tracking for the Islandora Usage Stats module')
         ),
-        'View usage stats block' => array(
+        'view usage stats block' => array(
             'title' => t('View usage tracking stats block'),
             'description' => t('View usage tracking stats block which includes number of views and downloads')
         )
@@ -334,16 +334,22 @@ function system_mime_type_extension($type)
  *            the user accessing the object
  * @param unknown $page_number            
  */
-function islandora_usage_stats_islandora_view_object($object, $user, $page_number)
+// function islandora_usage_stats_islandora_view_object($object, $user, $page_number)
+function islandora_usage_stats_islandora_view_object($object)
 {
     $track = new islandora_usage_stats($object->id);
-    $track->add_view();
+    $track->plusOneView();
+    
+//     $track->add_view();
+    
+    // increase the view count only, the last viewed time is done later
+//     $track->increase_object_view_counter_only();
 }
 
 /**
  * Sets up tracking variables for the Islandora PDF module
  *
- * @param array $variables            
+ * @param array $variables
  */
 function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
 {
@@ -352,15 +358,30 @@ function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
     $label = $islandora_object->label;
     
     $track = new islandora_usage_stats($id);
+    $variables['time_last_viewed'] = $track->getLastTimeViewed();
+//     $variables['times_viewed'] = $track->plusOneView();
+    $currentStats = $track->get_view_count();
+    $variables['times_viewed'] = $currentStats['views'];
+//     $track->updateTimeLastViewed();
+
     
-    $viewed = $track->get_views();
+    // this call updates the last viewed time after the results are returned
+//     $viewed = $track->get_view_count();
+    
     $downloaded = $track->get_downloads('OBJ');
     
-    $variables['times_viewed'] = $viewed['views'];
-    $variables['time_last_viewed'] = $viewed['time'];
+//     $variables['times_viewed'] = $viewed['views'];
+//     $variables['time_last_viewed'] = $viewed['time'];
     
     $variables['times_downloaded'] = $downloaded['downloads'];
     $variables['time_last_downloaded'] = $downloaded['time'];
     
-    $variables['islandora_download_link'] = l(t('Download PDF'), 'download_ds/' . $id . '/OBJ/' . $label);
+    $variables['islandora_download_link'] = l('<i class="glyphicon glyphicon-download"> ' . t('Download PDF') . '</i>', 'download_ds/' . $id . '/OBJ/' . $label, array(
+	    'attributes' => array(
+            'class' => 'btn btn-primary'
+        ),
+        'html' => TRUE,
+    ));
+    
+    $track->set_last_viewed_time();
 }
