@@ -18,6 +18,14 @@ function islandora_usage_stats_block_info()
         'visibility' => BLOCK_VISIBILITY_NOTLISTED,
     );
     
+    $blocks['recent_activity'] = array(
+    	  'info' => t('Recently accessed Islandora Items'),
+        'status' => TRUE,
+        'region' => 'sidebar_first',
+        'weight' => 0,
+        'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+    );
+    
     return $blocks;
 }
 
@@ -54,6 +62,29 @@ function islandora_usage_stats_block_configure($delta)
                 );
             }
             break;
+        case 'recent_activity':
+            if (user_access('manage usage stats')) {
+                $form['islandora_usage_stats_recent_activity_block_display_rows'] = array(
+                    '#type' => 'textfield',
+                    '#title' => t('Configure Number of Rows to Display'),
+                    '#size' => 5,
+                    '#description' => t('Enter the number of rows to display in the block.'),
+                    '#default_value' => variable_get('islandora_usage_stats_recent_activity_block_display_rows', 5)
+                );
+                
+                $form['islandora_usage_stats_recent_activity_block_exclusion'] = array(
+                    '#type' => 'fieldset',
+                    '#title' => t('Omit PIDs from block display'),
+                    '#description' => t('Add Islandora PIDs that you want to omit from being displayed in the block')
+                );
+                
+                $form['islandora_usage_stats_recent_activity_block_exclusion']['islandora_usage_stats_recent_activity_block_exclusion_list'] = array(
+                    '#type' => 'textarea',
+                    '#description' => t('Add Islandora PIDs separated by spaces'),
+                    '#default_value' => variable_get('islandora_usage_stats_recent_activity_block_exclusion_list', 'islandora:root')
+                );
+            }
+            break;
     }
     
     return $form;
@@ -72,6 +103,10 @@ function islandora_usage_stats_block_save($delta = '', $edit = array())
             variable_set('islandora_usage_stats_block_display_rows', (int) $edit['islandora_usage_stats_block_display_rows']);
             variable_set('islandora_usage_stats_block_exclusion_list', $edit['islandora_usage_stats_exclusion_list']);
             break;
+        case 'recent_activity':
+            variable_set('islandora_usage_stats_recent_activity_block_display_rows', (int) $edit['islandora_usage_stats_recent_activity_block_display_rows']);
+            variable_set('islandora_usage_stats_recent_activity_block_exclusion_list', $edit['islandora_usage_stats_recent_activity_block_exclusion_list']);
+            break;
     }
     return;
 }
@@ -85,9 +120,12 @@ function islandora_usage_stats_block_view($delta = '')
 {
     switch ($delta) {
         case 'top_usage':
-            // $block['subject'] = t('Most Viewed Items');
             $block['content'] = islandora_usage_stats_block_contents($delta);
             return $block;
+            break;
+        case 'recent_activity':
+            $block['content'] = islandora_usage_stats_block_contents($delta);
+            return$block;
             break;
     }
 }
@@ -141,8 +179,47 @@ function islandora_usage_stats_block_contents($delta)
                 );
             }
             break;
+        case 'recent_activity':
+            if (user_access('View usage stats block')) {
+                $connection = islandora_get_tuque_connection($user);
+                $repository = $connection->repository;
+                
+                $excludedPIDlist = explode(' ', variable_get('islandora_usage_stats_recent_activity_block_exclusion_list'));
+                $excludeString = "('" . implode("','", $excludedPIDlist) . "')";
+                
+                // TODO: use a placeholder for this query to tighten up injection attacks
+                // NB: tried using a placeholder but drupal wouldn't play nicely
+                $nbr_rows = variable_get('islandora_usage_stats_recent_activity_block_display_rows');
+                $result = db_query_range("SELECT distinct(pid)
+                    FROM {islandora_usage_stats_object_access_log}
+                    WHERE pid not in $excludeString
+                    ORDER BY time ASC", 0, $nbr_rows);
+                $items = array();
+                foreach ($result as $row) {
+                    $object = islandora_object_load($row->pid);
+                    $items[] = array(
+                        'data' => l($object->label, 'islandora/object/' . urlencode($row->pid)),
+                        'class' => array(
+                            'list-group-item'
+                        )
+                    );
+                }
+                return array(
+                    '#markup' => theme('item_list', array(
+                        'items' => $items,
+                        'attributes' => array(
+                            'class' => array(
+                                'list-group'
+                            )
+                        )
+                    ))
+                );
+            }
+            break;
     }
 }
+
+
 
 /**
  * Implementation of hook_menu().
