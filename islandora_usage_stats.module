@@ -19,7 +19,7 @@ function islandora_usage_stats_block_info()
     );
     
     $blocks['recent_activity'] = array(
-    	  'info' => t('Recently accessed Islandora Items'),
+        'info' => t('Recently accessed Islandora Items'),
         'status' => TRUE,
         'region' => 'sidebar_first',
         'weight' => 0,
@@ -125,7 +125,7 @@ function islandora_usage_stats_block_view($delta = '')
             break;
         case 'recent_activity':
             $block['content'] = islandora_usage_stats_block_contents($delta);
-            return$block;
+            return $block;
             break;
     }
 }
@@ -140,7 +140,7 @@ function islandora_usage_stats_block_contents($delta)
     global $user;
     switch ($delta) {
         case 'top_usage':
-            if (user_access('View usage stats block')) {
+            if (user_access('view usage stats block')) {
                 $connection = islandora_get_tuque_connection($user);
                 $repository = $connection->repository;
                 
@@ -180,7 +180,7 @@ function islandora_usage_stats_block_contents($delta)
             }
             break;
         case 'recent_activity':
-            if (user_access('View usage stats block')) {
+            if (user_access('view usage stats block')) {
                 $connection = islandora_get_tuque_connection($user);
                 $repository = $connection->repository;
                 
