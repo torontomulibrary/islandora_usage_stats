@@ -38,7 +38,7 @@ function islandora_usage_stats_admin_settings()
     
     $form['usage']['islandora_usage_stats_use_access_log'] = array(
         '#type' => 'checkbox',
-        '#title' => 'Enable view and download log',
+        '#title' => 'Enable view and download log *REQUIRED FOR RECENT ACTIVITY BLOCK*',
         '#description' => t('Keep a log of all object view/download activity'),
         '#default_value' => variable_get('islandora_usage_stats_use_access_log', '1'),
     );
