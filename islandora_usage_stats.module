@@ -240,8 +240,8 @@ function islandora_usage_stats_download_ds_form($pid, $dsid)
     $ds_name = $datastream->id;
     
     // track the download
-    $track = new islandora_usage_stats($pid);
-    $result = $track->add_download($ds_name); // increase data stream tracking number by 1
+    $track = new IslandoraUsageStats($pid);
+    $result = $track->addDownload($ds_name); // increase data stream tracking number by 1
     
     $object_array = array(
         'object' => $object,
@@ -329,21 +329,12 @@ function system_mime_type_extension($type)
  * Implements hook_islandora_view_object to track usage stats
  *
  * @param unknown $object
- *            the islandora object
- * @param unknown $user
- *            the user accessing the object
- * @param unknown $page_number            
+ *            the islandora object          
  */
-// function islandora_usage_stats_islandora_view_object($object, $user, $page_number)
 function islandora_usage_stats_islandora_view_object($object)
 {
-    $track = new islandora_usage_stats($object->id);
+    $track = new IslandoraUsageStats($object->id);
     $track->plusOneView();
-    
-//     $track->add_view();
-    
-    // increase the view count only, the last viewed time is done later
-//     $track->increase_object_view_counter_only();
 }
 
 /**
@@ -357,21 +348,13 @@ function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
     $id = $islandora_object->id;
     $label = $islandora_object->label;
     
-    $track = new islandora_usage_stats($id);
-    $variables['time_last_viewed'] = $track->getLastTimeViewed();
-//     $variables['times_viewed'] = $track->plusOneView();
-    $currentStats = $track->get_view_count();
+    $track = new IslandoraUsageStats($id);
+    $variables['time_last_viewed'] = $track->getLastViewedTime();
+    
+    $currentStats = $track->getViewCount();
     $variables['times_viewed'] = $currentStats['views'];
-//     $track->updateTimeLastViewed();
-
     
-    // this call updates the last viewed time after the results are returned
-//     $viewed = $track->get_view_count();
-    
-    $downloaded = $track->get_downloads('OBJ');
-    
-//     $variables['times_viewed'] = $viewed['views'];
-//     $variables['time_last_viewed'] = $viewed['time'];
+    $downloaded = $track->getDownloads('OBJ');
     
     $variables['times_downloaded'] = $downloaded['downloads'];
     $variables['time_last_downloaded'] = $downloaded['time'];
@@ -382,6 +365,4 @@ function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
         ),
         'html' => TRUE,
     ));
-    
-    $track->set_last_viewed_time();
 }

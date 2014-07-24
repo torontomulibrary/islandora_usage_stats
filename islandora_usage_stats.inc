@@ -4,7 +4,7 @@
  * @file
  * Class to deal with tracking item views on islandora site
  */
-class islandora_usage_stats
+class IslandoraUsageStats
 {
 
     function __construct($pid)
@@ -14,10 +14,10 @@ class islandora_usage_stats
 
     /**
      * Performs check to see if user's IP is excluded from tracking
-     * 
+     *
      * @return boolean
      */
-    function ip_excluded()
+    function IpExcluded()
     {
         $ip_list = explode(' ', variable_get('islandora_usage_stats_ip_list', 'localhost 127.0.0.1'));
         $ip = ip_address();
@@ -30,65 +30,26 @@ class islandora_usage_stats
     }
 
     /**
-     * Checks to see if user has requested to view the item in the last X seconds previous.
-     * Does not make calls to increase the view count if IP is on exclusion list
-     * or if user requested view of the item too recently
-     */
-    function add_view()
-    {
-        $result = '';
-        
-        $logging = variable_get('islandora_usage_stats_use_access_log', 1);
-        
-        if (! $this->ip_excluded()) { // check if user's ip is excluded
-                                     
-            $lastViewedTime = $this->get_last_view_time_for_visitor();
-            
-            // user has never viewed item before
-            if (! $lastViewedTime) {
-                $timelastviewed = $this->get_last_viewed_time();
-                $result = $this->increase_object_view_counter();
-                $result['timelastviewed'] = $timelastviewed;
-                $this->update_last_view_time_for_visitor();
-                
-                if ($logging) {
-                    $this->log_object_view();
-                }
-            } else {
-                $cooldown_time = variable_get('islandora_usage_stats_cooldown_seconds', 300); // default 5 min
-                
-                if ($lastViewedTime + ($cooldown_time) < REQUEST_TIME) {
-                    $result = $this->increase_object_view_counter();
-                    $this->update_last_view_time_for_visitor();
-                    
-                    if ($logging) {
-                        $this->log_object_view();
-                    }
-                }
-            }
-        }
-        
-        return $result;
-    }
-
-    /**
      * Retrieves the number of times an item has been viewed from the database
      * and the last time it was viewed
      *
      * @return array
      */
-    function get_views()
+    function getViews()
     {
         $result = db_query("SELECT views, time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
             ':pid' => $this->pid
         ));
         $record = $result->fetchAssoc();
-        if (!$record) {
-            return array('views' => 0, 'time' => '');
+        if (! $record) {
+            return array(
+                'views' => 0,
+                'time' => ''
+            );
         }
         return $record;
     }
-    
+
     /**
      * Retrieves the number of times an item has been viewed from the database
      * and the last time it was viewed, BUT ALSO UPDATES THE LAST VIEWED TIME
@@ -96,82 +57,31 @@ class islandora_usage_stats
      *
      * @return array
      */
-    function get_view_count()
+    function getViewCount()
     {
         $result = db_query("SELECT views, time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
             ':pid' => $this->pid
         ));
         $record = $result->fetchAssoc();
-        if (!$record) {
-            return array('views' => 0, 'time' => '');
+        if (! $record) {
+            return array(
+                'views' => 0,
+                'time' => ''
+            );
         }
         
         // update the last viewed time, don't store it
-        /*************************/
-        $this->set_last_viewed_time();
-        /*************************/
+        /**
+         * **********************
+         */
+        $this->setLastViewedTime();
+        /**
+         * **********************
+         */
         
         return $record;
     }
 
-    /**
-     * Increases the view count of an item and the time last viewed
-     *
-     * @return number of views
-     */
-    function increase_object_view_counter()
-    {      
-        $current_views = $this->get_views();
-        
-        if ($current_views['views']) {
-            // increase view count by one
-            $result = db_update('islandora_usage_stats_object_views')
-                ->expression('views', 'views + :num', array(':num' => 1))
-                ->expression('time', REQUEST_TIME)
-                ->condition('pid', $this->pid)
-                ->execute();
-            
-            return $current_views['views'] + 1;
-            
-        } else {
-            $result = db_insert('islandora_usage_stats_object_views')->fields(array(
-                'pid' => $this->pid,
-                'views' => 1,
-                'time' => REQUEST_TIME,
-            ))->execute();
-            
-            return 1;
-        }
-    }
-
-    
-    function increase_object_view_counter_only()
-    {
-        $result = NULL;
-        
-        $logging = variable_get('islandora_usage_stats_use_access_log', 1);
-        
-        if (! $this->ip_excluded()) { // check if user's ip is excluded
-             
-            $lastViewedTime = $this->get_last_view_time_for_visitor();
-        
-            // user has never viewed item before
-            if (! $lastViewedTime) {
-                $result = $this->db_increase_view_counter();
-            } else {
-                $cooldown_time = variable_get('islandora_usage_stats_cooldown_seconds', 300); // default 5 min
-        
-                if ($lastViewedTime + ($cooldown_time) < REQUEST_TIME) {
-//                     $result = $this->increase_object_view_counter();
-                    $result = $this->db_increase_view_counter();
-                }
-            }
-        }
-        
-        return $result;
-    }
-    
-    
     /**
      * Increases the datastream download count by one in the database.
      * Count is not increased if user's IP is on exclusion list.
@@ -180,17 +90,17 @@ class islandora_usage_stats
      *            the datastream id
      * @return NULL string result
      */
-    function add_download($dsid)
+    function addDownload($dsid)
     {
         $result = '';
-       
+        
         $logging = variable_get('islandora_usage_stats_use_access_log', 1);
         
-        if (! $this->ip_excluded()) { // check if user's ip is excluded
-            $result = $this->increase_object_ds_download_counter($dsid);
+        if (! $this->IpExcluded()) { // check if user's ip is excluded
+            $result = $this->increaseObjectDSDownloadCounter($dsid);
             
             if ($logging) {
-                $this->log_object_download($dsid);
+                $this->logObjectDownload($dsid);
             }
         }
         
@@ -204,42 +114,46 @@ class islandora_usage_stats
      *            the datastream id
      * @return array
      */
-    function get_downloads($dsid)
+    function getDownloads($dsid)
     {
         $result = db_query("SELECT downloads, time from {islandora_usage_stats_object_ds_downloads} WHERE pid = :pid AND dsid = :dsid", array(
             ':pid' => $this->pid,
             ':dsid' => $dsid
         ));
-       $record = $result->fetchAssoc();
-              
-       if ($record) {
-           return $record;
-       } else {
-           return array('downloads' => 0, 'time' => NULL);
-       }
+        $record = $result->fetchAssoc();
+        
+        if ($record) {
+            return $record;
+        } else {
+            return array(
+                'downloads' => 0,
+                'time' => NULL
+            );
+        }
     }
 
     /**
      * Increases the download count for the given object's datastream ID
-     * 
+     *
      * @param string $dsid
      *            datastream id
      * @return the number of total downloads
      */
-    function increase_object_ds_download_counter($dsid)
+    function increaseObjectDSDownloadCounter($dsid)
     {
-        $current_info = $this->get_downloads($dsid);
+        $current_info = $this->getDownloads($dsid);
         
         if ($current_info['downloads']) {
             // increase view count by one
-            $result = db_update('islandora_usage_stats_object_ds_downloads')
-            ->expression('downloads', 'downloads + :downloads', array(':downloads' => 1))
-            ->expression('time', REQUEST_TIME)
-            ->condition('pid', $this->pid)
-            ->condition('dsid', $dsid)
-            ->execute();
+            $result = db_update('islandora_usage_stats_object_ds_downloads')->expression('downloads', 'downloads + :downloads', array(
+                ':downloads' => 1
+            ))
+                ->expression('time', REQUEST_TIME)
+                ->condition('pid', $this->pid)
+                ->condition('dsid', $dsid)
+                ->execute();
             
-            return $this->get_downloads($dsid);
+            return $this->getDownloads($dsid);
         } else {
             $result = db_insert('islandora_usage_stats_object_ds_downloads')->fields(array(
                 'pid' => $this->pid,
@@ -247,8 +161,11 @@ class islandora_usage_stats
                 'downloads' => 1,
                 'time' => REQUEST_TIME
             ))->execute();
-        
-            return array('downloads' => 1, 'time' => NULL);
+            
+            return array(
+                'downloads' => 1,
+                'time' => NULL
+            );
         }
     }
 
@@ -257,7 +174,7 @@ class islandora_usage_stats
      *
      * @return unknown
      */
-    function log_object_view()
+    function logObjectView()
     {
         global $user;
         $ip = ip_address();
@@ -266,7 +183,7 @@ class islandora_usage_stats
             'pid' => $this->pid,
             'time' => REQUEST_TIME,
             'ip' => $ip,
-            'user' => ($user==NULL) ? $user->name : 'Anonymous'
+            'user' => ($user == NULL) ? $user->name : 'Anonymous'
         ))->execute();
         
         return $result;
@@ -277,7 +194,7 @@ class islandora_usage_stats
      *
      * @return unknown
      */
-    function log_object_download($dsid)
+    function logObjectDownload($dsid)
     {
         global $user;
         $ip = ip_address();
@@ -287,7 +204,7 @@ class islandora_usage_stats
             'time' => REQUEST_TIME,
             'ip' => $ip,
             'dsid' => $dsid,
-            'user' => ($user==NULL) ? $user->name : 'Anonymous'
+            'user' => ($user == NULL) ? $user->name : 'Anonymous'
         ))->execute();
         
         return $result;
@@ -298,7 +215,7 @@ class islandora_usage_stats
      *
      * @return NULL string since the unix epoch
      */
-    function get_last_view_time_for_ip()
+    function getLastViewTimeForIp()
     {
         $ip = ip_address();
         $result = db_query("SELECT max(time) from {islandora_usage_stats_object_access_log} WHERE pid = :pid AND ip = :ip", array(
@@ -308,14 +225,14 @@ class islandora_usage_stats
         $lastViewTime = $result->fetchField(0);
         return $lastViewTime;
     }
-    
+
     /**
      * Queries the datastream access log to get the last time an ip downloaded the given datastream ID
-     * 
-     * @param string $dsid
+     *
+     * @param string $dsid            
      * @return string time in seconds since epoch
      */
-    function get_last_download_time_for_ip($dsid)
+    function getLastDownloadTimeForIp($dsid)
     {
         $ip = ip_address();
         $result = db_query("SELECT max(time) as time from {islandora_usage_stats_object_ds_access_log} WHERE pid = :pid AND dsid = :dsid AND ip = :ip", array(
@@ -332,7 +249,7 @@ class islandora_usage_stats
      *
      * @return NULL string since the unix epoch
      */
-    function get_last_view_time_for_visitor()
+    function getLastViewTimeForVisitor()
     {
         $time = @$_SESSION['islandora_usage_stats'][ip_address()][$this->pid];
         if (! $time) { // user has NOT requested item in this session
@@ -340,183 +257,169 @@ class islandora_usage_stats
         }
         return $time;
     }
-    
-    function update_last_view_time_for_visitor()
+
+    function updateLastViewTimeForVisitor()
     {
         $_SESSION['islandora_usage_stats'][ip_address()][$this->pid] = REQUEST_TIME;
     }
-    
-    function get_last_viewed_time()
+
+    function getLastViewedTime()
     {
         $result = db_query("SELECT time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
-        	':pid' => $this->pid,
+            ':pid' => $this->pid
         ));
         
         $record = $result->fetch();
-        if (!$record) {
+        
+        if (! $record) {
             return NULL;
-        }
-        else {
+        } else {
             return $record->time;
         }
     }
-    
-    function set_last_viewed_time()
-    {   
+
+    /**
+     * Performs a check to see if the user's IP is on the exclusion list, and
+     * a check to determine the last time they requested to view the object.
+     * If the last time the user requested the object falls within the cooldown period,
+     * nothing is updated. Otherwise, this function calls dBSetLastViewedTime
+     * and updates the time that the user requested the item
+     *
+     * @return Ambigous <multitype:, multitype:string, multitype:string number >
+     */
+    function setLastViewedTime()
+    {
         $result = array();
         
         $logging = variable_get('islandora_usage_stats_use_access_log', 1);
         
-        if (! $this->ip_excluded()) { // check if user's ip is excluded
-             
-            $lastViewedTime = $this->get_last_view_time_for_visitor();
-        
+        if (! $this->IpExcluded()) { // check if user's ip is excluded
+            
+            $lastViewedTime = $this->getLastViewTimeForVisitor();
+            
             // user has never viewed item before
             if (! $lastViewedTime) {
-                
-                $result = $this->db_set_last_viewed_time($this->pid);
-                $this->update_last_view_time_for_visitor();
-        
-//                 if ($logging) {
-//                     $this->log_object_view();
-//                 }
+                $result = $this->dBSetLastViewedTime();
+                $this->updateLastViewTimeForVisitor();
             } else {
                 $cooldown_time = variable_get('islandora_usage_stats_cooldown_seconds', 300); // default 5 min
-        
+                
                 if ($lastViewedTime + ($cooldown_time) < REQUEST_TIME) {
-                    
-//                     $result = $this->increase_object_view_counter();
-
-                    $result = $this->db_set_last_viewed_time($this->pid);
-                    $this->update_last_view_time_for_visitor();
-        
-//                     if ($logging) {
-//                         $this->log_object_view();
-//                     }
+                    $result = $this->dBSetLastViewedTime();
+                    $this->updateLastViewTimeForVisitor();
                 }
             }
         }
         
         return $result;
     }
-    
-    function db_set_last_viewed_time($pid) {
+
+    /**
+     * Sets the last accessed time of an object in the database if it exists,
+     * otherwise creaets a new entry for it view a view count of 1
+     * and access time of 0
+     *
+     * @return multitype:string number
+     */
+    function dBSetLastViewedTime()
+    {
         $result = array();
         
-        $current_views = $this->get_views();
+        $current_views = $this->getViews();
         
         if ($current_views['views']) {
             // set last viewed time to now
-            $update_result = db_update('islandora_usage_stats_object_views')
-            ->expression('time', REQUEST_TIME)
-            ->condition('pid', $pid)
-            ->execute();
-        
+            $update_result = db_update('islandora_usage_stats_object_views')->expression('time', REQUEST_TIME)
+                ->condition('pid', $this->pid)
+                ->execute();
+            
             $result['timelastviewed'] = REQUEST_TIME;
-        
         } else {
             // insert a new row into the DB for this object
             $insert_result = db_insert('islandora_usage_stats_object_views')->fields(array(
-                'pid' => $pid,
+                'pid' => $this->pid,
                 'views' => 1,
-                'time' => 0,
+                'time' => 0
             ))->execute();
-        
+            
             $result['timelastviewed'] = 0;
         }
         
         return $result;
     }
-    
+
     /**
-     * This function increases ONLY the view count by 1 for the given
-     * islandora_usage_stats object. If the object does not have an
+     * Increase ONLY the view count by 1 for the given
+     * IslandoraUsageStats object.
+     * If the object does not have an
      * entry in the database already, it creates a new one
-     * 
+     *
      * @return number
      */
-    function db_increase_view_counter() {
-//         $result = 0;
-        
-        $current_views = $this->get_views();
+    function dBIncreaseViewCounter()
+    {
+        // $result = 0;
+        $current_views = $this->getViews();
         
         if ($current_views['views']) {
             // increase view count by one
-            $update_result = db_update('islandora_usage_stats_object_views')
-                ->expression('views', 'views + :num', array(':num' => 1))
+            $update_result = db_update('islandora_usage_stats_object_views')->expression('views', 'views + :num', array(
+                ':num' => 1
+            ))
                 ->condition('pid', $this->pid)
                 ->execute();
-        
+            
             $result = $current_views['views'] + 1;
-        
         } else {
             $insert_result = db_insert('islandora_usage_stats_object_views')->fields(array(
                 'pid' => $this->pid,
                 'views' => 1,
-                'time' => 0,
+                'time' => 0
             ))->execute();
-        
+            
             $result = 1;
         }
         
         return $result;
     }
-    
-    function getLastTimeViewed() {
-        $result = db_query("SELECT time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
-            ':pid' => $this->pid,
-        ));
-        
-        $record = $result->fetch();
-        
-        if (!$record) {
-            return NULL;
-        }
-        else {
-            return $record->time;
-        }
-    }
-    
-    function plusOneView() {
-        $currentViews = $this->get_views();
+
+    /**
+     * If a user's IP address is not excluded and a user has not viewed this
+     * particular item in the last X seconds (cooldown time), then this function
+     * increases an item's view count by 1 and logs the access, if logging is enabled
+     *
+     * @return Ambigous <number, string>
+     */
+    function plusOneView()
+    {
+        $currentViews = $this->getViews();
         $result = $currentViews['views'];
         
         $logging = variable_get('islandora_usage_stats_use_access_log', 1);
         
-        if (! $this->ip_excluded()) { // check if user's ip is excluded
-             
-            $lastViewedTime = $this->get_last_view_time_for_visitor();
-        
+        if (! $this->IpExcluded()) { // check if user's ip is excluded
+            
+            $lastViewedTime = $this->getLastViewTimeForVisitor();
+            
             // user has never viewed item before
             if (! $lastViewedTime) {
-                $result = $this->db_increase_view_counter();
+                $result = $this->dBIncreaseViewCounter();
                 if ($logging) {
-                    $this->log_object_view();
+                    $this->logObjectView();
                 }
-            } 
-            else {
+            } else {
                 // check if user has requested this item in the past X seconds
                 $cooldown_time = variable_get('islandora_usage_stats_cooldown_seconds', 300); // default 5 min
-        
+                
                 if (($lastViewedTime + $cooldown_time) < REQUEST_TIME) {
-                    $result = $this->db_increase_view_counter();
+                    $result = $this->dBIncreaseViewCounter();
                     if ($logging) {
-                        $this->log_object_view();
+                        $this->logObjectView();
                     }
                 }
             }
         }
         
         return $result;
-    }
-    
-    function updateTimeLastViewed() {
-   
-        $update_result = db_update('islandora_usage_stats_object_views')
-            ->expression('time', REQUEST_TIME)
-            ->condition('pid', $this->pid)
-            ->execute();
-    
-        return REQUEST_TIME;
     }
 }
