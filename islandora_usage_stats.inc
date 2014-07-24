@@ -377,9 +377,9 @@ class islandora_usage_stats
                 $result = $this->db_set_last_viewed_time($this->pid);
                 $this->update_last_view_time_for_visitor();
         
-                if ($logging) {
-                    $this->log_object_view();
-                }
+//                 if ($logging) {
+//                     $this->log_object_view();
+//                 }
             } else {
                 $cooldown_time = variable_get('islandora_usage_stats_cooldown_seconds', 300); // default 5 min
         
@@ -390,9 +390,9 @@ class islandora_usage_stats
                     $result = $this->db_set_last_viewed_time($this->pid);
                     $this->update_last_view_time_for_visitor();
         
-                    if ($logging) {
-                        $this->log_object_view();
-                    }
+//                     if ($logging) {
+//                         $this->log_object_view();
+//                     }
                 }
             }
         }
@@ -490,6 +490,9 @@ class islandora_usage_stats
             // user has never viewed item before
             if (! $lastViewedTime) {
                 $result = $this->db_increase_view_counter();
+                if ($logging) {
+                    $this->log_object_view();
+                }
             } 
             else {
                 // check if user has requested this item in the past X seconds
@@ -497,6 +500,9 @@ class islandora_usage_stats
         
                 if (($lastViewedTime + $cooldown_time) < REQUEST_TIME) {
                     $result = $this->db_increase_view_counter();
+                    if ($logging) {
+                        $this->log_object_view();
+                    }
                 }
             }
         }
