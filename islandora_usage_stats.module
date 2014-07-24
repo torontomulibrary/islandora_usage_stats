@@ -190,10 +190,11 @@ function islandora_usage_stats_block_contents($delta)
                 // TODO: use a placeholder for this query to tighten up injection attacks
                 // NB: tried using a placeholder but drupal wouldn't play nicely
                 $nbr_rows = variable_get('islandora_usage_stats_recent_activity_block_display_rows');
-                $result = db_query_range("SELECT distinct(pid)
+                $result = db_query_range("SELECT pid
                     FROM {islandora_usage_stats_object_access_log}
                     WHERE pid not in $excludeString
-                    ORDER BY time ASC", 0, $nbr_rows);
+                    GROUP BY pid
+                    ORDER BY time desc", 0, $nbr_rows);
                 $items = array();
                 foreach ($result as $row) {
                     $object = islandora_object_load($row->pid);
