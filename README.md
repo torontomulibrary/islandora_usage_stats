@@ -33,7 +33,7 @@ Work based on code from https://github.com/roblib/islandora_scholar_upei and the
 ##How to display tracking data on your template files:
 - In order to display tracking data for Islandora objects we need to modify your site's theme files
 - Add a function with the naming convention ```islandora_usage_stats_preprocess_yourTemplateFileName``` at the end of the islandora_usage_stats.module file (and replace ```yourTemplateFileName``` with the name of a template you want to override).
--- The function ```islandora_usage_stats_preprocess_islandora_pdf``` included in the ```islandora_usage_stats.module``` file can be used as an example and should be duplicated and renamed to affect other templates
+  - The function ```islandora_usage_stats_preprocess_islandora_pdf``` included in the ```islandora_usage_stats.module``` file can be used as an example and should be duplicated and renamed to affect other templates
 - Copy the template file you want to override to your theme's ```templates``` directory and follow the example below to display tracking information
 
 ##An example:
