@@ -41,7 +41,7 @@ We will add view and download stats to items in our Islandora PDF collection
 ###Step 1
 Navigate to your Drupal site's modules directory and clone the latest version of the module
 
-```$ cd /var/www/<your_Drupal_Site>/sites/all/modules```
+```$ cd <your_Drupal_Site>/sites/all/modules```
 
 ```$ git clone https://github.com/ryersonlibrary/islandora_usage_stats```
 
@@ -49,6 +49,8 @@ Navigate to your Drupal site's modules directory and clone the latest version of
 Open the ```islandora_usage_stats.module``` file in a text editor and create/edit the template preprocess function necessary to modify the Islandora PDF collection
 
 ```$ vim islandora_usage_stats/islandora_usage_stats.module```
+
+The template preprocess function follows the naming convention of ```islandora_usage_stats_preprocess_MODULE_NAME(&$variables)``` so make sure to edit yours accordingly
 
 ```php
 function islandora_usage_stats_preprocess_islandora_pdf($&variables)
@@ -68,6 +70,7 @@ function islandora_usage_stats_preprocess_islandora_pdf($&variables)
   $variables['times_downloaded'] = $downloaded['downloads'];
   $variables['time_last_downloaded'] = $downloaded['time'];
   
+  // we have added some bootstrap specific css classes and glyphicons to our link, include if desired
   $variables['islandora_download_link'] = l('<i class="glyphicon glyphicon-download"> ' . t('Download PDF') . '</i>', 'download_ds/' . $id . '/OBJ/' . $label, array(
     'attributes' => array(
           'class' => 'btn btn-primary'
@@ -80,9 +83,9 @@ function islandora_usage_stats_preprocess_islandora_pdf($&variables)
 ###Step 3
 Navigate to your site's themes directory and copy the Islandora PDF template file so we can make changes to it and override it
 
-```$ cd /var/www/<your_Drupal_Site>/sites/themes/<yourtheme>```
+```$ cd <your_Drupal_Site>/sites/themes/<yourtheme>```
 
-```$ cp /var/www/<your_Drupal_Site>/sites/all/islandora_solution_pack_pdf/theme/islandora-pdf.tpl.php .```
+```$ cp <your_Drupal_Site>/sites/all/islandora_solution_pack_pdf/theme/islandora-pdf.tpl.php .```
 
 ###Step 4
 Edit the copied template file to output our new tracking variables 
