@@ -133,6 +133,7 @@ Edit the copied template file to output our new tracking variables
 <!-- usage stats -->
 <?php if (module_exists('islandora_usage_stats')): ?>
 <div class="islandora-usage-stats">
+  <!-- we have added some bootstrap specific css classes (badge) to our view counts, include if desired -->
   <p>
     Viewed: <span class="badge"><?php print $times_viewed ?></span> Last viewed: <?php print $time_last_viewed==NULL ? 'Never' : date('g:ia, M d, Y', $time_last_viewed); ?>
   </p>
