@@ -5,6 +5,9 @@ A simple module for Drupal 7 to track views of islandora items in the Ryerson Di
 
 Work based on code from https://github.com/roblib/islandora_scholar_upei and the scholar_tracking module for Drupal 6.
 
+View our fancy page here!
+http://ryersonlibrary.github.io/islandora_usage_stats
+
 ##Features
 - View count uses session variables and defaults to a 5 minute cooldown for repeated requests
 - Tracks views of all types of objects in the repository
