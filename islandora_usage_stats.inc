@@ -14,6 +14,7 @@ class IslandoraUsageStats
 
     /**
      * Performs check to see if user's IP is excluded from tracking
+     * Also checks if user is a bot (if enabled)
      *
      * @return boolean
      */
@@ -22,8 +23,17 @@ class IslandoraUsageStats
         $ip_list = explode(' ', variable_get('islandora_usage_stats_ip_list', 'localhost 127.0.0.1'));
         $ip = ip_address();
         
+        $bot_exclude = variable_get('islandora_usage_stats_exclude_bots', 1);
+        
         if (in_array($ip, $ip_list)) { // check if user's ip is excluded
             return TRUE;
+        }
+        else if ($bot_exclude) {
+            // bots check here
+            $user_agent = $_SERVER['HTTP_USER_AGENT'];
+            if (1 === preg_match('/robot|bot|spider|crawler|curl|^$/i', $user_agent)) {
+                return TRUE;
+            }
         }
         
         return FALSE;

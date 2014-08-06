@@ -43,6 +43,13 @@ function islandora_usage_stats_admin_settings()
         '#default_value' => variable_get('islandora_usage_stats_use_access_log', '1'),
     );
     
+    $form['usage']['islandora_usage_stats_exclude_bots'] = array(
+    	  '#type' => 'checkbox',
+        '#title' => 'Exclude common bots to avoid artifical view count inflation',
+        '#description' => t('Exclude bots who play nicely from view counts'),
+        '#default_value' => variable_get('islandora_usage_stats_exclude_bots', '1'),
+    );
+    
     $form['clear'] = array(
         '#type' => 'fieldset',
         '#title' => t('Clear values')
