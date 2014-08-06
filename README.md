@@ -9,6 +9,7 @@ View our fancy page here!
 http://ryersonlibrary.github.io/islandora_usage_stats
 
 ##Features
+- Toggle to ignore common bots
 - View count uses session variables and defaults to a 5 minute cooldown for repeated requests
 - Tracks views of all types of objects in the repository
 - Access log for all views and downloads, can be disabled
