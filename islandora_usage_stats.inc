@@ -31,7 +31,7 @@ class IslandoraUsageStats
         else if ($bot_exclude) {
             // bots check here
             $user_agent = $_SERVER['HTTP_USER_AGENT'];
-            if (1 === preg_match('/robot|bot|spider|crawler|curl|^$/i', $user_agent)) {
+            if (1 === preg_match('/bot|rambler|spider|crawl|slurp|curl|^$/i', $user_agent)) {
                 return TRUE;
             }
         }
