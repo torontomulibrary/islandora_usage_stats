@@ -412,6 +412,47 @@ function system_mime_type_extension($type)
 }
 
 /**
+ * Implements hook_islandora_object_purged
+ * 
+ * @param unknown $pid
+ */
+function islandora_usage_stats_islandora_object_purged($pid) {
+    // remove from views table
+    $viewsTable = 'islandora_usage_stats_object_views';
+    islandora_usage_stats_clear_tracking($viewsTable, $pid);
+    
+    // remove from downloads table
+    $downloadsTable = 'islandora_usage_stats_object_ds_downloads';
+    islandora_usage_stats_clear_tracking($downloadsTable, $pid);
+    
+    // remove from object activity log
+    $accessLog = 'islandora_usage_stats_object_access_log';
+    islandora_usage_stats_clear_tracking($accessLog, $pid);
+    
+    // remove from object datastream download log
+    $downloadLog = 'islandora_usage_stats_object_ds_access_log';
+    islandora_usage_stats_clear_tracking($downloadLog, $pid);
+}
+
+/**
+ * 
+ * @param unknown $table
+ * @param string $pid
+ * @return string
+ */
+function islandora_usage_stats_clear_tracking($table, $pid = NULL)
+{
+    $result = '';
+    if ($pid == NULL) {
+        $result = db_truncate($table)->execute();
+    }
+    else {
+        $result = db_delete($table)->condition('pid', $pid)->execute();
+    }
+    return $result;
+}
+
+/**
  * Implements hook_islandora_view_object to track usage stats
  *
  * @param unknown $object
