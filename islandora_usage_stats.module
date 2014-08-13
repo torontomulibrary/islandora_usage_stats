@@ -144,12 +144,12 @@ function islandora_usage_stats_block_contents($delta)
                 $connection = islandora_get_tuque_connection($user);
                 $repository = $connection->repository;
                 
-                $excludedPIDlist = explode(' ', variable_get('islandora_usage_stats_block_exclusion_list'));
+                $excludedPIDlist = explode(' ', variable_get('islandora_usage_stats_block_exclusion_list', 'islandora:root'));
                 $excludeString = "('" . implode("','", $excludedPIDlist) . "')";
                 
                 // TODO: use a placeholder for this query to tighten up injection attacks
                 // NB: tried using a placeholder but drupal wouldn't play nicely
-                $nbr_rows = variable_get('islandora_usage_stats_block_display_rows');
+                $nbr_rows = variable_get('islandora_usage_stats_block_display_rows', 5);
                 $result = db_query_range("SELECT pid, views 
 	                               FROM {islandora_usage_stats_object_views}
                                  WHERE pid not in $excludeString
@@ -184,12 +184,12 @@ function islandora_usage_stats_block_contents($delta)
                 $connection = islandora_get_tuque_connection($user);
                 $repository = $connection->repository;
                 
-                $excludedPIDlist = explode(' ', variable_get('islandora_usage_stats_recent_activity_block_exclusion_list'));
+                $excludedPIDlist = explode(' ', variable_get('islandora_usage_stats_recent_activity_block_exclusion_list', 'islandora:root'));
                 $excludeString = "('" . implode("','", $excludedPIDlist) . "')";
                 
                 // TODO: use a placeholder for this query to tighten up injection attacks
                 // NB: tried using a placeholder but drupal wouldn't play nicely
-                $nbr_rows = variable_get('islandora_usage_stats_recent_activity_block_display_rows');
+                $nbr_rows = variable_get('islandora_usage_stats_recent_activity_block_display_rows', 5);
                 
                 $result = db_query_range("SELECT pid, max(time) as time
                     FROM {islandora_usage_stats_object_access_log}
@@ -419,28 +419,29 @@ function system_mime_type_extension($type)
 function islandora_usage_stats_islandora_object_purged($pid) {
     // remove from views table
     $viewsTable = 'islandora_usage_stats_object_views';
-    islandora_usage_stats_clear_tracking($viewsTable, $pid);
+    islandora_usage_stats_delete_from_table($viewsTable, $pid);
     
     // remove from downloads table
     $downloadsTable = 'islandora_usage_stats_object_ds_downloads';
-    islandora_usage_stats_clear_tracking($downloadsTable, $pid);
+    islandora_usage_stats_delete_from_table($downloadsTable, $pid);
     
     // remove from object activity log
     $accessLog = 'islandora_usage_stats_object_access_log';
-    islandora_usage_stats_clear_tracking($accessLog, $pid);
+    islandora_usage_stats_delete_from_table($accessLog, $pid);
     
     // remove from object datastream download log
     $downloadLog = 'islandora_usage_stats_object_ds_access_log';
-    islandora_usage_stats_clear_tracking($downloadLog, $pid);
+    islandora_usage_stats_delete_from_table($downloadLog, $pid);
 }
 
 /**
+ * Copy of 'islandora_usage_stats_clear_tracking' method 
  * 
  * @param unknown $table
  * @param string $pid
  * @return string
  */
-function islandora_usage_stats_clear_tracking($table, $pid = NULL)
+function islandora_usage_stats_delete_from_table($table, $pid = NULL)
 {
     $result = '';
     if ($pid == NULL) {
