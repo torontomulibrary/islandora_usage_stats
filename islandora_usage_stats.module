@@ -306,6 +306,8 @@ function islandora_usage_stats_download_ds_form($pid, $dsid)
     
     $datastream = $object[$dsid];
     
+    drupal_set_message($sanitized_label);
+    
     if (! $datastream) {
         drupal_set_message(t('Could not get datastream, id: ' . $pid . ' , dsid: ' . $dsid));
         return;
@@ -345,7 +347,8 @@ function islandora_usage_stats_download_ds_form($pid, $dsid)
     
     // redirect to the file or error
     if ($file) {
-        drupal_add_http_header('Content-type', 'application/x-unknown; utf-8');
+//         drupal_add_http_header('Content-type', 'application/x-unknown; utf-8');
+        drupal_add_http_header('Content-type', $mime_type);
         drupal_add_http_header('Content-Disposition', 'attachment; filename' . $sanitized_label);
         echo $file;
         exit();
@@ -370,6 +373,7 @@ function islandora_usage_stats_download_ds_form($pid, $dsid)
 function islandora_usage_stats_islandora_datastream_download($object_array)
 {
     // drupal_set_message('Datastream with object id: ' . $object_array['object']->id . ' downloaded');
+    drupal_set_message($object_array['mime_type']);
 }
 
 /**
