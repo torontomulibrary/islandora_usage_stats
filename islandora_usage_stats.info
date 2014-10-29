@@ -1,11 +1,9 @@
 name = Islandora Usage Stats
-description = A module that allows the collection of traffic data on certain objects and datastreams
+description = Allows the collection and review of traffic data on objects and datastreams.
 package = Islandora Tools
-version = 7.x-1.3
+version = 7.x-dev
 core = 7.x
 files[] = islandora_usage_stats.admin.inc
 files[] = islandora_usage_stats.inc
-files[] = islandora_usage_stats.module
-files[] = islandora_usage_stats.install
 dependencies[] = islandora
 configure = admin/settings/islandora_usage_stats
