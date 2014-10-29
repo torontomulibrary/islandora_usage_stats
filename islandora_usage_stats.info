@@ -4,6 +4,6 @@ package = Islandora Tools
 version = 7.x-dev
 core = 7.x
 files[] = islandora_usage_stats.admin.inc
-files[] = islandora_usage_stats.inc
+files[] = includes/islandora_usage_stats.class.inc
 dependencies[] = islandora
 configure = admin/islandora/tools/islandora_usage_stats
