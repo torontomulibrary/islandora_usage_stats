@@ -2,181 +2,190 @@
 
 /**
  * @file
+ * Install/uninstall hooks.
  */
-function islandora_usage_stats_schema()
-{
-    $schema['islandora_usage_stats_object_views'] = array(
-        'description' => 'This table is used to store view count information for fedora objects',
-        'fields' => array(
-            'id' => array(
-                'description' => 'Unique id for each row',
-                'type' => 'serial',
-                'not null' => TRUE,
-            ),
-            'pid' => array(
-                'description' => 'PID of the object',
-                'type' => 'varchar', // varchar because pid's are sometimes text
-                'length' => 64,
-                'not null' => TRUE,
-            ),
-            'views' => array(
-                'description' => 'The number of views an object has received',
-                'type' =>  'int',
-                'not null' => TRUE,
-                'default' => 0,
-            ),
-            'time' => array(
-                'description' => 'The time in number of seconds of the last view of the object',
-                'type' => 'int',
-                'not null' => TRUE,
-                'default' => 0,
-            ),
-        ),
-        'primary key' => array(
-            'id'
-        ),
-        'indexes' => array(
-            'pid' => array(
-                'pid'
-            )
-        )
-    );
 
-    $schema['islandora_usage_stats_object_ds_downloads'] = array(
-        'description' => 'This table is used to store datastream download count information for fedora objects',
-        'fields' => array(
-            'id' => array(
-                'description' => 'Unique id for each row',
-                'type' => 'serial',
-                'not null' => TRUE,
-            ),
-            'pid' => array(
-                'description' => 'PID of the object',
-                'type' => 'varchar', // varchar because pid's are sometimes text
-                'length' => 64,
-                'not null' => TRUE,
-            ),
-            'dsid' => array(
-                'description' => 'Datastream ID of the object',
-                'type' => 'varchar',
-                'length' => 64,
-                'not null' => TRUE,
-            ),
-            'downloads' => array(
-                'description' => 'The number of views an object has received',
-                'type' =>  'int',
-                'not null' => TRUE,
-                'default' => 0,
-            ),
-            'time' => array(
-                'description' => 'The time in number of seconds of the last download of the object',
-                'type' => 'int',
-                'not null' => TRUE,
-                'default' => 0,
-            )
-        ),
-        'primary key' => array(
-            'id'
-        ),
-        'indexes' => array(
-            'pid' => array(
-                'pid'
-            ),
-            'dsid' => array(
-                'dsid'
-            )
-        )
-    );
+ /**
+  * Implements hook_schema().
+  *
+  * @todo Link to user table by UID, implement user deletion hook for sync.
+  * @XXX Stats tables look redundant.
+  */
+function islandora_usage_stats_schema() {
+  $schema['islandora_usage_stats_object_views'] = array(
+    'description' => 'This table is used to store view count information for fedora objects',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Unique id for each row',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'pid' => array(
+        'description' => 'PID of the object',
+        'type' => 'varchar',
+        // Using varchar because pid's are sometimes text.
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'views' => array(
+        'description' => 'The number of views an object has received',
+        'type' =>  'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'time' => array(
+        'description' => 'The time in number of seconds of the last view of the object',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array(
+      'id'
+    ),
+    'indexes' => array(
+      'pid' => array(
+        'pid'
+      ),
+    ),
+  );
 
-    $schema['islandora_usage_stats_object_access_log'] = array(
-        'description' => 'This table is used to store the usage information for fedora objects',
-        'fields' => array(
-            'id' => array(
-                'type' => 'serial',
-                'not null' => TRUE,
-            ),
-            'pid' => array(
-                'description' => 'PID of the object',
-                'type' => 'varchar',
-                'length' => 64,
-                'not null' => TRUE,
-            ),
-            'time' => array(
-                'type' => 'int',
-                'not null' => TRUE,
-                'default' => 0
-            ),
-            'ip' => array(
-                'description' => 'IP of user that accessed the object',
-                'type' => 'varchar',
-                'length' => 64,
-                'not null' => TRUE,
-            ),
-            'user' => array(
-                'description' => 'Drupal user that accessed the object',
-                'type' => 'varchar',
-                'length' => 64,
-                'not null' => TRUE,
-            )
-        ),
-        'primary key' => array(
-            'id'
-        ),
-        'indexes' => array(
-            'pid' => array(
-                'pid'
-            )
-        )
-    );
+  $schema['islandora_usage_stats_object_ds_downloads'] = array(
+    'description' => 'This table is used to store datastream download count information for fedora objects',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Unique id for each row',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'pid' => array(
+        'description' => 'PID of the object',
+        'type' => 'varchar',
+        // Using varchar because pid's are sometimes text.
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'dsid' => array(
+        'description' => 'Datastream ID of the object',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'downloads' => array(
+        'description' => 'The number of views an object has received',
+        'type' =>  'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'time' => array(
+        'description' => 'The time in number of seconds of the last download of the object',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array(
+      'id'
+    ),
+    'indexes' => array(
+      'pid' => array(
+        'pid'
+      ),
+      'dsid' => array(
+        'dsid',
+      ),
+    ),
+  );
 
-    $schema['islandora_usage_stats_object_ds_access_log'] = array(
-        'description' => 'This table is used to store the usage information for fedora datastreams',
-        'fields' => array(
-            'id' => array(
-                'type' => 'serial',
-                'not null' => TRUE,
-            ),
-            'pid' => array(
-                'description' => 'PID of the object',
-                'type' => 'varchar',
-                'length' => 64,
-                'not null' => TRUE,
-            ),
-            'dsid' => array(
-                'description' => 'Datastream ID',
-                'type' => 'varchar',
-                'length' => 64,
-                'not null' => TRUE,
-            ),
-            'time' => array(
-                'type' => 'int',
-                'not null' => TRUE,
-                'default' => 0
-            ),
-            'ip' => array(
-                'description' => 'IP of user that accessed the object',
-                'type' => 'varchar',
-                'length' => 64,
-                'not null' => TRUE,
-            ),
-            'user' => array(
-                'description' => 'Drupal user that accessed the object',
-                'type' => 'varchar',
-                'length' => 64,
-                'not null' => TRUE,
-            ),
-        ),
-        'primary key' => array(
-            'id'
-        ),
-        'indexes' => array(
-            'pid' => array(
-                'pid'
-            ),
-            'dsid' => array(
-                'dsid'
-            )
-        )
-    );
-    return $schema;
+  $schema['islandora_usage_stats_object_access_log'] = array(
+    'description' => 'This table is used to store the usage information for Fedora objects.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'pid' => array(
+        'description' => 'PID of the object',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'time' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'ip' => array(
+        'description' => 'IP of user that accessed the object',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'user' => array(
+        'description' => 'Drupal user that accessed the object',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      )
+    ),
+    'primary key' => array(
+      'id',
+    ),
+    'indexes' => array(
+      'pid' => array(
+        'pid',
+      ),
+    ),
+  );
+
+  $schema['islandora_usage_stats_object_ds_access_log'] = array(
+    'description' => 'This table is used to store the usage information for Fedora datastreams.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'pid' => array(
+        'description' => 'PID of the object',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'dsid' => array(
+        'description' => 'Datastream ID',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'time' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'ip' => array(
+        'description' => 'IP of user that accessed the object',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'user' => array(
+        'description' => 'Drupal user that accessed the object',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array(
+      'id'
+    ),
+    'indexes' => array(
+      'pid' => array(
+        'pid'
+      ),
+      'dsid' => array(
+        'dsid',
+      ),
+    ),
+  );
+  return $schema;
 }
