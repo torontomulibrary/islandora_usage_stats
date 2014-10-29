@@ -219,42 +219,38 @@ function islandora_usage_stats_block_contents($delta)
 /**
  * Implementation of hook_menu().
  */
-function islandora_usage_stats_menu()
-{
-    $items = array();
+function islandora_usage_stats_menu() {
+  $items = array();
 
-    /**
-     * Internal route with 2 wildcard matches
-     */
-    $items['download_ds/%/%'] = array(
-        'title' => 'Download datastream',
-        'page callback' => 'islandora_usage_stats_download_ds_form',
-        'page arguments' => array(
-            1,
-            2
-        ),
-        'access callback' => 'user_access',
-        'access arguments' => array(
-            'access content'
-        ),
-        'type' => MENU_CALLBACK
-    );
+  // Internal route with 2 wildcard matches.
+  $items['download_ds/%/%'] = array(
+    'title' => 'Download datastream',
+    'page callback' => 'islandora_usage_stats_download_ds_form',
+    'page arguments' => array(
+      1,
+      2
+    ),
+    'access callback' => 'user_access',
+    'access arguments' => array(
+      'access content'
+    ),
+    'type' => MENU_CALLBACK
+  );
 
-    $items['admin/settings/islandora_usage_stats'] = array(
-        'title' => 'Islandora Usage Stats settings',
-        'description' => 'Change how usage stats behave.',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array(
-            'islandora_usage_stats_admin_settings'
-        ),
-        'access arguments' => array(
-            'manage usage stats'
-        ),
-        'type' => MENU_CALLBACK,
-        'file' => 'islandora_usage_stats.admin.inc'
-    );
+  $items['admin/islandora/tools/islandora_usage_stats'] = array(
+    'title' => 'Islandora Usage Stats Settings',
+    'description' => 'Change how usage stats behave.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array(
+      'islandora_usage_stats_admin_settings'
+    ),
+    'access arguments' => array(
+      'manage usage stats'
+    ),
+    'file' => 'islandora_usage_stats.admin.inc'
+  );
 
-    return $items;
+  return $items;
 }
 
 /**

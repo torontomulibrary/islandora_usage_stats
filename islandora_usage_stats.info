@@ -6,4 +6,4 @@ core = 7.x
 files[] = islandora_usage_stats.admin.inc
 files[] = islandora_usage_stats.inc
 dependencies[] = islandora
-configure = admin/settings/islandora_usage_stats
+configure = admin/islandora/tools/islandora_usage_stats
