@@ -41,7 +41,7 @@ function islandora_usage_stats_schema()
             )
         )
     );
-    
+
     $schema['islandora_usage_stats_object_ds_downloads'] = array(
         'description' => 'This table is used to store datastream download count information for fedora objects',
         'fields' => array(
@@ -58,9 +58,9 @@ function islandora_usage_stats_schema()
             ),
             'dsid' => array(
                 'description' => 'Datastream ID of the object',
-                'type' => 'varchar', 
+                'type' => 'varchar',
                 'length' => 64,
-                'not null' => TRUE,      
+                'not null' => TRUE,
             ),
             'downloads' => array(
                 'description' => 'The number of views an object has received',
@@ -87,7 +87,7 @@ function islandora_usage_stats_schema()
             )
         )
     );
-    
+
     $schema['islandora_usage_stats_object_access_log'] = array(
         'description' => 'This table is used to store the usage information for fedora objects',
         'fields' => array(
@@ -128,7 +128,7 @@ function islandora_usage_stats_schema()
             )
         )
     );
-    
+
     $schema['islandora_usage_stats_object_ds_access_log'] = array(
         'description' => 'This table is used to store the usage information for fedora datastreams',
         'fields' => array(
