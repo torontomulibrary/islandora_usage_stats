@@ -148,7 +148,7 @@ function islandora_usage_stats_block_contents($delta)
     	                           ORDER BY views DESC", 0, $nbr_rows);
                 $items = array();
                 foreach ($result as $row) {
-
+                    // @XXX This object load can fail perms.
                     $object = islandora_object_load($row->pid);
                     $view_suffix = ((int)$row->views > 1) ? 'views' : 'view';
                     $viewcount = "$row->views $view_suffix";
