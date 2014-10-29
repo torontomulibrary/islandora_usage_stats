@@ -2,31 +2,23 @@
 
 /**
  * @file
- *
+ * Primary hook implementations.
  */
 
 /**
  * Implements hook_block_info().
  */
-function islandora_usage_stats_block_info()
-{
-    $blocks['top_usage'] = array(
-        'info' => t('Most Viewed Islandora Items'),
-        'status' => TRUE,
-        'region' => 'sidebar_first',
-        'weight' => 0,
-        'visibility' => BLOCK_VISIBILITY_NOTLISTED,
-    );
+function islandora_usage_stats_block_info() {
+  $blocks = array();
 
-    $blocks['recent_activity'] = array(
-        'info' => t('Recently accessed Islandora Items'),
-        'status' => TRUE,
-        'region' => 'sidebar_first',
-        'weight' => 0,
-        'visibility' => BLOCK_VISIBILITY_NOTLISTED,
-    );
+  $blocks['top_usage'] = array(
+    'info' => t('Most Viewed Islandora Items'),
+  );
+  $blocks['recent_activity'] = array(
+    'info' => t('Recently accessed Islandora Items'),
+  );
 
-    return $blocks;
+  return $blocks;
 }
 
 /**
