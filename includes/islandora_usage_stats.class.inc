@@ -2,239 +2,237 @@
 
 /**
  * @file
- * Class to deal with tracking item views on islandora site
+ * Class file for IslandoraUsageStats.
  */
-class IslandoraUsageStats
-{
 
-    function __construct($pid)
-    {
-        $this->pid = $pid;
+/**
+ * Class to deal with tracking item views on an Islandora site.
+ */
+class IslandoraUsageStats {
+
+  function __construct($pid)
+  {
+    $this->pid = $pid;
+  }
+
+  /**
+   * Performs check to see if user's IP is excluded from tracking
+   * Also checks if user is a bot (if enabled)
+   *
+   * @return boolean
+   */
+  function IpExcluded()
+  {
+    $ip_list = explode(' ', variable_get('islandora_usage_stats_ip_list', 'localhost 127.0.0.1'));
+    $ip = ip_address();
+
+    $bot_exclude = variable_get('islandora_usage_stats_exclude_bots', 1);
+
+    if (in_array($ip, $ip_list)) { // check if user's ip is excluded
+      return TRUE;
+    }
+    else if ($bot_exclude) {
+      // bots check here
+      $user_agent = $_SERVER['HTTP_USER_AGENT'];
+      if (1 === preg_match('/bot|rambler|spider|crawl|slurp|curl|^$/i', $user_agent)) {
+        return TRUE;
+      }
     }
 
-    /**
-     * Performs check to see if user's IP is excluded from tracking
-     * Also checks if user is a bot (if enabled)
-     *
-     * @return boolean
-     */
-    function IpExcluded()
-    {
-        $ip_list = explode(' ', variable_get('islandora_usage_stats_ip_list', 'localhost 127.0.0.1'));
-        $ip = ip_address();
+    return FALSE;
+  }
 
-        $bot_exclude = variable_get('islandora_usage_stats_exclude_bots', 1);
+  /**
+   * Retrieves the number of times an item has been viewed from the database
+   * and the last time it was viewed
+   *
+   * @return array
+   */
+  function getViews()
+  {
+    $result = db_query("SELECT views, time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
+      ':pid' => $this->pid
+    ));
+    $record = $result->fetchAssoc();
+    if (! $record) {
+      return array(
+          'views' => 0,
+         'time' => ''
+        );
+    }
+    return $record;
+  }
 
-        if (in_array($ip, $ip_list)) { // check if user's ip is excluded
-            return TRUE;
-        }
-        else if ($bot_exclude) {
-            // bots check here
-            $user_agent = $_SERVER['HTTP_USER_AGENT'];
-            if (1 === preg_match('/bot|rambler|spider|crawl|slurp|curl|^$/i', $user_agent)) {
-                return TRUE;
-            }
-        }
-
-        return FALSE;
+  /**
+   * Retrieves the number of times an item has been viewed from the database
+   * and the last time it was viewed, BUT ALSO UPDATES THE LAST VIEWED TIME
+   * AFTER THE RESULTS ARE RETURNED
+   *
+   * @return array
+   */
+  function getViewCount()
+  {
+    $result = db_query("SELECT views, time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
+        ':pid' => $this->pid
+    ));
+    $record = $result->fetchAssoc();
+    if (! $record) {
+        return array(
+            'views' => 0,
+            'time' => ''
+        );
     }
 
+    // update the last viewed time, don't store it
     /**
-     * Retrieves the number of times an item has been viewed from the database
-     * and the last time it was viewed
-     *
-     * @return array
+     * **********************
      */
-    function getViews()
-    {
-        $result = db_query("SELECT views, time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
-            ':pid' => $this->pid
-        ));
-        $record = $result->fetchAssoc();
-        if (! $record) {
-            return array(
-                'views' => 0,
-                'time' => ''
-            );
-        }
-        return $record;
-    }
-
+    $this->setLastViewedTime();
     /**
-     * Retrieves the number of times an item has been viewed from the database
-     * and the last time it was viewed, BUT ALSO UPDATES THE LAST VIEWED TIME
-     * AFTER THE RESULTS ARE RETURNED
-     *
-     * @return array
+     * **********************
      */
-    function getViewCount()
-    {
-        $result = db_query("SELECT views, time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
-            ':pid' => $this->pid
-        ));
-        $record = $result->fetchAssoc();
-        if (! $record) {
-            return array(
-                'views' => 0,
-                'time' => ''
-            );
-        }
 
-        // update the last viewed time, don't store it
-        /**
-         * **********************
-         */
-        $this->setLastViewedTime();
-        /**
-         * **********************
-         */
+    return $record;
+  }
 
-        return $record;
-    }
+  /**
+   * Increases the datastream download count by one in the database.
+   * Count is not increased if user's IP is on exclusion list.
+   *
+   * @param string $dsid
+   *            the datastream id
+   * @return NULL string result
+   */
+  function addDownload($dsid) {
+    $result = '';
 
-    /**
-     * Increases the datastream download count by one in the database.
-     * Count is not increased if user's IP is on exclusion list.
-     *
-     * @param string $dsid
-     *            the datastream id
-     * @return NULL string result
-     */
-    function addDownload($dsid)
-    {
-        $result = '';
+    $logging = variable_get('islandora_usage_stats_use_access_log', 1);
 
-        $logging = variable_get('islandora_usage_stats_use_access_log', 1);
+    if (! $this->IpExcluded()) { // check if user's ip is excluded
+        $result = $this->increaseObjectDSDownloadCounter($dsid);
 
-        if (! $this->IpExcluded()) { // check if user's ip is excluded
-            $result = $this->increaseObjectDSDownloadCounter($dsid);
-
-            if ($logging) {
-                $this->logObjectDownload($dsid);
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * Retrieves the number of times the object's datastream has been downloaded
-     *
-     * @param string $dsid
-     *            the datastream id
-     * @return array
-     */
-    function getDownloads($dsid)
-    {
-        $result = db_query("SELECT downloads, time from {islandora_usage_stats_object_ds_downloads} WHERE pid = :pid AND dsid = :dsid", array(
-            ':pid' => $this->pid,
-            ':dsid' => $dsid
-        ));
-        $record = $result->fetchAssoc();
-
-        if ($record) {
-            return $record;
-        } else {
-            return array(
-                'downloads' => 0,
-                'time' => NULL
-            );
+        if ($logging) {
+            $this->logObjectDownload($dsid);
         }
     }
 
-    /**
-     * Increases the download count for the given object's datastream ID
-     *
-     * @param string $dsid
-     *            datastream id
-     * @return the number of total downloads
-     */
-    function increaseObjectDSDownloadCounter($dsid)
-    {
-        $current_info = $this->getDownloads($dsid);
+    return $result;
+  }
 
-        if ($current_info['downloads']) {
-            // increase view count by one
-            $result = db_update('islandora_usage_stats_object_ds_downloads')->expression('downloads', 'downloads + :downloads', array(
-                ':downloads' => 1
-            ))
-                ->expression('time', REQUEST_TIME)
-                ->condition('pid', $this->pid)
-                ->condition('dsid', $dsid)
-                ->execute();
+  /**
+   * Retrieves the number of times the object's datastream has been downloaded
+   *
+   * @param string $dsid
+   *            the datastream id
+   * @return array
+   */
+  function getDownloads($dsid)
+  {
+    $result = db_query("SELECT downloads, time from {islandora_usage_stats_object_ds_downloads} WHERE pid = :pid AND dsid = :dsid", array(
+        ':pid' => $this->pid,
+        ':dsid' => $dsid
+    ));
+    $record = $result->fetchAssoc();
 
-            return $this->getDownloads($dsid);
-        } else {
-            $result = db_insert('islandora_usage_stats_object_ds_downloads')->fields(array(
-                'pid' => $this->pid,
-                'dsid' => $dsid,
-                'downloads' => 1,
-                'time' => REQUEST_TIME
-            ))->execute();
-
-            return array(
-                'downloads' => 1,
-                'time' => NULL
-            );
-        }
+    if ($record) {
+      return $record;
+    } else {
+        return array(
+            'downloads' => 0,
+            'time' => NULL
+        );
     }
+  }
 
-    /**
-     * Adds an entry into the log table for an access of a fedora object
-     *
-     * @return unknown
-     */
-    function logObjectView()
-    {
-        global $user;
-        $ip = ip_address();
+  /**
+   * Increases the download count for the given object's datastream ID
+   *
+   * @param string $dsid
+   *            datastream id
+   * @return the number of total downloads
+   */
+  function increaseObjectDSDownloadCounter($dsid) {
+    $current_info = $this->getDownloads($dsid);
 
-        $result = db_insert('islandora_usage_stats_object_access_log')->fields(array(
+    if ($current_info['downloads']) {
+        // increase view count by one
+        $result = db_update('islandora_usage_stats_object_ds_downloads')->expression('downloads', 'downloads + :downloads', array(
+            ':downloads' => 1
+        ))
+            ->expression('time', REQUEST_TIME)
+            ->condition('pid', $this->pid)
+            ->condition('dsid', $dsid)
+            ->execute();
+
+        return $this->getDownloads($dsid);
+    } else {
+        $result = db_insert('islandora_usage_stats_object_ds_downloads')->fields(array(
             'pid' => $this->pid,
-            'time' => REQUEST_TIME,
-            'ip' => $ip,
-            'user' => ($user == NULL) ? $user->name : 'Anonymous'
-        ))->execute();
-
-        return $result;
-    }
-
-    /**
-     * Add an entry into the log table for a download of a fedora object datastream
-     *
-     * @return unknown
-     */
-    function logObjectDownload($dsid)
-    {
-        global $user;
-        $ip = ip_address();
-
-        $result = db_insert('islandora_usage_stats_object_ds_access_log')->fields(array(
-            'pid' => $this->pid,
-            'time' => REQUEST_TIME,
-            'ip' => $ip,
             'dsid' => $dsid,
-            'user' => ($user == NULL) ? $user->name : 'Anonymous'
+            'downloads' => 1,
+            'time' => REQUEST_TIME
         ))->execute();
 
-        return $result;
+        return array(
+            'downloads' => 1,
+            'time' => NULL,
+        );
     }
+  }
 
-    /**
-     * Queries the database access logs to get the last time an ip accessed this item
-     *
-     * @return NULL string since the unix epoch
-     */
-    function getLastViewTimeForIp()
-    {
-        $ip = ip_address();
-        $result = db_query("SELECT max(time) from {islandora_usage_stats_object_access_log} WHERE pid = :pid AND ip = :ip", array(
-            ':pid' => $this->pid,
-            ':ip' => $ip
-        ));
-        $lastViewTime = $result->fetchField(0);
-        return $lastViewTime;
-    }
+  /**
+   * Log a view of a Fedora object.
+   *
+   * @global user
+   */
+  public function logObjectView() {
+    global $user;
+    $ip = ip_address();
+
+    $result = db_insert('islandora_usage_stats_object_access_log')->fields(array(
+        'pid' => $this->pid,
+        'time' => REQUEST_TIME,
+        'ip' => $ip,
+        'user' => ($user == NULL) ? $user->name : 'Anonymous',
+    ))->execute();
+
+    return $result;
+  }
+
+  /**
+   * Log the download of a Fedora object datastream.
+   *
+   * @return unknown
+   */
+  function logObjectDownload($dsid) {
+    global $user;
+    $ip = ip_address();
+
+    $result = db_insert('islandora_usage_stats_object_ds_access_log')->fields(array(
+        'pid' => $this->pid,
+        'time' => REQUEST_TIME,
+        'ip' => $ip,
+        'dsid' => $dsid,
+        'user' => ($user == NULL) ? $user->name : 'Anonymous'
+    ))->execute();
+
+    return $result;
+  }
+
+  /**
+   * Queries the database access logs to get the last time an ip accessed this item
+   *
+   * @return NULL string since the unix epoch
+   */
+  function getLastViewTimeForIp() {
+    $ip = ip_address();
+    $result = db_query("SELECT max(time) from {islandora_usage_stats_object_access_log} WHERE pid = :pid AND ip = :ip", array(
+        ':pid' => $this->pid,
+        ':ip' => $ip
+    ));
+    $lastViewTime = $result->fetchField(0);
+    return $lastViewTime;
+  }
 
     /**
      * Queries the datastream access log to get the last time an ip downloaded the given datastream ID
