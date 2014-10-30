@@ -1,0 +1,5 @@
+<?php
+/**
+ * @file
+ * Default views.
+ */

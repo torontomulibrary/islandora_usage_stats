@@ -8,7 +8,7 @@
  /**
   * Implements hook_schema().
   *
-  * @todo Link to user table by UID, implement user deletion hook for sync.
+  * @todo Link to user table by UID don't make a foreign key.
   * @XXX Stats tables look redundant.
   */
 function islandora_usage_stats_schema() {
@@ -187,5 +187,123 @@ function islandora_usage_stats_schema() {
       ),
     ),
   );
+  $schema['islandora_usage_stats_collection_access_log'] = array(
+    'description' => 'Used to log the parent collection(s) of an object being visited.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'object_access_id' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'collection' => array(
+        'description' => 'The PID of the collection.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not NULL' => TRUE,
+      ),
+    ),
+    'foreign keys' => array(
+      'object_acces_id' => array(
+        'table' => 'islandora_usage_stats_object_access_log',
+        'columns' => array('object_access_id' => 'id'),
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  $schema['islandora_usage_stats_content_model_access_log'] = array(
+    'description' => 'Used to log the content model(s) when an object is visited.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'object_access_id' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'content_model' => array(
+        'description' => 'The PID of the content model.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not NULL' => TRUE,
+      ),
+    ),
+    'foreign keys' => array(
+      'object_access_id' => array(
+        'table' => 'islandora_usage_stats_object_access_log',
+        'columns' => array('object_access_id' => 'id'),
+      ),
+    ),
+    'primary key' => array('id'),
+  );
   return $schema;
+}
+
+/**
+ * Updates schema to support collections and content models.
+ */
+function islandora_usage_stats_update_7001() {
+  $schema = array();
+
+  $schema['islandora_usage_stats_collection_access_log'] = array(
+    'description' => 'Used to log the parent collection(s) of an object being visited.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'object_access_id' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'collection' => array(
+        'description' => 'The PID of the collection.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not NULL' => TRUE,
+      ),
+    ),
+    'foreign keys' => array(
+      'object_acces_id' => array(
+        'table' => 'islandora_usage_stats_object_access_log',
+        'columns' => array('object_access_id' => 'id'),
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  $schema['islandora_usage_stats_content_model_access_log'] = array(
+    'description' => 'Used to log the content model(s) when an object is visited.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'object_access_id' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'content_model' => array(
+        'description' => 'The PID of the content model.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not NULL' => TRUE,
+      ),
+    ),
+    'foreign keys' => array(
+      'object_access_id' => array(
+        'table' => 'islandora_usage_stats_object_access_log',
+        'columns' => array('object_access_id' => 'id'),
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  foreach ($schema as $name => $schema_info) {
+    db_create_table($name, $schema_info);
+  }
+
+  return t('Updated database to support logging collection and content model events.');
 }

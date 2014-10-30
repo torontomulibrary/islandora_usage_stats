@@ -486,3 +486,13 @@ function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
         'html' => TRUE,
     ));
 }
+
+/**
+ * Implements hook_views_api().
+ */
+function islandora_usage_stats_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'islandora_usage_stats') . '/views',
+  );
+}

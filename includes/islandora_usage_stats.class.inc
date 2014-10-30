@@ -184,19 +184,38 @@ class IslandoraUsageStats {
    * Log a view of a Fedora object.
    *
    * @global user
+   *
+   * @todo look into batching the DB updates.
    */
   public function logObjectView() {
+    module_load_include('inc', 'islandora_basic_collection', 'includes/utilities');
     global $user;
-    $ip = ip_address();
+    $object = islandora_object_load($this->pid);
 
-    $result = db_insert('islandora_usage_stats_object_access_log')->fields(array(
+    $object_access_id = db_insert('islandora_usage_stats_object_access_log')->fields(array(
         'pid' => $this->pid,
         'time' => REQUEST_TIME,
-        'ip' => $ip,
-        'user' => ($user == NULL) ? $user->name : 'Anonymous',
+        'ip' => ip_address(),
+        'user' => ($user->uid) ? $user->name : variable_get('anonymous', t('Anonymous')),
     ))->execute();
 
-    return $result;
+    // Log content models.
+    $models = $object->models;
+    unset($models[array_search('fedora-system:FedoraObject-3.0', $models)]);
+    foreach ($models as $model) {
+      db_insert('islandora_usage_stats_content_model_access_log')->fields(array(
+        'object_access_id' => $object_access_id,
+        'content_model' => $model,
+      ))->execute();
+    }
+    // Log parents.
+    $collections = islandora_basic_collection_get_parent_pids($object);
+    foreach ($collections as $collection) {
+      db_insert('islandora_usage_stats_collection_access_log')->fields(array(
+        'object_access_id' => $object_access_id,
+        'collection' => $collection,
+      ))->execute();
+    }
   }
 
   /**
