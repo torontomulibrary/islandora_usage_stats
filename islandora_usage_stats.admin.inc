@@ -11,6 +11,8 @@
  *
  * @ingroup forms
  *
+ * @todo break out non-settings elements into their own form.
+ *
  * @see system_settings_form().
  */
 function islandora_usage_stats_admin_settings() {
@@ -131,7 +133,9 @@ function islandora_usage_stats_admin_settings_validate($form, &$form_state) {
     switch ($button) {
       case 'edit-clear-object-access-log-submit':
           $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_access_log');
-          if ($result) {
+          $collection_result = islandora_usage_stats_clear_tracking('islandora_usage_stats_collection_access_log');
+          $content_model_result = islandora_usage_stats_clear_tracking('islandora_usage_stats_content_model_access_log');
+          if ($result && $collection_result && $content_model_result) {
               drupal_set_message(t("Object view access logs have been cleared"));
           }
           break;
