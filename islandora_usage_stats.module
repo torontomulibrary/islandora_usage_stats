@@ -242,39 +242,35 @@ function islandora_usage_stats_menu() {
     'description' => 'Change how usage stats behave.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array(
-      'islandora_usage_stats_admin_settings'
+      'islandora_usage_stats_admin_settings',
     ),
     'access arguments' => array(
-      'manage usage stats'
+      'manage usage stats',
     ),
-    'file' => 'islandora_usage_stats.admin.inc'
+    'file' => 'islandora_usage_stats.admin.inc',
   );
 
   return $items;
 }
 
 /**
- * Implementation of hook_permission
- *
- * Sets the permissions required by this module
- *
+ * Implements hook_permission().
  */
-function islandora_usage_stats_permission()
-{
-    return array(
-        'manage usage stats' => array(
-            'title' => t('Manage usage tracking'),
-            'description' => t('Manage usage tracking for the Islandora Usage Stats module')
-        ),
-        'view usage stats block' => array(
-            'title' => t('View usage tracking stats block'),
-            'description' => t('View usage tracking stats block which includes number of views and downloads')
-        )
-    );
+function islandora_usage_stats_permission() {
+  return array(
+    'manage usage stats' => array(
+      'title' => t('Manage usage tracking'),
+      'description' => t('Manage usage tracking for the Islandora Usage Stats module'),
+    ),
+    'view usage stats block' => array(
+      'title' => t('View usage tracking stats block'),
+      'description' => t('View usage tracking stats block which includes number of views and downloads'),
+    ),
+  );
 }
 
 /**
- * Form called when paths with link 'download_ds/$pid/$dsid' are clicked
+ * Form called when paths with link 'download_ds/$pid/$dsid' are clicked.
  */
 function islandora_usage_stats_download_ds_form($pid, $dsid)
 {
