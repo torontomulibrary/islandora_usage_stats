@@ -3,7 +3,6 @@ description = Allows the collection and review of traffic data on objects and da
 package = Islandora Tools
 version = 7.x-dev
 core = 7.x
-files[] = islandora_usage_stats.admin.inc
 files[] = includes/islandora_usage_stats.class.inc
 dependencies[] = islandora
 dependencies[] = views

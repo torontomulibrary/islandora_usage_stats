@@ -232,7 +232,7 @@ function islandora_usage_stats_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_usage_stats_admin_settings'),
     'access arguments' => array('manage usage stats'),
-    'file' => 'islandora_usage_stats.admin.inc',
+    'file' => 'includes/admin.form.inc',
   );
 
   return $items;
