@@ -397,6 +397,8 @@ function islandora_usage_stats_islandora_object_purged($pid) {
 /**
  * Copy of 'islandora_usage_stats_clear_tracking' method
  *
+ * @todo nuke this or the other copy of this function respect DRY.
+ *
  * @param unknown $table
  * @param string $pid
  * @return string
