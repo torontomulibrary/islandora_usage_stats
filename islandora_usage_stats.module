@@ -26,11 +26,8 @@ function islandora_usage_stats_block_info() {
 
 /**
  * Implements hook_block_configure().
- *
- * @param unknown $delta
  */
-function islandora_usage_stats_block_configure($delta)
-{
+function islandora_usage_stats_block_configure($delta) {
     $form = array();
 
     switch ($delta) {
@@ -87,32 +84,25 @@ function islandora_usage_stats_block_configure($delta)
 
 /**
  * Implements hook_block_save().
- *
- * @param string $delta
- * @param unknown $edit
  */
-function islandora_usage_stats_block_save($delta = '', $edit = array())
-{
-    switch ($delta) {
-        case 'top_usage':
-            variable_set('islandora_usage_stats_block_display_rows', (int) $edit['islandora_usage_stats_block_display_rows']);
-            variable_set('islandora_usage_stats_block_exclusion_list', $edit['islandora_usage_stats_exclusion_list']);
-            break;
-        case 'recent_activity':
-            variable_set('islandora_usage_stats_recent_activity_block_display_rows', (int) $edit['islandora_usage_stats_recent_activity_block_display_rows']);
-            variable_set('islandora_usage_stats_recent_activity_block_exclusion_list', $edit['islandora_usage_stats_recent_activity_block_exclusion_list']);
-            break;
-    }
-    return;
+function islandora_usage_stats_block_save($delta = '', $edit = array()) {
+  switch ($delta) {
+    case 'top_usage':
+      variable_set('islandora_usage_stats_block_display_rows', (int) $edit['islandora_usage_stats_block_display_rows']);
+      variable_set('islandora_usage_stats_block_exclusion_list', $edit['islandora_usage_stats_exclusion_list']);
+      break;
+    case 'recent_activity':
+      variable_set('islandora_usage_stats_recent_activity_block_display_rows', (int) $edit['islandora_usage_stats_recent_activity_block_display_rows']);
+      variable_set('islandora_usage_stats_recent_activity_block_exclusion_list', $edit['islandora_usage_stats_recent_activity_block_exclusion_list']);
+      break;
+  }
+  return;
 }
 
 /**
  * Implements hook_block_view().
- *
- * @param string $delta
  */
-function islandora_usage_stats_block_view($delta = '')
-{
+function islandora_usage_stats_block_view($delta = '') {
     switch ($delta) {
         case 'top_usage':
             $block['content'] = islandora_usage_stats_block_contents($delta);
@@ -127,6 +117,8 @@ function islandora_usage_stats_block_view($delta = '')
 
 /**
  * Module-defined content generating function
+ *
+ * @global user
  *
  * @param unknown $delta
  */
@@ -280,13 +272,10 @@ function islandora_usage_stats_permission() {
 /**
  * Form called when paths with link 'download_ds/$pid/$dsid' are clicked.
  */
-function islandora_usage_stats_download_ds_form($pid, $dsid)
-{
+function islandora_usage_stats_download_ds_form($pid, $dsid) {
     global $base_url;
 
     $object = islandora_object_load($pid);
-
-    // $url = $base_url . '/fedora/repository/' . $pid . '/' . $dsid . '/content';
 
     if (! $object) {
         drupal_set_message(t('Object could not be loaded from islandora!'));
@@ -319,10 +308,10 @@ function islandora_usage_stats_download_ds_form($pid, $dsid)
 
     $ds_name = $datastream->id;
 
-    // track the download
+    // Track the download.
     $track = new IslandoraUsageStats($pid);
-    $result = $track->addDownload($ds_name); // increase data stream tracking number by 1
-
+    // Increase data stream tracking number by 1.
+    $result = $track->addDownload($ds_name);
     $object_array = array(
         'object' => $object,
         'label' => $sanitized_label,
@@ -350,30 +339,17 @@ function islandora_usage_stats_download_ds_form($pid, $dsid)
 }
 
 /**
- * Implements HOOK_islandora_datastream_download
- *
- * @param array $object_array
- *            'object'
- *            'label'
- *            'download_url'
- *            'datastream'
- *            'ds_name'
- *            'mime_type'
- *            'extension'
- *            'tracking'
+ * Implements hook_islandora_datastream_download().
  */
-function islandora_usage_stats_islandora_datastream_download($object_array)
-{
-    // drupal_set_message('Datastream with object id: ' . $object_array['object']->id . ' downloaded');
-    drupal_set_message($object_array['mime_type']);
+function islandora_usage_stats_islandora_datastream_download($object_array) {
+  drupal_set_message($object_array['mime_type']);
 }
 
 /**
  * Returns the system MIME type mapping of MIME types to extensions, as defined in /etc/mime.types
  * (considering the first extension listed to be canonical).
  */
-function system_mime_type_extensions()
-{
+function system_mime_type_extensions() {
     $out = array();
     $file = fopen('/etc/mime.types', 'r');
     while (($line = fgets($file)) !== FALSE) {
@@ -399,33 +375,31 @@ function system_mime_type_extensions()
  *            - The MIME type
  * @return Ambigous <NULL, unknown>
  */
-function system_mime_type_extension($type)
-{
-    static $exts;
-    if (! isset($exts))
-        $exts = system_mime_type_extensions();
-    return isset($exts[$type]) ? $exts[$type] : NULL;
+function system_mime_type_extension($type) {
+  static $exts;
+  if (!isset($exts)){
+    $exts = system_mime_type_extensions();
+  }
+  return isset($exts[$type]) ? $exts[$type] : NULL;
 }
 
 /**
- * Implements hook_islandora_object_purged
- *
- * @param unknown $pid
+ * Implements hook_islandora_object_purged().
  */
 function islandora_usage_stats_islandora_object_purged($pid) {
-    // remove from views table
+    // Remove from views table.
     $viewsTable = 'islandora_usage_stats_object_views';
     islandora_usage_stats_delete_from_table($viewsTable, $pid);
 
-    // remove from downloads table
+    // Remove from downloads table.
     $downloadsTable = 'islandora_usage_stats_object_ds_downloads';
     islandora_usage_stats_delete_from_table($downloadsTable, $pid);
 
-    // remove from object activity log
+    // Remove from object activity log.
     $accessLog = 'islandora_usage_stats_object_access_log';
     islandora_usage_stats_delete_from_table($accessLog, $pid);
 
-    // remove from object datastream download log
+    // Remove from object datastream download log.
     $downloadLog = 'islandora_usage_stats_object_ds_access_log';
     islandora_usage_stats_delete_from_table($downloadLog, $pid);
 }
@@ -437,8 +411,7 @@ function islandora_usage_stats_islandora_object_purged($pid) {
  * @param string $pid
  * @return string
  */
-function islandora_usage_stats_delete_from_table($table, $pid = NULL)
-{
+function islandora_usage_stats_delete_from_table($table, $pid = NULL) {
     $result = '';
     if ($pid == NULL) {
         $result = db_truncate($table)->execute();
@@ -450,15 +423,13 @@ function islandora_usage_stats_delete_from_table($table, $pid = NULL)
 }
 
 /**
- * Implements hook_islandora_view_object to track usage stats
+ * Implements hook_islandora_view_object().
  *
- * @param unknown $object
- *            the islandora object
+ * Tracks usage stats.
  */
-function islandora_usage_stats_islandora_view_object($object)
-{
-    $track = new IslandoraUsageStats($object->id);
-    $track->plusOneView();
+function islandora_usage_stats_islandora_view_object($object) {
+  $track = new IslandoraUsageStats($object->id);
+  $track->plusOneView();
 }
 
 /**
@@ -466,8 +437,7 @@ function islandora_usage_stats_islandora_view_object($object)
  *
  * @param array $variables
  */
-function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
-{
+function islandora_usage_stats_preprocess_islandora_pdf(&$variables) {
     $islandora_object = $variables['islandora_object'];
     $id = $islandora_object->id;
     $label = $islandora_object->label;

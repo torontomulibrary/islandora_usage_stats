@@ -5,12 +5,12 @@
  * Install/uninstall hooks.
  */
 
- /**
-  * Implements hook_schema().
-  *
-  * @todo Link to user table by UID don't make a foreign key.
-  * @XXX Stats tables look redundant.
-  */
+/**
+ * Implements hook_schema().
+ *
+ * @todo Link to user table by UID don't make a foreign key.
+ * @XXX Stats tables look redundant.
+ */
 function islandora_usage_stats_schema() {
   $schema['islandora_usage_stats_object_views'] = array(
     'description' => 'This table is used to store view count information for fedora objects',
@@ -29,7 +29,7 @@ function islandora_usage_stats_schema() {
       ),
       'views' => array(
         'description' => 'The number of views an object has received',
-        'type' =>  'int',
+        'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
       ),
@@ -41,11 +41,11 @@ function islandora_usage_stats_schema() {
       ),
     ),
     'primary key' => array(
-      'id'
+      'id',
     ),
     'indexes' => array(
       'pid' => array(
-        'pid'
+        'pid',
       ),
     ),
   );
@@ -73,7 +73,7 @@ function islandora_usage_stats_schema() {
       ),
       'downloads' => array(
         'description' => 'The number of views an object has received',
-        'type' =>  'int',
+        'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
       ),
@@ -85,11 +85,11 @@ function islandora_usage_stats_schema() {
       ),
     ),
     'primary key' => array(
-      'id'
+      'id',
     ),
     'indexes' => array(
       'pid' => array(
-        'pid'
+        'pid',
       ),
       'dsid' => array(
         'dsid',
@@ -113,7 +113,7 @@ function islandora_usage_stats_schema() {
       'time' => array(
         'type' => 'int',
         'not null' => TRUE,
-        'default' => 0
+        'default' => 0,
       ),
       'ip' => array(
         'description' => 'IP of user that accessed the object',
@@ -126,7 +126,7 @@ function islandora_usage_stats_schema() {
         'type' => 'varchar',
         'length' => 64,
         'not null' => TRUE,
-      )
+      ),
     ),
     'primary key' => array(
       'id',
@@ -176,11 +176,11 @@ function islandora_usage_stats_schema() {
       ),
     ),
     'primary key' => array(
-      'id'
+      'id',
     ),
     'indexes' => array(
       'pid' => array(
-        'pid'
+        'pid',
       ),
       'dsid' => array(
         'dsid',
