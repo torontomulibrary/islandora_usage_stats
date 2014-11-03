@@ -9,6 +9,7 @@
  * Implements hook_schema().
  *
  * @todo Link to user table by UID don't make a foreign key.
+ * @todo Start using a table for PID lookup.
  * @XXX Stats tables look redundant.
  */
 function islandora_usage_stats_schema() {
