@@ -201,7 +201,10 @@ class IslandoraUsageStats {
 
     // Log content models.
     $models = $object->models;
-    unset($models[array_search('fedora-system:FedoraObject-3.0', $models)]);
+    $basic_model_key = array_search('fedora-system:FedoraObject-3.0', $models);
+    if ($basic_model_key) {
+      unset($models[$basic_model_key]);
+    }
     foreach ($models as $model) {
       db_insert('islandora_usage_stats_content_model_access_log')->fields(array(
         'object_access_id' => $object_access_id,
