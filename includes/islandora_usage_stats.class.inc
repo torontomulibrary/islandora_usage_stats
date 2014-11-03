@@ -202,7 +202,7 @@ class IslandoraUsageStats {
     // Log content models.
     $models = $object->models;
     $basic_model_key = array_search('fedora-system:FedoraObject-3.0', $models);
-    if ($basic_model_key) {
+    if ($basic_model_key !== FALSE) {
       unset($models[$basic_model_key]);
     }
     foreach ($models as $model) {
