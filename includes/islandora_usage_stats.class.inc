@@ -436,6 +436,7 @@ class IslandoraUsageStats {
                 $result = $this->dBIncreaseViewCounter();
                 if ($logging) {
                     $this->logObjectView();
+                    $this->updateLastViewTimeForVisitor();
                 }
             } else {
                 // check if user has requested this item in the past X seconds
@@ -445,6 +446,7 @@ class IslandoraUsageStats {
                     $result = $this->dBIncreaseViewCounter();
                     if ($logging) {
                         $this->logObjectView();
+                    $this->updateLastViewTimeForVisitor();
                     }
                 }
             }
