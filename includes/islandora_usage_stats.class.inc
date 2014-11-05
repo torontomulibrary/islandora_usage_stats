@@ -279,18 +279,20 @@ class IslandoraUsageStats {
      *
      * @return NULL string since the unix epoch
      */
-    function getLastViewTimeForVisitor()
-    {
-        $time = @$_SESSION['islandora_usage_stats'][ip_address()][$this->pid];
-        if (! $time) { // user has NOT requested item in this session
-            return NULL;
-        }
-        return $time;
+    function getLastViewTimeForVisitor() {
+      $time = @$_SESSION['islandora_usage_stats'][ip_address()][$this->pid];
+      // User has NOT requested item in this session.
+      if (! $time) {
+        return NULL;
+      }
+      return $time;
     }
 
-    function updateLastViewTimeForVisitor()
-    {
-        $_SESSION['islandora_usage_stats'][ip_address()][$this->pid] = REQUEST_TIME;
+    /**
+     * Updates the session to indicate the user has accessed the object.
+     */
+    function updateLastViewTimeForVisitor() {
+      $_SESSION['islandora_usage_stats'][ip_address()][$this->pid] = REQUEST_TIME;
     }
 
     function getLastViewedTime()
@@ -420,34 +422,33 @@ class IslandoraUsageStats {
      *
      * @return Ambigous <number, string>
      */
-    function plusOneView()
-    {
+    function plusOneView() {
         $currentViews = $this->getViews();
         $result = $currentViews['views'];
 
         $logging = variable_get('islandora_usage_stats_use_access_log', 1);
-
-        if (! $this->IpExcluded()) { // check if user's ip is excluded
-
+        // Check if user's ip is excluded.
+        if (! $this->IpExcluded()) {
             $lastViewedTime = $this->getLastViewTimeForVisitor();
 
-            // user has never viewed item before
+            // User has never viewed item before.
             if (! $lastViewedTime) {
-                $result = $this->dBIncreaseViewCounter();
-                if ($logging) {
-                    $this->logObjectView();
-                    $this->updateLastViewTimeForVisitor();
-                }
-            } else {
-                // check if user has requested this item in the past X seconds
-                $cooldown_time = variable_get('islandora_usage_stats_cooldown_seconds', 300); // default 5 min
+              $result = $this->dBIncreaseViewCounter();
+              if ($logging) {
+                $this->logObjectView();
+                $this->updateLastViewTimeForVisitor();
+              }
+            }
+            else {
+                // Check if user has requested this item in the past X seconds.
+                $cooldown_time = variable_get('islandora_usage_stats_cooldown_seconds', 300);
 
                 if (($lastViewedTime + $cooldown_time) < REQUEST_TIME) {
-                    $result = $this->dBIncreaseViewCounter();
-                    if ($logging) {
-                        $this->logObjectView();
+                  $result = $this->dBIncreaseViewCounter();
+                  if ($logging) {
+                    $this->logObjectView();
                     $this->updateLastViewTimeForVisitor();
-                    }
+                  }
                 }
             }
         }
