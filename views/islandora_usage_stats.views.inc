@@ -95,6 +95,7 @@ function islandora_usage_stats_views_data() {
       ),
       'filter' => array(
         'handler' => 'datepicker_views_filter_handler',
+        'is date' => TRUE,
       ),
     ),
   );

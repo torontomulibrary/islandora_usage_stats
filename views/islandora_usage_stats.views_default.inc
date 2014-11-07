@@ -143,6 +143,10 @@ function islandora_usage_stats_views_default_views() {
     1 => 0,
     3 => 0,
   );
+  $handler->display->display_options['filters']['time']['form_type'] = 'date_popup';
+  $handler->display->display_options['filters']['time']['date_fields'] = array(
+    'islandora_usage_stats_object_access_log.time' => 'islandora_usage_stats_object_access_log.time',
+  );
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
