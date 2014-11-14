@@ -7,12 +7,15 @@
 
 /**
  * Class to deal with tracking item views on an Islandora site.
+ *
+ * @todo create a static cache of pid_ids.
  */
 class IslandoraUsageStats {
 
-  function __construct($pid)
-  {
+  function __construct($pid) {
+    module_load_include('inc', 'islandora_usage_stats', 'includes/db');
     $this->pid = $pid;
+    $this->pid_id = islandora_usage_stats_get_pid_id($pid);
   }
 
   /**
@@ -48,17 +51,17 @@ class IslandoraUsageStats {
    *
    * @return array
    */
-  function getViews()
-  {
-    $result = db_query("SELECT views, time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
-      ':pid' => $this->pid
-    ));
+  function getViews() {
+    $result = db_select('islandora_usage_stats_object_views', 'object_views')
+      ->fields('object_views')
+      ->condition('pid_id', $this->pid_id)
+      ->execute();
     $record = $result->fetchAssoc();
-    if (! $record) {
+    if (!$record) {
       return array(
-          'views' => 0,
-         'time' => ''
-        );
+        'views' => 0,
+        'time' => '',
+      );
     }
     return $record;
   }
@@ -73,7 +76,7 @@ class IslandoraUsageStats {
   function getViewCount()
   {
     $result = db_query("SELECT views, time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
-        ':pid' => $this->pid
+        ':pid_id' => $this->pid_id
     ));
     $record = $result->fetchAssoc();
     if (! $record) {
@@ -129,7 +132,7 @@ class IslandoraUsageStats {
   function getDownloads($dsid)
   {
     $result = db_query("SELECT downloads, time from {islandora_usage_stats_object_ds_downloads} WHERE pid = :pid AND dsid = :dsid", array(
-        ':pid' => $this->pid,
+        ':pid_id' => $this->pid_id,
         ':dsid' => $dsid
     ));
     $record = $result->fetchAssoc();
@@ -160,14 +163,14 @@ class IslandoraUsageStats {
             ':downloads' => 1
         ))
             ->expression('time', REQUEST_TIME)
-            ->condition('pid', $this->pid)
+            ->condition('pid_id', $this->pid_id)
             ->condition('dsid', $dsid)
             ->execute();
 
         return $this->getDownloads($dsid);
     } else {
         $result = db_insert('islandora_usage_stats_object_ds_downloads')->fields(array(
-            'pid' => $this->pid,
+            'pid_id' => $this->pid_id,
             'dsid' => $dsid,
             'downloads' => 1,
             'time' => REQUEST_TIME
@@ -193,7 +196,7 @@ class IslandoraUsageStats {
     $object = islandora_object_load($this->pid);
 
     $object_access_id = db_insert('islandora_usage_stats_object_access_log')->fields(array(
-        'pid' => $this->pid,
+        'pid_id' => $this->pid_id,
         'time' => REQUEST_TIME,
         'ip' => ip_address(),
         'user' => ($user->uid) ? $user->name : variable_get('anonymous', t('Anonymous')),
@@ -206,17 +209,19 @@ class IslandoraUsageStats {
       unset($models[$basic_model_key]);
     }
     foreach ($models as $model) {
+      $model_id = islandora_usage_stats_get_pid_id($model);
       db_insert('islandora_usage_stats_content_model_access_log')->fields(array(
         'object_access_id' => $object_access_id,
-        'content_model' => $model,
+        'content_model' => $model_id,
       ))->execute();
     }
     // Log parents.
     $collections = islandora_basic_collection_get_parent_pids($object);
     foreach ($collections as $collection) {
+      $collection_id = islandora_usage_stats_get_pid_id($collection);
       db_insert('islandora_usage_stats_collection_access_log')->fields(array(
         'object_access_id' => $object_access_id,
-        'collection' => $collection,
+        'collection' => $collection_id,
       ))->execute();
     }
   }
@@ -231,7 +236,7 @@ class IslandoraUsageStats {
     $ip = ip_address();
 
     $result = db_insert('islandora_usage_stats_object_ds_access_log')->fields(array(
-        'pid' => $this->pid,
+        'pid_id' => $this->pid_id,
         'time' => REQUEST_TIME,
         'ip' => $ip,
         'dsid' => $dsid,
@@ -249,7 +254,7 @@ class IslandoraUsageStats {
   function getLastViewTimeForIp() {
     $ip = ip_address();
     $result = db_query("SELECT max(time) from {islandora_usage_stats_object_access_log} WHERE pid = :pid AND ip = :ip", array(
-        ':pid' => $this->pid,
+        ':pid_id' => $this->pid_id,
         ':ip' => $ip
     ));
     $lastViewTime = $result->fetchField(0);
@@ -266,7 +271,7 @@ class IslandoraUsageStats {
     {
         $ip = ip_address();
         $result = db_query("SELECT max(time) as time from {islandora_usage_stats_object_ds_access_log} WHERE pid = :pid AND dsid = :dsid AND ip = :ip", array(
-            ':pid' => $this->pid,
+            ':pid_id' => $this->pid_id,
             ':dsid' => $dsid,
             ':ip' => $ip
         ));
@@ -298,7 +303,7 @@ class IslandoraUsageStats {
     function getLastViewedTime()
     {
         $result = db_query("SELECT time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
-            ':pid' => $this->pid
+            ':pid_id' => $this->pid_id
         ));
 
         $record = $result->fetch();
@@ -362,14 +367,14 @@ class IslandoraUsageStats {
         if ($current_views['views']) {
             // set last viewed time to now
             $update_result = db_update('islandora_usage_stats_object_views')->expression('time', REQUEST_TIME)
-                ->condition('pid', $this->pid)
+                ->condition('pid_id', $this->pid_id)
                 ->execute();
 
             $result['timelastviewed'] = REQUEST_TIME;
         } else {
             // insert a new row into the DB for this object
             $insert_result = db_insert('islandora_usage_stats_object_views')->fields(array(
-                'pid' => $this->pid,
+                'pid_id' => $this->pid_id,
                 'views' => 1,
                 'time' => 0
             ))->execute();
@@ -398,13 +403,13 @@ class IslandoraUsageStats {
             $update_result = db_update('islandora_usage_stats_object_views')->expression('views', 'views + :num', array(
                 ':num' => 1
             ))
-                ->condition('pid', $this->pid)
+                ->condition('pid_id', $this->pid_id)
                 ->execute();
 
             $result = $current_views['views'] + 1;
         } else {
             $insert_result = db_insert('islandora_usage_stats_object_views')->fields(array(
-                'pid' => $this->pid,
+                'pid_id' => $this->pid_id,
                 'views' => 1,
                 'time' => 0
             ))->execute();
