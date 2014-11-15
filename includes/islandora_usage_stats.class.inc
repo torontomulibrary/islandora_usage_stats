@@ -30,12 +30,12 @@ class IslandoraUsageStats {
     $ip = ip_address();
 
     $bot_exclude = variable_get('islandora_usage_stats_exclude_bots', 1);
-
-    if (in_array($ip, $ip_list)) { // check if user's ip is excluded
+    // Check if user's IP is excluded.
+    if (in_array($ip, $ip_list)) {
       return TRUE;
     }
     else if ($bot_exclude) {
-      // bots check here
+      // Bots check here.
       $user_agent = $_SERVER['HTTP_USER_AGENT'];
       if (1 === preg_match('/bot|rambler|spider|crawl|slurp|curl|^$/i', $user_agent)) {
         return TRUE;
@@ -46,10 +46,10 @@ class IslandoraUsageStats {
   }
 
   /**
-   * Retrieves the number of times an item has been viewed from the database
-   * and the last time it was viewed
+   * Retrieves the number of times and last time an item was viewed.
    *
    * @return array
+   *   Associative array with members views and time.
    */
   function getViews() {
     $result = db_select('islandora_usage_stats_object_views', 'object_views')
@@ -87,23 +87,18 @@ class IslandoraUsageStats {
     }
 
     // update the last viewed time, don't store it
-    /**
-     * **********************
-     */
     $this->setLastViewedTime();
-    /**
-     * **********************
-     */
 
     return $record;
   }
 
   /**
    * Increases the datastream download count by one in the database.
+   *
    * Count is not increased if user's IP is on exclusion list.
    *
    * @param string $dsid
-   *            the datastream id
+   *   The datastream id.
    * @return NULL string result
    */
   function addDownload($dsid) {
@@ -112,25 +107,24 @@ class IslandoraUsageStats {
     $logging = variable_get('islandora_usage_stats_use_access_log', 1);
 
     if (! $this->IpExcluded()) { // check if user's ip is excluded
-        $result = $this->increaseObjectDSDownloadCounter($dsid);
+      $result = $this->increaseObjectDSDownloadCounter($dsid);
 
-        if ($logging) {
-            $this->logObjectDownload($dsid);
-        }
+      if ($logging) {
+        $this->logObjectDownload($dsid);
+      }
     }
 
     return $result;
   }
 
   /**
-   * Retrieves the number of times the object's datastream has been downloaded
+   * Retrieves the number of times the object's datastream has been downloaded.
    *
    * @param string $dsid
-   *            the datastream id
+   *   The datastream id.
    * @return array
    */
-  function getDownloads($dsid)
-  {
+  function getDownloads($dsid) {
     $result = db_query("SELECT downloads, time from {islandora_usage_stats_object_ds_downloads} WHERE pid = :pid AND dsid = :dsid", array(
         ':pid_id' => $this->pid_id,
         ':dsid' => $dsid
@@ -139,11 +133,12 @@ class IslandoraUsageStats {
 
     if ($record) {
       return $record;
-    } else {
-        return array(
-            'downloads' => 0,
-            'time' => NULL
-        );
+    }
+    else {
+      return array(
+        'downloads' => 0,
+        'time' => NULL
+      );
     }
   }
 
@@ -151,14 +146,14 @@ class IslandoraUsageStats {
    * Increases the download count for the given object's datastream ID
    *
    * @param string $dsid
-   *            datastream id
+   *   The datastream id.
    * @return the number of total downloads
    */
   function increaseObjectDSDownloadCounter($dsid) {
     $current_info = $this->getDownloads($dsid);
 
     if ($current_info['downloads']) {
-        // increase view count by one
+        // Increase view count by one.
         $result = db_update('islandora_usage_stats_object_ds_downloads')->expression('downloads', 'downloads + :downloads', array(
             ':downloads' => 1
         ))
@@ -261,23 +256,22 @@ class IslandoraUsageStats {
     return $lastViewTime;
   }
 
-    /**
-     * Queries the datastream access log to get the last time an ip downloaded the given datastream ID
-     *
-     * @param string $dsid
-     * @return string time in seconds since epoch
-     */
-    function getLastDownloadTimeForIp($dsid)
-    {
-        $ip = ip_address();
-        $result = db_query("SELECT max(time) as time from {islandora_usage_stats_object_ds_access_log} WHERE pid = :pid AND dsid = :dsid AND ip = :ip", array(
-            ':pid_id' => $this->pid_id,
-            ':dsid' => $dsid,
-            ':ip' => $ip
-        ));
-        $record = $result->fetch();
-        return $record->time;
-    }
+  /**
+   * Queries the datastream access log to get the last time an ip downloaded the given datastream ID
+   *
+   * @param string $dsid
+   * @return string time in seconds since epoch
+   */
+  function getLastDownloadTimeForIp($dsid) {
+    $ip = ip_address();
+    $result = db_query("SELECT max(time) as time from {islandora_usage_stats_object_ds_access_log} WHERE pid = :pid AND dsid = :dsid AND ip = :ip", array(
+      ':pid_id' => $this->pid_id,
+      ':dsid' => $dsid,
+      ':ip' => $ip
+    ));
+    $record = $result->fetch();
+    return $record->time;
+  }
 
     /**
      * Uses session variables to check if user requested this item before
@@ -358,31 +352,31 @@ class IslandoraUsageStats {
      *
      * @return multitype:string number
      */
-    function dBSetLastViewedTime()
-    {
-        $result = array();
+    function dBSetLastViewedTime() {
+      $result = array();
 
-        $current_views = $this->getViews();
+      $current_views = $this->getViews();
 
-        if ($current_views['views']) {
-            // set last viewed time to now
-            $update_result = db_update('islandora_usage_stats_object_views')->expression('time', REQUEST_TIME)
-                ->condition('pid_id', $this->pid_id)
-                ->execute();
+      if ($current_views['views']) {
+          // Set last viewed time to now.
+          $update_result = db_update('islandora_usage_stats_object_views')->expression('time', REQUEST_TIME)
+              ->condition('pid_id', $this->pid_id)
+              ->execute();
 
-            $result['timelastviewed'] = REQUEST_TIME;
-        } else {
-            // insert a new row into the DB for this object
-            $insert_result = db_insert('islandora_usage_stats_object_views')->fields(array(
-                'pid_id' => $this->pid_id,
-                'views' => 1,
-                'time' => 0
-            ))->execute();
+          $result['timelastviewed'] = REQUEST_TIME;
+      }
+      else {
+          // Insert a new row into the DB for this object.
+          $insert_result = db_insert('islandora_usage_stats_object_views')->fields(array(
+              'pid_id' => $this->pid_id,
+              'views' => 1,
+              'time' => 0
+          ))->execute();
 
-            $result['timelastviewed'] = 0;
-        }
+          $result['timelastviewed'] = 0;
+      }
 
-        return $result;
+      return $result;
     }
 
     /**
@@ -393,13 +387,11 @@ class IslandoraUsageStats {
      *
      * @return number
      */
-    function dBIncreaseViewCounter()
-    {
-        // $result = 0;
-        $current_views = $this->getViews();
+    function dBIncreaseViewCounter() {
+      $current_views = $this->getViews();
 
         if ($current_views['views']) {
-            // increase view count by one
+            // Increase view count by one.
             $update_result = db_update('islandora_usage_stats_object_views')->expression('views', 'views + :num', array(
                 ':num' => 1
             ))
@@ -407,7 +399,8 @@ class IslandoraUsageStats {
                 ->execute();
 
             $result = $current_views['views'] + 1;
-        } else {
+        }
+        else {
             $insert_result = db_insert('islandora_usage_stats_object_views')->fields(array(
                 'pid_id' => $this->pid_id,
                 'views' => 1,
