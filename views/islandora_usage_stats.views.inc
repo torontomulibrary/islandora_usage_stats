@@ -9,18 +9,18 @@
  */
 function islandora_usage_stats_views_data() {
   $data = array();
-  $data['islandora_usage_stats_object_access_log'] = array(
+  $data['islandora_usage_stats_objects'] = array(
     'table' => array(
       'group' => t('Islandora Usage Stats'),
       'base' => array(
         'field' => 'id',
-        'title' => t('Islandora Usage Stats Object Access'),
-        'help' => t('The log of objects being visited.'),
+        'title' => t('Islandora Usage Stats Objects'),
+        'help' => t('Object information.'),
       ),
     ),
     'id' => array(
-      'title' => t('Log ID'),
-      'help' => t('ID of the log entry.'),
+      'title' => t('Object ID'),
+      'help' => t('ID of the object.'),
       'field' => array(
         'handler' => 'views_handler_field_numeric',
         'click sortable' => TRUE,
@@ -32,9 +32,9 @@ function islandora_usage_stats_views_data() {
         'handler' => 'views_handler_filter_numeric',
       ),
     ),
-    'pid' => array(
-      'title' => t('PID'),
-      'help' => t('PID of the object being logged.'),
+    'label' => array(
+      'title' => t('Label'),
+      'help' => t('Label of the object.'),
       'field' => array(
         'handler' => 'views_handler_field',
         'click sortable' => TRUE,
@@ -47,6 +47,75 @@ function islandora_usage_stats_views_data() {
       ),
       'argument' => array(
         'handler' => 'views_handler_argument_string',
+      ),
+    ),
+    'pid' => array(
+      'title' => t('PID'),
+      'help' => t('PID of the object.'),
+      'field' => array(
+        'handler' => 'views_handler_field',
+        'click sortable' => TRUE,
+      ),
+      'sort' => array(
+        'handler' => 'views_handler_sort',
+      ),
+      'filter' => array(
+        'handler' => 'views_handler_filter_string',
+      ),
+      'argument' => array(
+        'handler' => 'views_handler_argument_string',
+      ),
+    ),
+  );
+  $data['islandora_usage_stats_object_access_log'] = array(
+    'table' => array(
+      'group' => t('Islandora Usage Stats'),
+      'base' => array(
+        'field' => 'id',
+        'title' => t('Islandora Usage Stats Object Access'),
+        'help' => t('The log of objects being visited.'),
+      ),
+    ),
+    'id' => array(
+      'title' => t('Log ID'),
+      'help' => t('ID of the log entry.'),
+      'relationship' => array(
+        'base' => 'islandora_usage_stats_collection_access_log',
+        'base field' => 'object_access_id',
+        'handler' => 'views_handler_relationship',
+        'label' => t('Collection'),
+        'title' => t('Collection'),
+      ),
+      'field' => array(
+        'handler' => 'views_handler_field_numeric',
+        'click sortable' => TRUE,
+      ),
+      'sort' => array(
+        'handler' => 'views_handler_sort',
+      ),
+      'filter' => array(
+        'handler' => 'views_handler_filter_numeric',
+      ),
+    ),
+    'pid_id' => array(
+      'title' => t('PID ID'),
+      'help' => t('ID of the object.'),
+      'relationship' => array(
+        'base' => 'islandora_usage_stats_objects',
+        'base field' => 'id',
+        'handler' => 'views_handler_relationship',
+        'label' => t('Object'),
+        'title' => t('Object'),
+      ),
+      'field' => array(
+        'handler' => 'views_handler_field_numeric',
+        'click sortable' => TRUE,
+      ),
+      'sort' => array(
+        'handler' => 'views_handler_sort',
+      ),
+      'filter' => array(
+        'handler' => 'views_handler_filter_numeric',
       ),
     ),
     'ip' => array(
@@ -107,28 +176,26 @@ function islandora_usage_stats_views_data() {
         'title' => t('Islandora Usage Stats Collection Access'),
         'help' => t('The log of the parents of objects that are visited.'),
       ),
-      'join' => array(
-        'islandora_usage_stats_object_access_log' => array(
-          'left_field' => 'id',
-          'field' => 'object_access_id',
-        ),
-      ),
     ),
     'collection' => array(
       'title' => t('Collection'),
-      'help' => t('The parent of the object being logged.'),
+      'help' => t('The PID ID of the parent of the object being logged.'),
+      'relationship' => array(
+        'base' => 'islandora_usage_stats_objects',
+        'base field' => 'id',
+        'handler' => 'views_handler_relationship',
+        'label' => t('Collection Object'),
+        'title' => t('Collection Object'),
+      ),
       'field' => array(
-        'handler' => 'views_handler_field',
+        'handler' => 'views_handler_field_numeric',
         'click sortable' => TRUE,
       ),
       'sort' => array(
         'handler' => 'views_handler_sort',
       ),
       'filter' => array(
-        'handler' => 'views_handler_filter_string',
-      ),
-      'argument' => array(
-        'handler' => 'views_handler_argument_string',
+        'handler' => 'views_handler_filter_numeric',
       ),
     ),
     'id' => array(
@@ -148,6 +215,13 @@ function islandora_usage_stats_views_data() {
     'object_access_id' => array(
       'title' => t('Log ID'),
       'help' => t('ID of the log entry.'),
+      'relationship' => array(
+        'base' => 'islandora_usage_stats_object_access_log',
+        'base field' => 'id',
+        'handler' => 'views_handler_relationship',
+        'label' => t('Object Collection Access'),
+        'title' => t('Object Collection Access'),
+      ),
       'field' => array(
         'handler' => 'views_handler_field_numeric',
         'click sortable' => TRUE,
@@ -168,28 +242,26 @@ function islandora_usage_stats_views_data() {
         'title' => t('Islandora Usage Stats Content Model Access'),
         'help' => t('The log of content models of objects that are visited.'),
       ),
-      'join' => array(
-        'islandora_usage_stats_object_access_log' => array(
-          'left_field' => 'id',
-          'field' => 'object_access_id',
-        ),
-      ),
     ),
     'content_model' => array(
       'title' => t('Content Model'),
-      'help' => t('The content model of the object being logged.'),
+      'help' => t('The PID ID of the content model of the object being logged.'),
+      'relationship' => array(
+        'base' => 'islandora_usage_stats_objects',
+        'base field' => 'id',
+        'handler' => 'views_handler_relationship',
+        'label' => t('Content Model Object'),
+        'title' => t('Content Model Object'),
+      ),
       'field' => array(
-        'handler' => 'views_handler_field',
+        'handler' => 'views_handler_field_numeric',
         'click sortable' => TRUE,
       ),
       'sort' => array(
         'handler' => 'views_handler_sort',
       ),
       'filter' => array(
-        'handler' => 'views_handler_filter_string',
-      ),
-      'argument' => array(
-        'handler' => 'views_handler_argument_string',
+        'handler' => 'views_handler_filter_numeric',
       ),
     ),
     'id' => array(
@@ -209,6 +281,13 @@ function islandora_usage_stats_views_data() {
     'object_access_id' => array(
       'title' => t('Log ID'),
       'help' => t('ID of the log entry.'),
+      'relationship' => array(
+        'base' => 'islandora_usage_stats_object_access_log',
+        'base field' => 'id',
+        'handler' => 'views_handler_relationship',
+        'label' => t('Object Content Model Access'),
+        'title' => t('Object Content Model Access'),
+      ),
       'field' => array(
         'handler' => 'views_handler_field_numeric',
         'click sortable' => TRUE,
