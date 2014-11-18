@@ -127,25 +127,20 @@ function islandora_usage_stats_block_contents($delta) {
   switch ($delta) {
     case 'top_usage':
       if (user_access('view usage stats block')) {
+        module_load_include('inc', 'islandora_usage_stats', 'includes/db');
         $connection = islandora_get_tuque_connection($user);
         $repository = $connection->repository;
 
-        $excludedPIDlist = explode(' ', variable_get('islandora_usage_stats_block_exclusion_list', 'islandora:root'));
-        $excludeString = "('" . implode("','", $excludedPIDlist) . "')";
-
-        // TODO: use a placeholder for this query to tighten up injection attacks.
-        // NB: tried using a placeholder but drupal wouldn't play nicely.
-        $nbr_rows = variable_get('islandora_usage_stats_block_display_rows', 5);
-        $result = db_query_range(
-          "SELECT pid, views FROM {islandora_usage_stats_object_views}
-            WHERE pid not in $excludeString
-            ORDER BY views DESC",
-          0,
-          $nbr_rows
+        $result = islandora_usage_stats_get_most_viewed(
+          variable_get('islandora_usage_stats_block_display_rows', 5),
+          explode(
+            ' ',
+            variable_get('islandora_usage_stats_block_exclusion_list', 'islandora:root')
+          )
         );
         $items = array();
         foreach ($result as $row) {
-          // @XXX This object load can fail perms.
+          // @XXX This object load can fail perms, or not exist.
           $object = islandora_object_load($row->pid);
           $view_suffix = ((int)$row->views > 1) ? 'views' : 'view';
           $viewcount = "$row->views $view_suffix";
@@ -165,47 +160,40 @@ function islandora_usage_stats_block_contents($delta) {
         );
       }
       break;
-        case 'recent_activity':
-            if (user_access('view usage stats block')) {
-                $connection = islandora_get_tuque_connection($user);
-                $repository = $connection->repository;
-
-                $excludedPIDlist = explode(' ', variable_get('islandora_usage_stats_recent_activity_block_exclusion_list', 'islandora:root'));
-                $excludeString = "('" . implode("','", $excludedPIDlist) . "')";
-
-                // TODO: use a placeholder for this query to tighten up injection attacks
-                // NB: tried using a placeholder but drupal wouldn't play nicely
-                $nbr_rows = variable_get('islandora_usage_stats_recent_activity_block_display_rows', 5);
-
-                $result = db_query_range("SELECT pid, max(time) as time
-                    FROM {islandora_usage_stats_object_access_log}
-                    WHERE pid not in $excludeString
-                    group by pid
-                    ORDER BY time desc", 0, $nbr_rows);
-
-                $items = array();
-                foreach ($result as $row) {
-                    $object = islandora_object_load($row->pid);
-                    $items[] = array(
-                        'data' => l($object->label, 'islandora/object/' . urlencode($row->pid)),
-                        'class' => array(
-                            'list-group-item'
-                        )
-                    );
-                }
-                return array(
-                    '#markup' => theme('item_list', array(
-                        'items' => $items,
-                        'attributes' => array(
-                            'class' => array(
-                                'list-group'
-                            )
-                        )
-                    ))
-                );
-            }
-            break;
-    }
+    case 'recent_activity':
+      if (user_access('view usage stats block')) {
+        module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+        $result = islandora_usage_stats_get_recently_viewed(
+          variable_get('islandora_usage_stats_recent_activity_block_display_rows', 5),
+          explode(
+            ' ',
+            variable_get('islandora_usage_stats_recent_activity_block_exclusion_list', 'islandora:root')
+          )
+        );
+        $items = array();
+        foreach ($result as $pid) {
+          // @XXX This object load can fail perms, or not exist.
+          $object = islandora_object_load($pid);
+          $items[] = array(
+            'data' => l($object->label, 'islandora/object/' . urlencode($pid)),
+            'class' => array(
+              'list-group-item',
+            )
+          );
+        }
+        return array(
+          '#markup' => theme('item_list', array(
+            'items' => $items,
+            'attributes' => array(
+              'class' => array(
+                'list-group',
+              ),
+            ),
+          ))
+        );
+      }
+      break;
+  }
 }
 
 
