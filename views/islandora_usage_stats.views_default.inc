@@ -110,7 +110,7 @@ function islandora_usage_stats_views_default_views() {
     ),
     'label_1' => array(
       'sortable' => 1,
-      'default_sort_order' => 'asc',
+      'default_sort_order' => 'desc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
@@ -179,7 +179,7 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['filters']['time']['date_fields'] = array(
     'islandora_usage_stats_object_access_log.time' => 'islandora_usage_stats_object_access_log.time',
   );
-  $handler->display->display_options['path'] = 'islandora-usage-stats-report';
+  $handler->display->display_options['path'] = 'admin/reports/islandora_usage_stats_report';
   $handler->display->display_options['menu']['type'] = 'normal';
   $handler->display->display_options['menu']['title'] = 'Islandora Usage Stats';
   $handler->display->display_options['menu']['description'] = 'Browse the logs of object views.';
