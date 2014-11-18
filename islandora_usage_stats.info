@@ -7,5 +7,6 @@ files[] = includes/islandora_usage_stats.class.inc
 dependencies[] = islandora
 dependencies[] = views
 dependencies[] = datepicker_views
+dependencies[] = views_autocomplete_filters
 dependencies[] = islandora_basic_collection
 configure = admin/islandora/tools/islandora_usage_stats

@@ -129,53 +129,53 @@ function islandora_usage_stats_admin_settings() {
 function islandora_usage_stats_admin_settings_validate($form, &$form_state) {
   $result = '';
 
-    $button = $form_state['triggering_element']['#id'];
-    switch ($button) {
-      case 'edit-clear-object-access-log-submit':
-          $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_access_log');
-          $collection_result = islandora_usage_stats_clear_tracking('islandora_usage_stats_collection_access_log');
-          $content_model_result = islandora_usage_stats_clear_tracking('islandora_usage_stats_content_model_access_log');
-          if ($result && $collection_result && $content_model_result) {
-              drupal_set_message(t("Object view access logs have been cleared"));
-          }
-          break;
-      case 'edit-clear-ds-access-log-submit':
-          $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_ds_access_log');
-          if ($result) {
-              drupal_set_message(t("Datastream download access logs have been cleared"));
-          }
-          break;
-        case 'edit-clear-view-by-pid-submit':
-            $pid = $form_state['values']['clear_view_by_pid'];
-            $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_views', $pid);
-            if ($result) {
-                drupal_set_message(t("Page tracking for PID '@pid' deleted!", array(
-                    '@pid' => $pid
-                )));
-            }
-            break;
-        case 'edit-clear-view-all':
-            $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_views');
-            if ($result) {
-                drupal_set_message(t('All page tracking deleted!'));
-            }
-            break;
-        case 'edit-clear-ds-by-pid-submit':
-            $pid = $form_state['values']['clear_ds_by_pid'];
-            $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_ds_downloads', $pid);
-            if ($result) {
-                drupal_set_message(t("Datastream tracking for PID '@pid' deleted!", array(
-                    '@pid' => $pid
-                )));
-            }
-            break;
-        case 'edit-clear-ds-all':
-            $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_ds_downloads');
-            if ($result) {
-                drupal_set_message(t('All datastream tracking deleted!'));
-            }
-            break;
-    }
+  $button = $form_state['triggering_element']['#id'];
+  switch ($button) {
+    case 'edit-clear-object-access-log-submit':
+      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_access_log');
+      $collection_result = islandora_usage_stats_clear_tracking('islandora_usage_stats_collection_access_log');
+      $content_model_result = islandora_usage_stats_clear_tracking('islandora_usage_stats_content_model_access_log');
+      if ($result && $collection_result && $content_model_result) {
+        drupal_set_message(t("Object view access logs have been cleared"));
+      }
+      break;
+    case 'edit-clear-ds-access-log-submit':
+      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_ds_access_log');
+      if ($result) {
+        drupal_set_message(t("Datastream download access logs have been cleared"));
+      }
+      break;
+    case 'edit-clear-view-by-pid-submit':
+      $pid = $form_state['values']['clear_view_by_pid'];
+      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_views', $pid);
+      if ($result) {
+        drupal_set_message(
+          t("Page tracking for PID '@pid' deleted!", array('@pid' => $pid))
+        );
+      }
+      break;
+    case 'edit-clear-view-all':
+      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_views');
+      if ($result) {
+        drupal_set_message(t('All page tracking deleted!'));
+      }
+      break;
+    case 'edit-clear-ds-by-pid-submit':
+      $pid = $form_state['values']['clear_ds_by_pid'];
+      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_ds_downloads', $pid);
+      if ($result) {
+        drupal_set_message(
+          t("Datastream tracking for PID '@pid' deleted!", array('@pid' => $pid))
+        );
+      }
+      break;
+    case 'edit-clear-ds-all':
+      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_ds_downloads');
+      if ($result) {
+        drupal_set_message(t('All datastream tracking deleted!'));
+      }
+      break;
+  }
 }
 
 /**
