@@ -133,6 +133,12 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['fields']['label_1']['relationship'] = 'pid_id';
   $handler->display->display_options['fields']['label_1']['group_type'] = 'count';
   $handler->display->display_options['fields']['label_1']['label'] = 'Page Views';
+  /* Field: Islandora Usage Stats: Label */
+  $handler->display->display_options['fields']['label_2']['id'] = 'label_2';
+  $handler->display->display_options['fields']['label_2']['table'] = 'islandora_usage_stats_objects';
+  $handler->display->display_options['fields']['label_2']['field'] = 'label';
+  $handler->display->display_options['fields']['label_2']['relationship'] = 'collection';
+  $handler->display->display_options['fields']['label_2']['exclude'] = TRUE;
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Islandora Usage Stats: Label */
@@ -155,7 +161,7 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['filters']['label']['expose']['autocomplete_filter'] = 1;
   $handler->display->display_options['filters']['label']['expose']['autocomplete_items'] = '10';
   $handler->display->display_options['filters']['label']['expose']['autocomplete_min_chars'] = '0';
-  $handler->display->display_options['filters']['label']['expose']['autocomplete_field'] = 'label';
+  $handler->display->display_options['filters']['label']['expose']['autocomplete_field'] = 'label_2';
   $handler->display->display_options['filters']['label']['expose']['autocomplete_raw_suggestion'] = 1;
   $handler->display->display_options['filters']['label']['expose']['autocomplete_raw_dropdown'] = 1;
   $handler->display->display_options['filters']['label']['expose']['autocomplete_dependent'] = 0;
