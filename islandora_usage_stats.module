@@ -54,6 +54,7 @@ function islandora_usage_stats_block_configure($delta) {
         );
       }
       break;
+
     case 'recent_activity':
       if (user_access('manage usage stats')) {
         $form['islandora_usage_stats_recent_activity_block_display_rows'] = array(
@@ -77,9 +78,9 @@ function islandora_usage_stats_block_configure($delta) {
         );
       }
       break;
-    }
+  }
 
-    return $form;
+  return $form;
 }
 
 /**
@@ -91,12 +92,12 @@ function islandora_usage_stats_block_save($delta = '', $edit = array()) {
       variable_set('islandora_usage_stats_block_display_rows', (int) $edit['islandora_usage_stats_block_display_rows']);
       variable_set('islandora_usage_stats_block_exclusion_list', $edit['islandora_usage_stats_exclusion_list']);
       break;
+
     case 'recent_activity':
       variable_set('islandora_usage_stats_recent_activity_block_display_rows', (int) $edit['islandora_usage_stats_recent_activity_block_display_rows']);
       variable_set('islandora_usage_stats_recent_activity_block_exclusion_list', $edit['islandora_usage_stats_recent_activity_block_exclusion_list']);
       break;
   }
-  return;
 }
 
 /**
@@ -108,6 +109,7 @@ function islandora_usage_stats_block_view($delta = '') {
       $block['content'] = islandora_usage_stats_block_contents($delta);
       return $block;
       break;
+
     case 'recent_activity':
       $block['content'] = islandora_usage_stats_block_contents($delta);
       return $block;
@@ -415,9 +417,7 @@ function islandora_usage_stats_islandora_view_object($object) {
 }
 
 /**
- * Sets up tracking variables for the Islandora PDF module
- *
- * @param array $variables
+ * Implements hook_preprocess_theme().
  */
 function islandora_usage_stats_preprocess_islandora_pdf(&$variables) {
   $islandora_object = $variables['islandora_object'];
