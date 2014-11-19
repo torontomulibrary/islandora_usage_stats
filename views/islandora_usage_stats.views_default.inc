@@ -149,7 +149,7 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['filters']['label']['operator'] = 'contains';
   $handler->display->display_options['filters']['label']['exposed'] = TRUE;
   $handler->display->display_options['filters']['label']['expose']['operator_id'] = 'label_op';
-  $handler->display->display_options['filters']['label']['expose']['label'] = 'Collection';
+  $handler->display->display_options['filters']['label']['expose']['label'] = 'Collection Title';
   $handler->display->display_options['filters']['label']['expose']['use_operator'] = TRUE;
   $handler->display->display_options['filters']['label']['expose']['operator'] = 'label_op';
   $handler->display->display_options['filters']['label']['expose']['identifier'] = 'label';
@@ -172,7 +172,7 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['filters']['time']['operator'] = 'between';
   $handler->display->display_options['filters']['time']['exposed'] = TRUE;
   $handler->display->display_options['filters']['time']['expose']['operator_id'] = 'time_op';
-  $handler->display->display_options['filters']['time']['expose']['label'] = 'Time';
+  $handler->display->display_options['filters']['time']['expose']['label'] = 'Time Period';
   $handler->display->display_options['filters']['time']['expose']['use_operator'] = TRUE;
   $handler->display->display_options['filters']['time']['expose']['operator'] = 'time_op';
   $handler->display->display_options['filters']['time']['expose']['identifier'] = 'time';
@@ -229,6 +229,8 @@ function islandora_usage_stats_views_default_views() {
     t('Time'),
     t('Page'),
     t('Page Views'),
+    t('Collection Title'),
+    t('Time Period'),
     t('Attachment'),
   );
 
