@@ -454,3 +454,15 @@ function islandora_usage_stats_views_api() {
     'path' => drupal_get_path('module', 'islandora_usage_stats') . '/views',
   );
 }
+
+/**
+ * Implements hook_islandora_object_alter().
+ *
+ * Using alter because of the ordering bug in hook_islandora_object_modify().
+ */
+function islandora_usage_stats_islandora_object_alter(AbstractObject $object, &$context) {
+  module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+  if (isset($context['params']['label'])) {
+    islandora_usage_stats_update_object_label($object->id, $context['params']['label']);
+  }
+}

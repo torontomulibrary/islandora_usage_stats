@@ -85,3 +85,19 @@ function islandora_usage_stats_get_recently_viewed($count, $exclude = NULL) {
   $records = $results->fetchAllAssoc('pid');
   return array_keys($records);
 }
+
+/**
+ * Update an object's label if necessary.
+ *
+ * @param string $pid
+ *   The PID of the object.
+ * @param string $label
+ *   The label to set.
+ */
+function islandora_usage_stats_update_object_label($pid, $label) {
+  db_update('islandora_usage_stats_objects')
+    ->fields(array('label' => $label))
+    ->condition('pid', $pid, '=')
+    ->condition('label', $label, '<>')
+    ->execute();
+}
