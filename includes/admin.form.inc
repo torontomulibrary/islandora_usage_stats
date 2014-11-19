@@ -35,6 +35,12 @@ function islandora_usage_stats_admin_settings() {
     '#description' => t('The number of seconds to wait before counting a repeated view request from the same IP'),
     '#default_value' => variable_get('islandora_usage_stats_cooldown_seconds', '300'),
   );
+  $form['usage']['islandora_usage_stats_alter_pdf_display'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Alter PDF Display'),
+    '#description' => t('Whether or not to alter the PDF display to include usage stats.'),
+    '#default_value' => variable_get('islandora_usage_stats_alter_pdf_display', FALSE),
+  );
 
   $form['usage']['islandora_usage_stats_use_access_log'] = array(
     '#type' => 'checkbox',
