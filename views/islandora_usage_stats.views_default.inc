@@ -133,6 +133,12 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['fields']['label_1']['relationship'] = 'pid_id';
   $handler->display->display_options['fields']['label_1']['group_type'] = 'count';
   $handler->display->display_options['fields']['label_1']['label'] = 'Page Views';
+  /* Field: Islandora Usage Stats: Label */
+  $handler->display->display_options['fields']['label_2']['id'] = 'label_2';
+  $handler->display->display_options['fields']['label_2']['table'] = 'islandora_usage_stats_objects';
+  $handler->display->display_options['fields']['label_2']['field'] = 'label';
+  $handler->display->display_options['fields']['label_2']['relationship'] = 'collection';
+  $handler->display->display_options['fields']['label_2']['exclude'] = TRUE;
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Islandora Usage Stats: Label */
@@ -143,7 +149,7 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['filters']['label']['operator'] = 'contains';
   $handler->display->display_options['filters']['label']['exposed'] = TRUE;
   $handler->display->display_options['filters']['label']['expose']['operator_id'] = 'label_op';
-  $handler->display->display_options['filters']['label']['expose']['label'] = 'Collection';
+  $handler->display->display_options['filters']['label']['expose']['label'] = 'Collection Title';
   $handler->display->display_options['filters']['label']['expose']['use_operator'] = TRUE;
   $handler->display->display_options['filters']['label']['expose']['operator'] = 'label_op';
   $handler->display->display_options['filters']['label']['expose']['identifier'] = 'label';
@@ -155,7 +161,7 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['filters']['label']['expose']['autocomplete_filter'] = 1;
   $handler->display->display_options['filters']['label']['expose']['autocomplete_items'] = '10';
   $handler->display->display_options['filters']['label']['expose']['autocomplete_min_chars'] = '0';
-  $handler->display->display_options['filters']['label']['expose']['autocomplete_field'] = 'label';
+  $handler->display->display_options['filters']['label']['expose']['autocomplete_field'] = 'label_2';
   $handler->display->display_options['filters']['label']['expose']['autocomplete_raw_suggestion'] = 1;
   $handler->display->display_options['filters']['label']['expose']['autocomplete_raw_dropdown'] = 1;
   $handler->display->display_options['filters']['label']['expose']['autocomplete_dependent'] = 0;
@@ -166,7 +172,7 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['filters']['time']['operator'] = 'between';
   $handler->display->display_options['filters']['time']['exposed'] = TRUE;
   $handler->display->display_options['filters']['time']['expose']['operator_id'] = 'time_op';
-  $handler->display->display_options['filters']['time']['expose']['label'] = 'Time';
+  $handler->display->display_options['filters']['time']['expose']['label'] = 'Time Period';
   $handler->display->display_options['filters']['time']['expose']['use_operator'] = TRUE;
   $handler->display->display_options['filters']['time']['expose']['operator'] = 'time_op';
   $handler->display->display_options['filters']['time']['expose']['identifier'] = 'time';
@@ -223,6 +229,8 @@ function islandora_usage_stats_views_default_views() {
     t('Time'),
     t('Page'),
     t('Page Views'),
+    t('Collection Title'),
+    t('Time Period'),
     t('Attachment'),
   );
 

@@ -79,14 +79,14 @@ class IslandoraUsageStats {
         ':pid_id' => $this->pid_id
     ));
     $record = $result->fetchAssoc();
-    if (! $record) {
-        return array(
-            'views' => 0,
-            'time' => ''
-        );
+    if (!$record) {
+      return array(
+        'views' => 0,
+        'time' => '',
+      );
     }
 
-    // update the last viewed time, don't store it
+    // Update the last viewed time, don't store it.
     $this->setLastViewedTime();
 
     return $record;
@@ -137,7 +137,7 @@ class IslandoraUsageStats {
     else {
       return array(
         'downloads' => 0,
-        'time' => NULL
+        'time' => NULL,
       );
     }
   }

@@ -6,14 +6,13 @@
  */
 
 /**
- * Form builder.
- * Configure usage stats.
+ * Usage stats administration and configuration form.
  *
  * @ingroup forms
  *
  * @todo break out non-settings elements into their own form.
  *
- * @see system_settings_form().
+ * @see system_settings_form()
  */
 function islandora_usage_stats_admin_settings() {
   $form = array();
@@ -123,8 +122,7 @@ function islandora_usage_stats_admin_settings() {
 }
 
 /**
- * We use the validate function as a pseudo-submit function as the call to
- * system_settings_form prevents us from using our own submit handler.
+ * A pseudo-submit func as system_settings_form prevents a submit handler.
  */
 function islandora_usage_stats_admin_settings_validate($form, &$form_state) {
   $result = '';
@@ -139,12 +137,14 @@ function islandora_usage_stats_admin_settings_validate($form, &$form_state) {
         drupal_set_message(t("Object view access logs have been cleared"));
       }
       break;
+
     case 'edit-clear-ds-access-log-submit':
       $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_ds_access_log');
       if ($result) {
         drupal_set_message(t("Datastream download access logs have been cleared"));
       }
       break;
+
     case 'edit-clear-view-by-pid-submit':
       $pid = $form_state['values']['clear_view_by_pid'];
       $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_views', $pid);
@@ -154,12 +154,14 @@ function islandora_usage_stats_admin_settings_validate($form, &$form_state) {
         );
       }
       break;
+
     case 'edit-clear-view-all':
       $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_views');
       if ($result) {
         drupal_set_message(t('All page tracking deleted!'));
       }
       break;
+
     case 'edit-clear-ds-by-pid-submit':
       $pid = $form_state['values']['clear_ds_by_pid'];
       $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_ds_downloads', $pid);
@@ -169,6 +171,7 @@ function islandora_usage_stats_admin_settings_validate($form, &$form_state) {
         );
       }
       break;
+
     case 'edit-clear-ds-all':
       $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_ds_downloads');
       if ($result) {
