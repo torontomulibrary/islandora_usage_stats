@@ -420,29 +420,31 @@ function islandora_usage_stats_islandora_view_object($object) {
  * Implements hook_preprocess_theme().
  */
 function islandora_usage_stats_preprocess_islandora_pdf(&$variables) {
-  $islandora_object = $variables['islandora_object'];
-  $id = $islandora_object->id;
-  $label = $islandora_object->label;
+  if (variable_get('islandora_usage_stats_alter_pdf_display', FALSE)) {
+    $islandora_object = $variables['islandora_object'];
+    $id = $islandora_object->id;
+    $label = $islandora_object->label;
 
-  $track = new IslandoraUsageStats($id);
-  $variables['time_last_viewed'] = $track->getLastViewedTime();
+    $track = new IslandoraUsageStats($id);
+    $variables['time_last_viewed'] = $track->getLastViewedTime();
 
-  $currentStats = $track->getViewCount();
-  $variables['times_viewed'] = $currentStats['views'];
+    $currentStats = $track->getViewCount();
+    $variables['times_viewed'] = $currentStats['views'];
 
-  $downloaded = $track->getDownloads('OBJ');
+    $downloaded = $track->getDownloads('OBJ');
 
-  $variables['times_downloaded'] = $downloaded['downloads'];
-  $variables['time_last_downloaded'] = $downloaded['time'];
+    $variables['times_downloaded'] = $downloaded['downloads'];
+    $variables['time_last_downloaded'] = $downloaded['time'];
 
-  $variables['islandora_download_link'] = l(
-    '<i class="glyphicon glyphicon-download"> ' . t('Download PDF') . '</i>',
-    "download_ds/$id/OBJ/$label",
-    array(
-      'attributes' => array('class' => 'btn btn-primary'),
-      'html' => TRUE,
-    )
-  );
+    $variables['islandora_download_link'] = l(
+      '<i class="glyphicon glyphicon-download"> ' . t('Download PDF') . '</i>',
+      "download_ds/$id/OBJ/$label",
+      array(
+        'attributes' => array('class' => 'btn btn-primary'),
+        'html' => TRUE,
+      )
+    );
+  }
 }
 
 /**
