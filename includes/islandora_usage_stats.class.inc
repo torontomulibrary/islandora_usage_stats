@@ -7,25 +7,26 @@
 
 /**
  * Class to deal with tracking item views on an Islandora site.
- *
- * @todo create a static cache of pid_ids.
  */
 class IslandoraUsageStats {
 
-  function __construct($pid) {
+  /**
+   * Constructor, populates PID and PID ID.
+   */
+  public function __construct($pid) {
     module_load_include('inc', 'islandora_usage_stats', 'includes/db');
     $this->pid = $pid;
     $this->pid_id = islandora_usage_stats_get_pid_id($pid);
   }
 
   /**
-   * Performs check to see if user's IP is excluded from tracking
-   * Also checks if user is a bot (if enabled)
+   * Performs check to see if user's IP is excluded from tracking.
    *
-   * @return boolean
+   * Also checks if user is a bot if enabled.
+   *
+   * @return bool
    */
-  function IpExcluded()
-  {
+  public function IpExcluded() {
     $ip_list = explode(' ', variable_get('islandora_usage_stats_ip_list', 'localhost 127.0.0.1'));
     $ip = ip_address();
 
@@ -34,7 +35,7 @@ class IslandoraUsageStats {
     if (in_array($ip, $ip_list)) {
       return TRUE;
     }
-    else if ($bot_exclude) {
+    elseif ($bot_exclude) {
       // Bots check here.
       $user_agent = $_SERVER['HTTP_USER_AGENT'];
       if (1 === preg_match('/bot|rambler|spider|crawl|slurp|curl|^$/i', $user_agent)) {

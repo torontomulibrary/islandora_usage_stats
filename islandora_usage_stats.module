@@ -106,31 +106,9 @@ function islandora_usage_stats_block_save($delta = '', $edit = array()) {
 function islandora_usage_stats_block_view($delta = '') {
   switch ($delta) {
     case 'top_usage':
-      $block['content'] = islandora_usage_stats_block_contents($delta);
-      return $block;
-      break;
-
-    case 'recent_activity':
-      $block['content'] = islandora_usage_stats_block_contents($delta);
-      return $block;
-      break;
-  }
-}
-
-/**
- * Module-defined content generating function
- *
- * @global user
- *
- * @param unknown $delta
- */
-function islandora_usage_stats_block_contents($delta) {
-  global $user;
-  switch ($delta) {
-    case 'top_usage':
       if (user_access('view usage stats block')) {
         module_load_include('inc', 'islandora_usage_stats', 'includes/db');
-        $connection = islandora_get_tuque_connection($user);
+        $connection = islandora_get_tuque_connection();
         $repository = $connection->repository;
 
         $result = islandora_usage_stats_get_most_viewed(
@@ -152,13 +130,15 @@ function islandora_usage_stats_block_contents($delta) {
           );
         }
         return array(
-          '#markup' => theme(
-            'item_list',
-            array(
-              'items' => $items,
-              'attributes' => array('class' => array('list-group')),
-            )
-          ),
+          'content' => array(
+            '#markup' => theme(
+              'item_list',
+              array(
+                'items' => $items,
+                'attributes' => array('class' => array('list-group')),
+              )
+            ),
+          )
         );
       }
       break;
@@ -184,21 +164,24 @@ function islandora_usage_stats_block_contents($delta) {
           );
         }
         return array(
-          '#markup' => theme('item_list', array(
-            'items' => $items,
-            'attributes' => array(
-              'class' => array(
-                'list-group',
-              ),
+          'content' => array(
+            '#markup' => theme(
+              'item_list',
+              array(
+                'items' => $items,
+                'attributes' => array(
+                  'class' => array(
+                    'list-group',
+                  ),
+                ),
+              )
             ),
-          ))
+          )
         );
       }
       break;
   }
 }
-
-
 
 /**
  * Implementation of hook_menu().
@@ -252,69 +235,66 @@ function islandora_usage_stats_permission() {
  * Form called when paths with link 'download_ds/$pid/$dsid' are clicked.
  */
 function islandora_usage_stats_download_ds_form($pid, $dsid) {
-    global $base_url;
+  $object = islandora_object_load($pid);
 
-    $object = islandora_object_load($pid);
+  if (!$object) {
+    drupal_set_message(t('Object could not be loaded from islandora!'));
+    return;
+  }
 
-    if (! $object) {
-      drupal_set_message(t('Object could not be loaded from islandora!'));
-      return;
-    }
+  $sanitized_label = preg_replace('/[^A-Za-z0-9_\-]|\.pdf$/', '_', $object->label);
+  $download_url = 'islandora/object/' . $object->id . '/datastream/OBJ/download/' . $sanitized_label . '.pdf';
 
-    $sanitized_label = preg_replace('/[^A-Za-z0-9_\-]|\.pdf$/', '_', $object->label);
-    $download_url = 'islandora/object/' . $object->id . '/datastream/OBJ/download/' . $sanitized_label . '.pdf';
+  $datastream = $object[$dsid];
 
-    $datastream = $object[$dsid];
+  drupal_set_message($sanitized_label);
 
-    drupal_set_message($sanitized_label);
+  if (!$datastream) {
+    drupal_set_message(t('Could not get datastream, id: ' . $pid . ' , dsid: ' . $dsid));
+    return;
+  }
 
-    if (!$datastream) {
-      drupal_set_message(t('Could not get datastream, id: ' . $pid . ' , dsid: ' . $dsid));
-      return;
-    }
+  $mime_type = $datastream->mimeType;
 
-    $mime_type = $datastream->mimeType;
+  if (!$mime_type) {
+    drupal_set_message(t('Could not get mimetype'));
+    return;
+  }
 
-    if (!$mime_type) {
-      drupal_set_message(t('Could not get mimetype'));
-      return;
-    }
+  $extension = system_mime_type_extension($mime_type);
 
-    $extension = system_mime_type_extension($mime_type);
+  $file = $datastream->getContent($file);
 
-    $file = '';
-    $file = $datastream->getContent($file);
+  $ds_name = $datastream->id;
 
-    $ds_name = $datastream->id;
+  // Track the download.
+  $track = new IslandoraUsageStats($pid);
+  // Increase data stream tracking number by 1.
+  $result = $track->addDownload($ds_name);
+  $object_array = array(
+    'object' => $object,
+    'label' => $sanitized_label,
+    'download_url' => $download_url,
+    'datastream' => $datastream,
+    'ds_name' => $ds_name,
+    'mime_type' => $mime_type,
+    'extension' => $extension,
+    'tracking' => $result
+  );
 
-    // Track the download.
-    $track = new IslandoraUsageStats($pid);
-    // Increase data stream tracking number by 1.
-    $result = $track->addDownload($ds_name);
-    $object_array = array(
-        'object' => $object,
-        'label' => $sanitized_label,
-        'download_url' => $download_url,
-        'datastream' => $datastream,
-        'ds_name' => $ds_name,
-        'mime_type' => $mime_type,
-        'extension' => $extension,
-        'tracking' => $result
-    );
+  // Create custom hook that other modules can implement.
+  module_invoke_all('islandora_datastream_download', $object_array);
 
-    // Create custom hook that other modules can implement.
-    module_invoke_all('islandora_datastream_download', $object_array);
-
-    // Redirect to the file or error.
-    if ($file) {
-      drupal_add_http_header('Content-type', $mime_type);
-      drupal_add_http_header('Content-Disposition', 'attachment; filename' . $sanitized_label);
-      echo $file;
-      exit();
-    }
-    else {
-      drupal_set_message(t('Specified file does not exist!'));
-    }
+  // Redirect to the file or error.
+  if ($file) {
+    drupal_add_http_header('Content-type', $mime_type);
+    drupal_add_http_header('Content-Disposition', 'attachment; filename' . $sanitized_label);
+    echo $file;
+    exit();
+  }
+  else {
+    drupal_set_message(t('Specified file does not exist!'));
+  }
 }
 
 /**
@@ -359,7 +339,7 @@ function system_mime_type_extensions() {
  */
 function system_mime_type_extension($type) {
   static $exts;
-  if (!isset($exts)){
+  if (!isset($exts)) {
     $exts = system_mime_type_extensions();
   }
   return isset($exts[$type]) ? $exts[$type] : NULL;
