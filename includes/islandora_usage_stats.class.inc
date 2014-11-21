@@ -75,7 +75,7 @@ class IslandoraUsageStats {
    */
   function getViewCount()
   {
-    $result = db_query("SELECT views, time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
+    $result = db_query("SELECT views, time from {islandora_usage_stats_object_views} WHERE pid_id = :pid_id", array(
         ':pid_id' => $this->pid_id
     ));
     $record = $result->fetchAssoc();
@@ -125,7 +125,7 @@ class IslandoraUsageStats {
    * @return array
    */
   function getDownloads($dsid) {
-    $result = db_query("SELECT downloads, time from {islandora_usage_stats_object_ds_downloads} WHERE pid = :pid AND dsid = :dsid", array(
+    $result = db_query("SELECT downloads, time from {islandora_usage_stats_object_ds_downloads} WHERE pid_id = :pid_id AND dsid = :dsid", array(
         ':pid_id' => $this->pid_id,
         ':dsid' => $dsid
     ));
@@ -248,7 +248,7 @@ class IslandoraUsageStats {
    */
   function getLastViewTimeForIp() {
     $ip = ip_address();
-    $result = db_query("SELECT max(time) from {islandora_usage_stats_object_access_log} WHERE pid = :pid AND ip = :ip", array(
+    $result = db_query("SELECT max(time) from {islandora_usage_stats_object_access_log} WHERE pid_id = :pid_id AND ip = :ip", array(
         ':pid_id' => $this->pid_id,
         ':ip' => $ip
     ));
@@ -264,7 +264,7 @@ class IslandoraUsageStats {
    */
   function getLastDownloadTimeForIp($dsid) {
     $ip = ip_address();
-    $result = db_query("SELECT max(time) as time from {islandora_usage_stats_object_ds_access_log} WHERE pid = :pid AND dsid = :dsid AND ip = :ip", array(
+    $result = db_query("SELECT max(time) as time from {islandora_usage_stats_object_ds_access_log} WHERE pid_id = :pid_id AND dsid = :dsid AND ip = :ip", array(
       ':pid_id' => $this->pid_id,
       ':dsid' => $dsid,
       ':ip' => $ip
@@ -296,7 +296,7 @@ class IslandoraUsageStats {
 
     function getLastViewedTime()
     {
-        $result = db_query("SELECT time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
+        $result = db_query("SELECT time from {islandora_usage_stats_object_views} WHERE pid_id = :pid_id", array(
             ':pid_id' => $this->pid_id
         ));
 

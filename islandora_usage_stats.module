@@ -369,41 +369,17 @@ function system_mime_type_extension($type) {
  * Implements hook_islandora_object_purged().
  */
 function islandora_usage_stats_islandora_object_purged($pid) {
-  // Remove from views table.
-  $viewsTable = 'islandora_usage_stats_object_views';
-  islandora_usage_stats_delete_from_table($viewsTable, $pid);
-
-  // Remove from downloads table.
-  $downloadsTable = 'islandora_usage_stats_object_ds_downloads';
-  islandora_usage_stats_delete_from_table($downloadsTable, $pid);
-
-  // Remove from object activity log.
-  $accessLog = 'islandora_usage_stats_object_access_log';
-  islandora_usage_stats_delete_from_table($accessLog, $pid);
-
-  // Remove from object datastream download log.
-  $downloadLog = 'islandora_usage_stats_object_ds_access_log';
-  islandora_usage_stats_delete_from_table($downloadLog, $pid);
-}
-
-/**
- * Copy of 'islandora_usage_stats_clear_tracking' method
- *
- * @todo nuke this or the other copy of this function respect DRY.
- *
- * @param unknown $table
- * @param string $pid
- * @return string
- */
-function islandora_usage_stats_delete_from_table($table, $pid = NULL) {
-  $result = '';
-  if ($pid == NULL) {
-    $result = db_truncate($table)->execute();
+  module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+  $purge_tables = array(
+    'islandora_usage_stats_object_views',
+    'islandora_usage_stats_object_ds_downloads',
+    'islandora_usage_stats_object_access_log',
+    'islandora_usage_stats_object_ds_access_log',
+    'islandora_usage_stats_objects',
+  );
+  foreach ($purge_tables as $table) {
+    islandora_usage_stats_clear_tracking($table, $pid);
   }
-  else {
-    $result = db_delete($table)->condition('pid', $pid)->execute();
-  }
-  return $result;
 }
 
 /**
