@@ -288,27 +288,33 @@ class IslandoraUsageStats {
       return $time;
     }
 
-    /**
-     * Updates the session to indicate the user has accessed the object.
-     */
-    function updateLastViewTimeForVisitor() {
-      $_SESSION['islandora_usage_stats'][ip_address()][$this->pid] = REQUEST_TIME;
+  /**
+   * Updates the session to indicate the user has accessed the object.
+   */
+  function updateLastViewTimeForVisitor() {
+    $_SESSION['islandora_usage_stats'][ip_address()][$this->pid] = REQUEST_TIME;
+  }
+
+  /**
+   * Returns the object's last viewed time.
+   *
+   * @return string|null
+   *   The last viewed time, or NULL if none existed.
+   */
+  function getLastViewedTime() {
+    $result = db_query("SELECT time from {islandora_usage_stats_object_views} WHERE pid_id = :pid_id", array(
+      ':pid_id' => $this->pid_id
+    ));
+
+    $record = $result->fetch();
+
+    if (!$record) {
+      return NULL;
     }
-
-    function getLastViewedTime()
-    {
-        $result = db_query("SELECT time from {islandora_usage_stats_object_views} WHERE pid_id = :pid_id", array(
-            ':pid_id' => $this->pid_id
-        ));
-
-        $record = $result->fetch();
-
-        if (! $record) {
-            return NULL;
-        } else {
-            return $record->time;
-        }
+    else {
+      return $record->time;
     }
+  }
 
     /**
      * Performs a check to see if the user's IP is on the exclusion list, and
