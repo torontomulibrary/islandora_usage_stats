@@ -146,35 +146,6 @@ function islandora_usage_stats_block_view($delta = '') {
   $block = array();
   switch ($delta) {
     case 'top_usage':
-      $block['content'] = islandora_usage_stats_block_contents($delta);
-      break;
-
-    case 'recent_activity':
-      $block['content'] = islandora_usage_stats_block_contents($delta);
-      break;
-
-    case 'top_downloads':
-      $block['content'] = islandora_usage_stats_block_contents($delta);
-      break;
-
-    case 'top_search':
-      $block['content'] = islandora_usage_stats_block_contents($delta);
-      break;
-
-  }
-  return $block;
-}
-
-/**
- * Module-defined content generating function.
- *
- * @param string $delta
- *   The block name.
- */
-function islandora_usage_stats_block_contents($delta) {
-  global $user;
-  switch ($delta) {
-    case 'top_usage':
       if (user_access('view usage stats block')) {
         module_load_include('inc', 'islandora_usage_stats', 'includes/db');
         $connection = islandora_get_tuque_connection();
@@ -365,8 +336,6 @@ function islandora_usage_stats_permission() {
  * Form called when paths with link 'download_ds/$pid/$dsid' are clicked.
  */
 function islandora_usage_stats_download_ds_form($pid, $dsid) {
-  global $base_url;
-
   $object = islandora_object_load($pid);
 
   if (!$object) {
@@ -379,17 +348,10 @@ function islandora_usage_stats_download_ds_form($pid, $dsid) {
 
   $datastream = $object[$dsid];
 
-  drupal_set_message(check_plain($sanitized_label));
+  drupal_set_message($sanitized_label);
 
   if (!$datastream) {
-    drupal_set_message(
-      t('Could not get datastream, id: @pid , dsid: @dsid',
-        array(
-          '@pid' => $pid,
-          '@dsid' => $dsid,
-        )
-      )
-    );
+    drupal_set_message(t('Could not get datastream, id: ' . $pid . ' , dsid: ' . $dsid));
     return;
   }
 
@@ -418,7 +380,7 @@ function islandora_usage_stats_download_ds_form($pid, $dsid) {
     'ds_name' => $ds_name,
     'mime_type' => $mime_type,
     'extension' => $extension,
-    'tracking' => $result,
+    'tracking' => $result
   );
 
   // Create custom hook that other modules can implement.
