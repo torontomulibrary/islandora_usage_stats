@@ -6,6 +6,20 @@
  */
 
 /**
+ * Implements hook_uninstall().
+ */
+function islandora_usage_stats_uninstall() {
+  $variables = array(
+    'islandora_usage_stats_ip_list',
+    'islandora_usage_stats_cooldown_seconds',
+    'islandora_usage_stats_use_access_log',
+    'islandora_usage_stats_alter_pdf_display',
+    'islandora_usage_stats_exclude_bots',
+  );
+  array_walk($variables, 'variable_del');
+}
+
+/**
  * Implements hook_schema().
  *
  * @todo Link to user table by UID don't make a foreign key.
@@ -254,106 +268,172 @@ function islandora_usage_stats_schema() {
 /**
  * Updates schema to support collections and content models.
  */
-function islandora_usage_stats_update_7001() {
+function islandora_usage_stats_update_7001(&$sandbox) {
   $schema = array();
-  // Add new tables.
-  // @todo make only happen on first batch pass.
-  $schema['islandora_usage_stats_objects'] = array(
-    'description' => 'Used to specify object information in the DB; primarily for views.',
-    'fields' => array(
-      'id' => array(
-        'type' => 'serial',
-        'not null' => TRUE,
-      ),
-      'label' => array(
-        'description' => 'Object label in Fedora.',
-        'type' => 'varchar',
-        'length' => 255,
-      ),
-      'pid' => array(
-        'description' => 'The PID of the object.',
-        'type' => 'varchar',
-        'length' => 64,
-        'not NULL' => TRUE,
-      ),
-    ),
-    'primary key' => array('id'),
-    'unique keys' => array(
-      'pid' => array('pid'),
-    ),
-  );
-  $schema['islandora_usage_stats_collection_access_log'] = array(
-    'description' => 'Used to log the parent collection(s) of an object being visited.',
-    'fields' => array(
-      'id' => array(
-        'type' => 'serial',
-        'not null' => TRUE,
-      ),
-      'object_access_id' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-      ),
-      'collection' => array(
-        'description' => 'The PID ID of the collection.',
-        'type' => 'int',
-        'not NULL' => TRUE,
-      ),
-    ),
-    'foreign keys' => array(
-      'object_acces_id' => array(
-        'table' => 'islandora_usage_stats_object_access_log',
-        'columns' => array('object_access_id' => 'id'),
-      ),
-      'collection' => array(
-        'table' => 'islandora_usage_stats_objects',
-        'columns' => array('collection' => 'id'),
-      ),
-    ),
-    'primary key' => array('id'),
-  );
-  $schema['islandora_usage_stats_content_model_access_log'] = array(
-    'description' => 'Used to log the content model(s) when an object is visited.',
-    'fields' => array(
-      'id' => array(
-        'type' => 'serial',
-        'not null' => TRUE,
-      ),
-      'object_access_id' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-      ),
-      'content_model' => array(
-        'description' => 'The PID ID of the content model.',
-        'type' => 'int',
-        'not NULL' => TRUE,
-      ),
-    ),
-    'foreign keys' => array(
-      'object_access_id' => array(
-        'table' => 'islandora_usage_stats_object_access_log',
-        'columns' => array('object_access_id' => 'id'),
-      ),
-      'content_model' => array(
-        'table' => 'islandora_usage_stats_objects',
-        'columns' => array('content_model' => 'id'),
-      ),
-    ),
-    'primary key' => array('id'),
-  );
-  foreach ($schema as $name => $schema_info) {
-    db_create_table($name, $schema_info);
-  }
+  $sandbox['#finished'] = 0;
   $pid_tables = array(
     'islandora_usage_stats_object_ds_downloads',
     'islandora_usage_stats_object_access_log',
     'islandora_usage_stats_object_ds_access_log',
     'islandora_usage_stats_object_views',
   );
-  // @todo drop indexes.
-  // @todo add PID ID columns.
-  // @todo populate PID table with existing PIDS (batch).
-  // @todo populate label info in object table (batch).
-  // @todo populate PID ID columns.
-  // @todo remove PID columns.
-  return t('Updated database to support logging collection and content model events.');
+  // Add new tables.
+  if (!isset($sandbox['done_first_pass'])) {
+    $sandbox['done_first_pass'] = TRUE;
+    $schema['islandora_usage_stats_objects'] = array(
+      'description' => 'Used to specify object information in the DB; primarily for views.',
+      'fields' => array(
+        'id' => array(
+          'type' => 'serial',
+          'not null' => TRUE,
+        ),
+        'label' => array(
+          'description' => 'Object label in Fedora.',
+          'type' => 'varchar',
+          'length' => 255,
+        ),
+        'pid' => array(
+          'description' => 'The PID of the object.',
+          'type' => 'varchar',
+          'length' => 64,
+          'not NULL' => TRUE,
+        ),
+      ),
+      'primary key' => array('id'),
+      'unique keys' => array(
+        'pid' => array('pid'),
+      ),
+    );
+    $schema['islandora_usage_stats_collection_access_log'] = array(
+      'description' => 'Used to log the parent collection(s) of an object being visited.',
+      'fields' => array(
+        'id' => array(
+          'type' => 'serial',
+          'not null' => TRUE,
+        ),
+        'object_access_id' => array(
+          'type' => 'int',
+          'not null' => TRUE,
+        ),
+        'collection' => array(
+          'description' => 'The PID ID of the collection.',
+          'type' => 'int',
+          'not NULL' => TRUE,
+        ),
+      ),
+      'foreign keys' => array(
+        'object_acces_id' => array(
+          'table' => 'islandora_usage_stats_object_access_log',
+          'columns' => array('object_access_id' => 'id'),
+        ),
+        'collection' => array(
+          'table' => 'islandora_usage_stats_objects',
+          'columns' => array('collection' => 'id'),
+        ),
+      ),
+      'primary key' => array('id'),
+    );
+    $schema['islandora_usage_stats_content_model_access_log'] = array(
+      'description' => 'Used to log the content model(s) when an object is visited.',
+      'fields' => array(
+        'id' => array(
+          'type' => 'serial',
+          'not null' => TRUE,
+        ),
+        'object_access_id' => array(
+          'type' => 'int',
+          'not null' => TRUE,
+        ),
+        'content_model' => array(
+          'description' => 'The PID ID of the content model.',
+          'type' => 'int',
+          'not NULL' => TRUE,
+        ),
+      ),
+      'foreign keys' => array(
+        'object_access_id' => array(
+          'table' => 'islandora_usage_stats_object_access_log',
+          'columns' => array('object_access_id' => 'id'),
+        ),
+        'content_model' => array(
+          'table' => 'islandora_usage_stats_objects',
+          'columns' => array('content_model' => 'id'),
+        ),
+      ),
+      'primary key' => array('id'),
+    );
+    foreach ($schema as $name => $schema_info) {
+      db_create_table($name, $schema_info);
+    }
+    $pid_queries = array();
+    foreach ($pid_tables as $table) {
+      db_drop_index($table, 'pid');
+      db_add_field(
+        $table,
+        'pid_id',
+        array(
+          'description' => 'PID ID of the object.',
+          'type' => 'int',
+          'not null' => TRUE,
+          'initial' => 1,
+        )
+      );
+      $pid_queries[] = db_select($table)
+        ->fields($table, array('pid'))
+        ->groupBy('pid');
+    }
+    // Populate PID table with existing PIDS.
+    foreach ($pid_queries as $query) {
+      if (!isset($pid_query)) {
+        $pid_query = $query;
+      }
+      else {
+        $pid_query->union($query);
+      }
+    }
+    db_insert('islandora_usage_stats_objects')
+      ->from($pid_query)
+      ->execute();
+    // Populate PID ID columns, and drop the PID column.
+    foreach ($pid_tables as $table) {
+      db_update($table)
+        ->expression(
+          "$table.pid_id",
+          "(SELECT islandora_usage_stats_objects.id FROM
+            islandora_usage_stats_objects WHERE $table.pid = islandora_usage_stats_objects.pid)"
+        )
+        ->execute();
+      db_drop_field($table, 'pid');
+    }
+    $sandbox['total'] = db_select('islandora_usage_stats_objects')
+      ->fields('islandora_usage_stats_objects', array('pid'))
+      ->countQuery()
+      ->execute()
+      ->fetchField();
+  }
+  // Populate label info in object table (batch).
+  $step = 10;
+  if (!isset($sandbox['progress'])) {
+    $sandbox['progress'] = 0;
+  }
+  $query = db_select('islandora_usage_stats_objects')
+    ->fields('islandora_usage_stats_objects', array('pid'))
+    ->orderBy('islandora_usage_stats_objects.id')
+    ->range($sandbox['progress'], $step)
+    ->execute();
+
+  $results = $query->fetchAllAssoc('pid');
+  $pids = array_keys($results);
+  foreach ($pids as $pid) {
+    $object = islandora_object_load($pid);
+    db_update('islandora_usage_stats_objects')
+      ->fields(array('label' => $object->label))
+      ->condition('pid', $pid)
+      ->execute();
+  }
+  $sandbox['progress'] = $sandbox['progress'] + $step;
+  $sandbox['#finished'] = $sandbox['progress'] / $sandbox['total'];
+  if ($sandbox['#finished'] >= 1) {
+    return t('Updated database to support logging collection and content model events.');
+  }
 }

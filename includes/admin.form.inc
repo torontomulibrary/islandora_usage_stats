@@ -35,6 +35,12 @@ function islandora_usage_stats_admin_settings() {
     '#description' => t('The number of seconds to wait before counting a repeated view request from the same IP'),
     '#default_value' => variable_get('islandora_usage_stats_cooldown_seconds', '300'),
   );
+  $form['usage']['islandora_usage_stats_alter_pdf_display'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Alter PDF Display'),
+    '#description' => t('Whether or not to alter the PDF display to include usage stats.'),
+    '#default_value' => variable_get('islandora_usage_stats_alter_pdf_display', FALSE),
+  );
 
   $form['usage']['islandora_usage_stats_use_access_log'] = array(
     '#type' => 'checkbox',
@@ -125,15 +131,12 @@ function islandora_usage_stats_admin_settings() {
  * A pseudo-submit func as system_settings_form prevents a submit handler.
  */
 function islandora_usage_stats_admin_settings_validate($form, &$form_state) {
-  $result = '';
-
+  module_load_include('inc', 'islandora_usage_stats', 'includes/db');
   $button = $form_state['triggering_element']['#id'];
   switch ($button) {
     case 'edit-clear-object-access-log-submit':
       $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_access_log');
-      $collection_result = islandora_usage_stats_clear_tracking('islandora_usage_stats_collection_access_log');
-      $content_model_result = islandora_usage_stats_clear_tracking('islandora_usage_stats_content_model_access_log');
-      if ($result && $collection_result && $content_model_result) {
+      if ($result) {
         drupal_set_message(t("Object view access logs have been cleared"));
       }
       break;
@@ -179,23 +182,4 @@ function islandora_usage_stats_admin_settings_validate($form, &$form_state) {
       }
       break;
   }
-}
-
-/**
- * Clear information from tables.
- *
- * @param string $table
- *   The table to remove information from.
- * @param string $pid
- *   The PID to remove information from on the condition of row pid==$pid.
- */
-function islandora_usage_stats_clear_tracking($table, $pid = NULL) {
-  $result = '';
-  if ($pid == NULL) {
-    $result = db_truncate($table)->execute();
-  }
-  else {
-    $result = db_delete($table)->condition('pid', $pid)->execute();
-  }
-  return $result;
 }
