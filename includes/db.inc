@@ -101,3 +101,100 @@ function islandora_usage_stats_update_object_label($pid, $label) {
     ->condition('label', $label, '<>')
     ->execute();
 }
+
+/**
+ * Select top downloads, ordered by most downloaded.
+ *
+ * @param int $count
+ *   The number of max results to return.
+ *
+ * @return array
+ *   A list of PIDS.
+ */
+function islandora_usage_stats_get_top_downloads($count) {
+  $query = db_select('islandora_usage_stats_object_ds_downloads', 'dl');
+  $query->join('islandora_usage_stats_objects', 'objects', 'dl.pid_id = objects.id');
+  $results = $query->fields('objects', array('pid'))
+    ->fields('dl', array('dsid'))
+    ->orderBy('dl.downloads', 'DESC')
+    ->range(0, $count)
+    ->execute();
+  $records = $results->fetchAllAssoc('pid');
+  return array_keys($records);
+}
+
+/**
+ * Get similar search terms for a given term.
+ *
+ * @param string $term
+ *   The Current search term.
+ *
+ * @return array
+ *   The search term as an associated array.
+ */
+function islandora_usage_stats_get_search_term($term) {
+  $result = db_select('islandora_usage_stats_top_searches', 'ts')
+    ->fields('ts')
+    ->condition('term', db_like($term) . '%', 'LIKE')
+    ->execute()
+    ->fetchAssoc();
+  return $result;
+}
+
+/**
+ * Increase search term usage by row id.
+ *
+ * @param int $id
+ *   The row id in db to increment.
+ *
+ * @return array
+ *   Increment results array.
+ */
+function islandora_usage_stats_increment_search_term($id) {
+  $result = db_update('islandora_usage_stats_top_searches')
+    ->expression('search_total', 'search_total + :search_total', array(
+      ':search_total' => 1,
+      )
+    )
+    ->condition('id', $id)
+    ->execute();
+  return $result;
+}
+
+/**
+ * Set a new search term to track.
+ *
+ * @param string $term
+ *   The search term to track.
+ *
+ * @return array
+ *   Results of the insertion.
+ */
+function islandora_usage_stats_set_search_term($term) {
+  $result = db_insert('islandora_usage_stats_top_searches')->fields(
+    array(
+      'term' => $term,
+      'search_total' => 1,
+    )
+  )->execute();
+  return $result;
+}
+
+/**
+ * Get top searches used on this site.
+ *
+ * @param int $count
+ *   Max number of results to return
+ *
+ * @return array
+ *   Results array of top search terms.
+ */
+function islandora_usage_stats_get_top_searched($count) {
+  $query = db_select('islandora_usage_stats_top_searches', 'ts');
+  $results = $query->orderBy('search_total', 'DESC')
+    ->fields('ts', array('term', 'search_total'))
+    ->range(0, $count)
+    ->execute();
+  $records = $results->fetchAll();
+  return $records;
+}

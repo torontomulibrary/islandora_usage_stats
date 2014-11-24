@@ -73,10 +73,9 @@ class IslandoraUsageStats {
    *
    * @return array
    */
-  function getViewCount()
-  {
+  function getViewCount() {
     $result = db_query("SELECT views, time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
-        ':pid_id' => $this->pid_id
+        ':pid_id' => $this->pid_id,
     ));
     $record = $result->fetchAssoc();
     if (!$record) {
@@ -125,7 +124,7 @@ class IslandoraUsageStats {
    * @return array
    */
   function getDownloads($dsid) {
-    $result = db_query("SELECT downloads, time from {islandora_usage_stats_object_ds_downloads} WHERE pid = :pid AND dsid = :dsid", array(
+    $result = db_query("SELECT downloads, time from {islandora_usage_stats_object_ds_downloads} WHERE pid_id = :pid_id AND dsid = :dsid", array(
         ':pid_id' => $this->pid_id,
         ':dsid' => $dsid
     ));
@@ -151,30 +150,35 @@ class IslandoraUsageStats {
    */
   function increaseObjectDSDownloadCounter($dsid) {
     $current_info = $this->getDownloads($dsid);
-
     if ($current_info['downloads']) {
-        // Increase view count by one.
-        $result = db_update('islandora_usage_stats_object_ds_downloads')->expression('downloads', 'downloads + :downloads', array(
-            ':downloads' => 1
-        ))
-            ->expression('time', REQUEST_TIME)
-            ->condition('pid_id', $this->pid_id)
-            ->condition('dsid', $dsid)
-            ->execute();
-
-        return $this->getDownloads($dsid);
-    } else {
-        $result = db_insert('islandora_usage_stats_object_ds_downloads')->fields(array(
-            'pid_id' => $this->pid_id,
-            'dsid' => $dsid,
-            'downloads' => 1,
-            'time' => REQUEST_TIME
-        ))->execute();
-
-        return array(
-            'downloads' => 1,
-            'time' => NULL,
-        );
+      // Increase view count by one.
+      $result = db_update('islandora_usage_stats_object_ds_downloads')
+      ->expression('downloads', 'downloads + :downloads',
+        array(
+          ':downloads' => 1,
+        )
+      )
+      ->expression('time', REQUEST_TIME)
+      ->condition('pid_id', $this->pid_id)
+      ->condition('dsid', $dsid)
+      ->execute();
+      return $this->getDownloads($dsid);
+    }
+    else {
+      $result = db_insert('islandora_usage_stats_object_ds_downloads')
+      ->fields(
+        array(
+          'pid_id' => $this->pid_id,
+          'dsid' => $dsid,
+          'downloads' => 1,
+          'time' => REQUEST_TIME,
+        )
+      )
+      ->execute();
+      return array(
+        'downloads' => 1,
+        'time' => NULL,
+      );
     }
   }
 
@@ -218,6 +222,25 @@ class IslandoraUsageStats {
         'object_access_id' => $object_access_id,
         'collection' => $collection_id,
       ))->execute();
+    }
+  }
+
+  /**
+   * Track the top used search terms.
+   *
+   * @param string $term
+   *   The search text to track.
+   */
+  public static function trackSearchTerm($term) {
+    module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+    $term = strtolower($term);
+    $result = islandora_usage_stats_get_search_term($term);
+    if ($result) {
+      // Term is found, increment by one.
+      islandora_usage_stats_increment_search_term($result['id']);
+    }
+    else {
+      islandora_usage_stats_set_search_term($term);
     }
   }
 

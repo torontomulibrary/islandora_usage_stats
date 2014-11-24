@@ -20,6 +20,12 @@ function islandora_usage_stats_block_info() {
   $blocks['recent_activity'] = array(
     'info' => t('Recently accessed Islandora Items'),
   );
+  $blocks['top_search'] = array(
+    'info' => t('Most Searched Terms'),
+  );
+  $blocks['top_downloads'] = array(
+    'info' => t('Recently downloaded items'),
+  );
 
   return $blocks;
 }
@@ -78,6 +84,31 @@ function islandora_usage_stats_block_configure($delta) {
         );
       }
       break;
+
+    case 'top_downloads':
+      if (user_access('manage usage stats')) {
+        $form['islandora_usage_stats_top_downloads_block_display_rows'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Configure Number of Rows to Display'),
+          '#size' => 5,
+          '#description' => t('Enter the number of rows to display in the block.'),
+          '#default_value' => variable_get('islandora_usage_stats_top_downloads_block_display_rows', 5),
+        );
+      }
+      break;
+
+    case 'top_search':
+      if (user_access('manage usage stats')) {
+        $form['islandora_usage_stats_top_search_block_display_rows'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Configure Number of Rows to Display'),
+          '#size' => 5,
+          '#description' => t('Enter the number of rows to display in the block.'),
+          '#default_value' => variable_get('islandora_usage_stats_top_search_block_display_rows', 5),
+        );
+      }
+      break;
+
   }
 
   return $form;
@@ -97,6 +128,16 @@ function islandora_usage_stats_block_save($delta = '', $edit = array()) {
       variable_set('islandora_usage_stats_recent_activity_block_display_rows', (int) $edit['islandora_usage_stats_recent_activity_block_display_rows']);
       variable_set('islandora_usage_stats_recent_activity_block_exclusion_list', $edit['islandora_usage_stats_recent_activity_block_exclusion_list']);
       break;
+
+    case 'top_downloads':
+      variable_set('islandora_usage_stats_top_downloads_block_display_rows', (int) $edit['islandora_usage_stats_top_downloads_block_display_rows']);
+      variable_set('islandora_usage_stats_top_downloads_block_exclusion_list', $edit['islandora_usage_stats_top_downloads_block_exclusion_list']);
+      break;
+
+    case 'top_search':
+      variable_set('islandora_usage_stats_top_search_block_display_rows', (int) $edit['islandora_usage_stats_top_search_block_display_rows']);
+      variable_set('islandora_usage_stats_top_search_block_exclusion_list', $edit['islandora_usage_stats_top_search_block_exclusion_list']);
+      break;
   }
 }
 
@@ -104,25 +145,33 @@ function islandora_usage_stats_block_save($delta = '', $edit = array()) {
  * Implements hook_block_view().
  */
 function islandora_usage_stats_block_view($delta = '') {
+  $block = array();
   switch ($delta) {
     case 'top_usage':
       $block['content'] = islandora_usage_stats_block_contents($delta);
-      return $block;
       break;
 
     case 'recent_activity':
       $block['content'] = islandora_usage_stats_block_contents($delta);
-      return $block;
       break;
+
+    case 'top_downloads':
+      $block['content'] = islandora_usage_stats_block_contents($delta);
+      break;
+
+    case 'top_search':
+      $block['content'] = islandora_usage_stats_block_contents($delta);
+      break;
+
   }
+  return $block;
 }
 
 /**
- * Module-defined content generating function
+ * Module-defined content generating function.
  *
- * @global user
- *
- * @param unknown $delta
+ * @param string $delta
+ *   The block name.
  */
 function islandora_usage_stats_block_contents($delta) {
   global $user;
@@ -144,10 +193,10 @@ function islandora_usage_stats_block_contents($delta) {
         foreach ($result as $row) {
           // @XXX This object load can fail perms, or not exist.
           $object = islandora_object_load($row->pid);
-          $view_suffix = ((int)$row->views > 1) ? 'views' : 'view';
+          $view_suffix = ((int) $row->views > 1) ? 'views' : 'view';
           $viewcount = "$row->views $view_suffix";
           $items[] = array(
-            'data' => l($object->label, 'islandora/object/' . urlencode($row->pid)) . " <span class='label label-default'>". $viewcount . '</span>',
+            'data' => l($object->label, 'islandora/object/' . urlencode($row->pid)) . " <span class='label label-default'>" . $viewcount . '</span>',
             'class' => array('list-group-item'),
           );
         }
@@ -162,6 +211,7 @@ function islandora_usage_stats_block_contents($delta) {
         );
       }
       break;
+
     case 'recent_activity':
       if (user_access('view usage stats block')) {
         module_load_include('inc', 'islandora_usage_stats', 'includes/db');
@@ -180,7 +230,7 @@ function islandora_usage_stats_block_contents($delta) {
             'data' => l($object->label, 'islandora/object/' . urlencode($pid)),
             'class' => array(
               'list-group-item',
-            )
+            ),
           );
         }
         return array(
@@ -191,17 +241,75 @@ function islandora_usage_stats_block_contents($delta) {
                 'list-group',
               ),
             ),
-          ))
+          )),
         );
       }
       break;
+
+    case 'top_downloads':
+      if (user_access('view usage stats block')) {
+        module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+        $result = islandora_usage_stats_get_top_downloads(
+          variable_get('islandora_usage_stats_top_downloads_block_display_rows', 5)
+        );
+        $items = array();
+        foreach ($result as $pid) {
+          // @XXX This object load can fail perms, or not exist.
+          $object = islandora_object_load($pid);
+          $items[] = array(
+            'data' => l($object->label, 'islandora/object/' . urlencode($pid)),
+            'class' => array(
+              'list-group-item',
+            ),
+          );
+        }
+        return array(
+          '#markup' => theme('item_list', array(
+            'items' => $items,
+            'attributes' => array(
+              'class' => array(
+                'list-group',
+              ),
+            ),
+          )),
+        );
+      }
+      break;
+
+    case 'top_search':
+      if (user_access('view usage stats block')) {
+        module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+        $results = islandora_usage_stats_get_top_searched(
+          variable_get('islandora_usage_stats_top_search_block_display_rows', 5));
+        $items = array();
+        foreach ($results as $result) {
+          $term = $result->term;
+          $options = array('query' => array('type' => 'dismax'));
+          $items[] = array(
+            'data' => l($result->term, "islandora/search/$term", $options),
+            'class' => array(
+              'list-group-item',
+            ),
+          );
+        }
+        return array(
+          '#markup' => theme('item_list', array(
+            'items' => $items,
+            'attributes' => array(
+              'class' => array(
+                'list-group',
+              ),
+            ),
+          )),
+        );
+      }
+      break;
+
   }
 }
 
-
-
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function islandora_usage_stats_menu() {
   $items = array();
@@ -252,69 +360,76 @@ function islandora_usage_stats_permission() {
  * Form called when paths with link 'download_ds/$pid/$dsid' are clicked.
  */
 function islandora_usage_stats_download_ds_form($pid, $dsid) {
-    global $base_url;
+  global $base_url;
 
-    $object = islandora_object_load($pid);
+  $object = islandora_object_load($pid);
 
-    if (! $object) {
-      drupal_set_message(t('Object could not be loaded from islandora!'));
-      return;
-    }
+  if (!$object) {
+    drupal_set_message(t('Object could not be loaded from islandora!'));
+    return;
+  }
 
-    $sanitized_label = preg_replace('/[^A-Za-z0-9_\-]|\.pdf$/', '_', $object->label);
-    $download_url = 'islandora/object/' . $object->id . '/datastream/OBJ/download/' . $sanitized_label . '.pdf';
+  $sanitized_label = preg_replace('/[^A-Za-z0-9_\-]|\.pdf$/', '_', $object->label);
+  $download_url = 'islandora/object/' . $object->id . '/datastream/OBJ/download/' . $sanitized_label . '.pdf';
 
-    $datastream = $object[$dsid];
+  $datastream = $object[$dsid];
 
-    drupal_set_message($sanitized_label);
+  drupal_set_message(check_plain($sanitized_label));
 
-    if (!$datastream) {
-      drupal_set_message(t('Could not get datastream, id: ' . $pid . ' , dsid: ' . $dsid));
-      return;
-    }
-
-    $mime_type = $datastream->mimeType;
-
-    if (!$mime_type) {
-      drupal_set_message(t('Could not get mimetype'));
-      return;
-    }
-
-    $extension = system_mime_type_extension($mime_type);
-
-    $file = '';
-    $file = $datastream->getContent($file);
-
-    $ds_name = $datastream->id;
-
-    // Track the download.
-    $track = new IslandoraUsageStats($pid);
-    // Increase data stream tracking number by 1.
-    $result = $track->addDownload($ds_name);
-    $object_array = array(
-        'object' => $object,
-        'label' => $sanitized_label,
-        'download_url' => $download_url,
-        'datastream' => $datastream,
-        'ds_name' => $ds_name,
-        'mime_type' => $mime_type,
-        'extension' => $extension,
-        'tracking' => $result
+  if (!$datastream) {
+    drupal_set_message(
+      t('Could not get datastream, id: @pid , dsid: @dsid',
+        array(
+          '@pid' => $pid,
+          '@dsid' => $dsid,
+        )
+      )
     );
+    return;
+  }
 
-    // Create custom hook that other modules can implement.
-    module_invoke_all('islandora_datastream_download', $object_array);
+  $mime_type = $datastream->mimeType;
 
-    // Redirect to the file or error.
-    if ($file) {
-      drupal_add_http_header('Content-type', $mime_type);
-      drupal_add_http_header('Content-Disposition', 'attachment; filename' . $sanitized_label);
-      echo $file;
-      exit();
-    }
-    else {
-      drupal_set_message(t('Specified file does not exist!'));
-    }
+  if (!$mime_type) {
+    drupal_set_message(t('Could not get mimetype'));
+    return;
+  }
+
+  $extension = system_mime_type_extension($mime_type);
+
+  $file = '';
+  $file = $datastream->getContent($file);
+
+  $ds_name = $datastream->id;
+
+  // Track the download.
+  $track = new IslandoraUsageStats($pid);
+  // Increase data stream tracking number by 1.
+  $result = $track->addDownload($ds_name);
+  $object_array = array(
+    'object' => $object,
+    'label' => $sanitized_label,
+    'download_url' => $download_url,
+    'datastream' => $datastream,
+    'ds_name' => $ds_name,
+    'mime_type' => $mime_type,
+    'extension' => $extension,
+    'tracking' => $result,
+  );
+
+  // Create custom hook that other modules can implement.
+  module_invoke_all('islandora_datastream_download', $object_array);
+
+  // Redirect to the file or error.
+  if ($file) {
+    drupal_add_http_header('Content-type', $mime_type);
+    drupal_add_http_header('Content-Disposition', 'attachment; filename' . $sanitized_label);
+    echo $file;
+    exit();
+  }
+  else {
+    drupal_set_message(t('Specified file does not exist!'));
+  }
 }
 
 /**
@@ -325,7 +440,9 @@ function islandora_usage_stats_islandora_datastream_download($object_array) {
 }
 
 /**
- * Returns the system MIME type mapping of MIME types to extensions, as defined in /etc/mime.types
+ * Returns the system MIME type mapping of MIME types to extensions.
+ *
+ *  MIME types extensions as defined in /etc/mime.types
  * (considering the first extension listed to be canonical).
  */
 function system_mime_type_extensions() {
@@ -350,12 +467,16 @@ function system_mime_type_extensions() {
 }
 
 /**
- * Returns the canonical file extension for the MIME type specified, as defined in /etc/mime.types
+ * Returns the canonical file extension for the MIME type specified.
+ *
+ * MIME type specified as defined in /etc/mime.types
  * (considering the first extension listed to be canonical).
  *
  * @param string $type
  *   The MIME type
- * @return Ambigous <NULL, unknown>
+ *
+ * @return Ambigous
+ *   <NULL, unknown> MIME type extensions result.
  */
 function system_mime_type_extension($type) {
   static $exts;
@@ -467,4 +588,25 @@ function islandora_usage_stats_islandora_object_alter(AbstractObject $object, &$
   if (isset($context['params']['label'])) {
     islandora_usage_stats_update_object_label($object->id, $context['params']['label']);
   }
+}
+
+function islandora_usage_stats_menu_alter(&$items) {
+  $items['islandora/search']['page callback'] = 'islandora_usage_stats_track_search_results';
+  $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['page callback'] = 
+    'islandora_usage_stats_track_downloads';
+}
+
+function islandora_usage_stats_track_search_results($term) {
+  module_load_include('module', 'islandora_solr', "islandora_solr");
+  IslandoraUsageStats::trackSearchTerm($term);
+  $output = islandora_solr($term);
+  return $output;
+}
+
+function islandora_usage_stats_track_downloads($datastream) {
+  $ds_name = $datastream->id;
+  $parent_id = $datastream->parent->id;
+  $track = new IslandoraUsageStats($parent_id);
+  $track->addDownload($ds_name);
+  islandora_view_datastream($datastream, TRUE);
 }
