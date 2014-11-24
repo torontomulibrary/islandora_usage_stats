@@ -198,3 +198,57 @@ function islandora_usage_stats_get_top_searched($count) {
   $records = $results->fetchAll();
   return $records;
 }
+
+/**
+ * Clear information from tables.
+ *
+ * @param string $table
+ *   The base table to remove information from info from other tables may be
+ *   removed as well.
+ * @param string $pid
+ *   The PID to remove information about.
+ */
+function islandora_usage_stats_clear_tracking($table, $pid = NULL) {
+  $results = array();
+  if ($pid == NULL) {
+    $results[] = db_truncate($table)->execute();
+    if ($table == 'islandora_usage_stats_object_access_log') {
+      db_truncate('islandora_usage_stats_collection_access_log')->execute();
+      db_truncate('islandora_usage_stats_content_model_access_log')->execute();
+    }
+  }
+  else {
+    if ($table == 'islandora_usage_stats_objects') {
+      $results[] = db_delete($table)
+        ->condition('pid', $pid)
+        ->execute();
+    }
+    else {
+      $pid_id = islandora_usage_stats_pid_id($pid);
+      if ($table == 'islandora_usage_stats_object_access_log') {
+        $in_query = db_select('islandora_usage_stats_object_access_log')
+          ->fields('islandora_usage_stats_object_access_log', array('id'))
+          ->condition('pid_id', $pid_id);
+        $results[] = db_delete('islandora_usage_stats_collection_access_log')
+          ->condition('object_access_id', $in_query, 'IN')
+          ->execute();
+        $results[] = db_delete('islandora_usage_stats_content_model_access_log')
+          ->condition('object_access_id', $in_query, 'IN')
+          ->execute();
+      }
+      if ($table == 'islandora_usage_stats_collection_access_log') {
+        $pid_id_field = 'collection';
+      }
+      elseif ($table == 'islandora_usage_stats_content_model_access_log') {
+        $pid_id_field = 'content_model';
+      }
+      else {
+        $pid_id_field = 'pid_id';
+      }
+      $results[] = db_delete($table)
+        ->condition($pid_id_field, $pid_id)
+        ->execute();
+    }
+  }
+  return $results;
+}

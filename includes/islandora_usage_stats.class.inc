@@ -7,25 +7,26 @@
 
 /**
  * Class to deal with tracking item views on an Islandora site.
- *
- * @todo create a static cache of pid_ids.
  */
 class IslandoraUsageStats {
 
-  function __construct($pid) {
+  /**
+   * Constructor, populates PID and PID ID.
+   */
+  public function __construct($pid) {
     module_load_include('inc', 'islandora_usage_stats', 'includes/db');
     $this->pid = $pid;
     $this->pid_id = islandora_usage_stats_get_pid_id($pid);
   }
 
   /**
-   * Performs check to see if user's IP is excluded from tracking
-   * Also checks if user is a bot (if enabled)
+   * Performs check to see if user's IP is excluded from tracking.
    *
-   * @return boolean
+   * Also checks if user is a bot if enabled.
+   *
+   * @return bool
    */
-  function IpExcluded()
-  {
+  public function IpExcluded() {
     $ip_list = explode(' ', variable_get('islandora_usage_stats_ip_list', 'localhost 127.0.0.1'));
     $ip = ip_address();
 
@@ -34,7 +35,7 @@ class IslandoraUsageStats {
     if (in_array($ip, $ip_list)) {
       return TRUE;
     }
-    else if ($bot_exclude) {
+    elseif ($bot_exclude) {
       // Bots check here.
       $user_agent = $_SERVER['HTTP_USER_AGENT'];
       if (1 === preg_match('/bot|rambler|spider|crawl|slurp|curl|^$/i', $user_agent)) {
@@ -73,9 +74,10 @@ class IslandoraUsageStats {
    *
    * @return array
    */
-  function getViewCount() {
-    $result = db_query("SELECT views, time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
-        ':pid_id' => $this->pid_id,
+  function getViewCount()
+  {
+    $result = db_query("SELECT views, time from {islandora_usage_stats_object_views} WHERE pid_id = :pid_id", array(
+        ':pid_id' => $this->pid_id
     ));
     $record = $result->fetchAssoc();
     if (!$record) {
@@ -339,7 +341,7 @@ class IslandoraUsageStats {
    */
   function getLastViewTimeForIp() {
     $ip = ip_address();
-    $result = db_query("SELECT max(time) from {islandora_usage_stats_object_access_log} WHERE pid = :pid AND ip = :ip", array(
+    $result = db_query("SELECT max(time) from {islandora_usage_stats_object_access_log} WHERE pid_id = :pid_id AND ip = :ip", array(
         ':pid_id' => $this->pid_id,
         ':ip' => $ip
     ));
@@ -355,7 +357,7 @@ class IslandoraUsageStats {
    */
   function getLastDownloadTimeForIp($dsid) {
     $ip = ip_address();
-    $result = db_query("SELECT max(time) as time from {islandora_usage_stats_object_ds_access_log} WHERE pid = :pid AND dsid = :dsid AND ip = :ip", array(
+    $result = db_query("SELECT max(time) as time from {islandora_usage_stats_object_ds_access_log} WHERE pid_id = :pid_id AND dsid = :dsid AND ip = :ip", array(
       ':pid_id' => $this->pid_id,
       ':dsid' => $dsid,
       ':ip' => $ip
@@ -378,27 +380,33 @@ class IslandoraUsageStats {
       return $time;
     }
 
-    /**
-     * Updates the session to indicate the user has accessed the object.
-     */
-    function updateLastViewTimeForVisitor() {
-      $_SESSION['islandora_usage_stats'][ip_address()][$this->pid] = REQUEST_TIME;
+  /**
+   * Updates the session to indicate the user has accessed the object.
+   */
+  function updateLastViewTimeForVisitor() {
+    $_SESSION['islandora_usage_stats'][ip_address()][$this->pid] = REQUEST_TIME;
+  }
+
+  /**
+   * Returns the object's last viewed time.
+   *
+   * @return string|null
+   *   The last viewed time, or NULL if none existed.
+   */
+  function getLastViewedTime() {
+    $result = db_query("SELECT time from {islandora_usage_stats_object_views} WHERE pid_id = :pid_id", array(
+      ':pid_id' => $this->pid_id
+    ));
+
+    $record = $result->fetch();
+
+    if (!$record) {
+      return NULL;
     }
-
-    function getLastViewedTime()
-    {
-        $result = db_query("SELECT time from {islandora_usage_stats_object_views} WHERE pid = :pid", array(
-            ':pid_id' => $this->pid_id
-        ));
-
-        $record = $result->fetch();
-
-        if (! $record) {
-            return NULL;
-        } else {
-            return $record->time;
-        }
+    else {
+      return $record->time;
     }
+  }
 
     /**
      * Performs a check to see if the user's IP is on the exclusion list, and

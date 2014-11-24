@@ -177,7 +177,7 @@ function islandora_usage_stats_block_contents($delta) {
     case 'top_usage':
       if (user_access('view usage stats block')) {
         module_load_include('inc', 'islandora_usage_stats', 'includes/db');
-        $connection = islandora_get_tuque_connection($user);
+        $connection = islandora_get_tuque_connection();
         $repository = $connection->repository;
 
         $result = islandora_usage_stats_get_most_viewed(
@@ -199,13 +199,15 @@ function islandora_usage_stats_block_contents($delta) {
           );
         }
         return array(
-          '#markup' => theme(
-            'item_list',
-            array(
-              'items' => $items,
-              'attributes' => array('class' => array('list-group')),
-            )
-          ),
+          'content' => array(
+            '#markup' => theme(
+              'item_list',
+              array(
+                'items' => $items,
+                'attributes' => array('class' => array('list-group')),
+              )
+            ),
+          )
         );
       }
       break;
@@ -232,12 +234,17 @@ function islandora_usage_stats_block_contents($delta) {
           );
         }
         return array(
-          '#markup' => theme('item_list', array(
-            'items' => $items,
-            'attributes' => array(
-              'class' => array(
-                'list-group',
-              ),
+          'content' => array(
+            '#markup' => theme(
+              'item_list',
+              array(
+                'items' => $items,
+                'attributes' => array(
+                  'class' => array(
+                    'list-group',
+                  ),
+                ),
+              )
             ),
           )),
         );
@@ -395,7 +402,6 @@ function islandora_usage_stats_download_ds_form($pid, $dsid) {
 
   $extension = system_mime_type_extension($mime_type);
 
-  $file = '';
   $file = $datastream->getContent($file);
 
   $ds_name = $datastream->id;
@@ -478,7 +484,7 @@ function system_mime_type_extensions() {
  */
 function system_mime_type_extension($type) {
   static $exts;
-  if (!isset($exts)){
+  if (!isset($exts)) {
     $exts = system_mime_type_extensions();
   }
   return isset($exts[$type]) ? $exts[$type] : NULL;
@@ -488,41 +494,17 @@ function system_mime_type_extension($type) {
  * Implements hook_islandora_object_purged().
  */
 function islandora_usage_stats_islandora_object_purged($pid) {
-  // Remove from views table.
-  $viewsTable = 'islandora_usage_stats_object_views';
-  islandora_usage_stats_delete_from_table($viewsTable, $pid);
-
-  // Remove from downloads table.
-  $downloadsTable = 'islandora_usage_stats_object_ds_downloads';
-  islandora_usage_stats_delete_from_table($downloadsTable, $pid);
-
-  // Remove from object activity log.
-  $accessLog = 'islandora_usage_stats_object_access_log';
-  islandora_usage_stats_delete_from_table($accessLog, $pid);
-
-  // Remove from object datastream download log.
-  $downloadLog = 'islandora_usage_stats_object_ds_access_log';
-  islandora_usage_stats_delete_from_table($downloadLog, $pid);
-}
-
-/**
- * Copy of 'islandora_usage_stats_clear_tracking' method
- *
- * @todo nuke this or the other copy of this function respect DRY.
- *
- * @param unknown $table
- * @param string $pid
- * @return string
- */
-function islandora_usage_stats_delete_from_table($table, $pid = NULL) {
-  $result = '';
-  if ($pid == NULL) {
-    $result = db_truncate($table)->execute();
+  module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+  $purge_tables = array(
+    'islandora_usage_stats_object_views',
+    'islandora_usage_stats_object_ds_downloads',
+    'islandora_usage_stats_object_access_log',
+    'islandora_usage_stats_object_ds_access_log',
+    'islandora_usage_stats_objects',
+  );
+  foreach ($purge_tables as $table) {
+    islandora_usage_stats_clear_tracking($table, $pid);
   }
-  else {
-    $result = db_delete($table)->condition('pid', $pid)->execute();
-  }
-  return $result;
 }
 
 /**
