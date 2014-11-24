@@ -112,7 +112,7 @@ function islandora_usage_stats_update_object_label($pid, $label) {
  *   A list of PIDS.
  */
 function islandora_usage_stats_get_top_downloads($count) {
-  $query = db_select('islandora_usage_stats_object_ds_downloads', 'dl');
+  $query = db_select('islandora_usage_stats_top_downloads', 'dl');
   $query->join('islandora_usage_stats_objects', 'objects', 'dl.pid_id = objects.id');
   $results = $query->fields('objects', array('pid'))
     ->fields('dl', array('dsid'))

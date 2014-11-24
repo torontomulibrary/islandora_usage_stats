@@ -116,6 +116,22 @@ class IslandoraUsageStats {
     return $result;
   }
 
+  function addTopDownload($dsid) {
+    $result = '';
+    $logging = variable_get('islandora_usage_stats_use_access_log', 1);
+
+    // check if user's ip is excluded.
+    if (! $this->IpExcluded()) {
+      $result = $this->increaseTopObjectDSDownloadCounter($dsid);
+
+      if ($logging) {
+        $this->logObjectDownload($dsid);
+      }
+    }
+
+    return $result;
+  }
+
   /**
    * Retrieves the number of times the object's datastream has been downloaded.
    *
@@ -136,6 +152,58 @@ class IslandoraUsageStats {
     else {
       return array(
         'downloads' => 0,
+        'time' => NULL,
+      );
+    }
+  }
+
+  function getTopDownloads($dsid) {
+    $result = db_query("SELECT downloads, time from {islandora_usage_stats_top_downloads} WHERE pid_id = :pid_id AND dsid = :dsid", array(
+        ':pid_id' => $this->pid_id,
+        ':dsid' => $dsid
+    ));
+    $record = $result->fetchAssoc();
+
+    if ($record) {
+      return $record;
+    }
+    else {
+      return array(
+        'downloads' => 0,
+        'time' => NULL,
+      );
+    }
+  }
+
+  function increaseTopObjectDSDownloadCounter($dsid) {
+    $current_info = $this->getTopDownloads($dsid);
+    if ($current_info['downloads']) {
+      // Increase view count by one.
+      $result = db_update('islandora_usage_stats_top_downloads')
+      ->expression('downloads', 'downloads + :downloads',
+        array(
+          ':downloads' => 1,
+        )
+      )
+      ->expression('time', REQUEST_TIME)
+      ->condition('pid_id', $this->pid_id)
+      ->condition('dsid', $dsid)
+      ->execute();
+      return $this->getDownloads($dsid);
+    }
+    else {
+      $result = db_insert('islandora_usage_stats_top_downloads')
+      ->fields(
+        array(
+          'pid_id' => $this->pid_id,
+          'dsid' => $dsid,
+          'downloads' => 1,
+          'time' => REQUEST_TIME,
+        )
+      )
+      ->execute();
+      return array(
+        'downloads' => 1,
         'time' => NULL,
       );
     }

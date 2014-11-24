@@ -131,12 +131,10 @@ function islandora_usage_stats_block_save($delta = '', $edit = array()) {
 
     case 'top_downloads':
       variable_set('islandora_usage_stats_top_downloads_block_display_rows', (int) $edit['islandora_usage_stats_top_downloads_block_display_rows']);
-      variable_set('islandora_usage_stats_top_downloads_block_exclusion_list', $edit['islandora_usage_stats_top_downloads_block_exclusion_list']);
       break;
 
     case 'top_search':
       variable_set('islandora_usage_stats_top_search_block_display_rows', (int) $edit['islandora_usage_stats_top_search_block_display_rows']);
-      variable_set('islandora_usage_stats_top_search_block_exclusion_list', $edit['islandora_usage_stats_top_search_block_exclusion_list']);
       break;
   }
 }
@@ -607,6 +605,6 @@ function islandora_usage_stats_track_downloads($datastream) {
   $ds_name = $datastream->id;
   $parent_id = $datastream->parent->id;
   $track = new IslandoraUsageStats($parent_id);
-  $track->addDownload($ds_name);
+  $track->addTopDownload($ds_name);
   islandora_view_datastream($datastream, TRUE);
 }

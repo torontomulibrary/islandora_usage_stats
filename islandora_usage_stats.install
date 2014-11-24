@@ -105,6 +105,51 @@ function islandora_usage_stats_schema() {
     ),
   );
 
+  // This IS a straight copy of 'islandora_usage_stats_object_ds_downloads' table. Done this way
+  // so that in the future both tables can be merged into one, once we can be sure no strange use
+  // case would require both.
+  $schema['islandora_usage_stats_top_downloads'] = array(
+    'description' => 'This table is used to store datastream download count for all fedora objects',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Unique id for each row',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'pid_id' => array(
+        'description' => 'PID ID of the object.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'dsid' => array(
+        'description' => 'Datastream ID of the object',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'downloads' => array(
+        'description' => 'The number of views an object has received',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'time' => array(
+        'description' => 'The time in number of seconds of the last download of the object',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array(
+      'id',
+    ),
+    'indexes' => array(
+      'dsid' => array(
+        'dsid',
+      ),
+    ),
+  );
+
   $schema['islandora_usage_stats_object_access_log'] = array(
     'description' => 'This table is used to store the usage information for Fedora objects.',
     'fields' => array(
@@ -404,4 +449,53 @@ function islandora_usage_stats_update_7002() {
   );
   db_create_table('islandora_usage_stats_top_searches', $schema['islandora_usage_stats_top_searches']);
   return t('Updated database to support top search logging.');
+}
+
+/**
+ * Adds datastream downloads for 'Top Downloads' in a seperate table.
+ */
+function islandora_usage_stats_update_7003() {
+    $schema['islandora_usage_stats_top_downloads'] = array(
+    'description' => 'This table is used to store datastream download count for all fedora objects',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Unique id for each row',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'pid_id' => array(
+        'description' => 'PID ID of the object.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'dsid' => array(
+        'description' => 'Datastream ID of the object',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'downloads' => array(
+        'description' => 'The number of views an object has received',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'time' => array(
+        'description' => 'The time in number of seconds of the last download of the object',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array(
+      'id',
+    ),
+    'indexes' => array(
+      'dsid' => array(
+        'dsid',
+      ),
+    ),
+  );
+  db_create_table('islandora_usage_stats_top_downloads', $schema['islandora_usage_stats_top_downloads']);
+  return t('Updated database to add top downloads in a seperate table.');
 }
