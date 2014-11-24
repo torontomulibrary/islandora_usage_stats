@@ -246,7 +246,7 @@ function islandora_usage_stats_block_contents($delta) {
                 ),
               )
             ),
-          )),
+          )
         );
       }
       break;
