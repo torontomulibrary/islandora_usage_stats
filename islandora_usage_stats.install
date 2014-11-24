@@ -15,6 +15,8 @@ function islandora_usage_stats_uninstall() {
     'islandora_usage_stats_use_access_log',
     'islandora_usage_stats_alter_pdf_display',
     'islandora_usage_stats_exclude_bots',
+    'islandora_usage_stats_top_downloads_block_display_rows',
+    'islandora_usage_stats_top_search_block_display_rows',
   );
   array_walk($variables, 'variable_del');
 }
