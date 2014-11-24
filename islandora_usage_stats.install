@@ -119,9 +119,9 @@ function islandora_usage_stats_schema() {
     ),
   );
 
-  // This IS a straight copy of 'islandora_usage_stats_object_ds_downloads' table. Done this way
-  // so that in the future both tables can be merged into one, once we can be sure no strange use
-  // case would require both.
+  // This IS a straight copy of 'islandora_usage_stats_object_ds_downloads'.
+  // Table. done this way so that in the future both tables can be merged
+  // into one, Once we can be sure no strange use case would require both.
   $schema['islandora_usage_stats_top_downloads'] = array(
     'description' => 'This table is used to store datastream download count for all fedora objects',
     'fields' => array(
@@ -535,7 +535,7 @@ function islandora_usage_stats_update_7002() {
  * Adds datastream downloads for 'Top Downloads' in a seperate table.
  */
 function islandora_usage_stats_update_7003() {
-    $schema['islandora_usage_stats_top_downloads'] = array(
+  $schema['islandora_usage_stats_top_downloads'] = array(
     'description' => 'This table is used to store datastream download count for all fedora objects',
     'fields' => array(
       'id' => array(

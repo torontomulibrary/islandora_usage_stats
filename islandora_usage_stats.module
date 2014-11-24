@@ -207,7 +207,7 @@ function islandora_usage_stats_block_contents($delta) {
                 'attributes' => array('class' => array('list-group')),
               )
             ),
-          )
+          ),
         );
       }
       break;
@@ -246,7 +246,7 @@ function islandora_usage_stats_block_contents($delta) {
                 ),
               )
             ),
-          )
+          ),
         );
       }
       break;
@@ -570,12 +570,21 @@ function islandora_usage_stats_islandora_object_alter(AbstractObject $object, &$
   }
 }
 
+/**
+ * Implements hook_menu_alter().
+ */
 function islandora_usage_stats_menu_alter(&$items) {
   $items['islandora/search']['page callback'] = 'islandora_usage_stats_track_search_results';
-  $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['page callback'] = 
-    'islandora_usage_stats_track_downloads';
+  $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['page callback']
+    = 'islandora_usage_stats_track_downloads';
 }
 
+/**
+ * Menu alter replacement callback for islandora/search.
+ *
+ * @param string $term
+ *   The search term to track.
+ */
 function islandora_usage_stats_track_search_results($term) {
   module_load_include('module', 'islandora_solr', "islandora_solr");
   IslandoraUsageStats::trackSearchTerm($term);
@@ -583,6 +592,12 @@ function islandora_usage_stats_track_search_results($term) {
   return $output;
 }
 
+/**
+ * Menu alter replacement callback for ds downloads.
+ *
+ * @param AbstractDatastream $datastream
+ *   The datastream being downloaded.
+ */
 function islandora_usage_stats_track_downloads($datastream) {
   $ds_name = $datastream->id;
   $parent_id = $datastream->parent->id;

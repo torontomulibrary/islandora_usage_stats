@@ -102,7 +102,7 @@ class IslandoraUsageStats {
    *   The datastream id.
    * @return NULL string result
    */
-  function addDownload($dsid) {
+  public function addDownload($dsid) {
     $result = '';
 
     $logging = variable_get('islandora_usage_stats_use_access_log', 1);
@@ -118,11 +118,22 @@ class IslandoraUsageStats {
     return $result;
   }
 
-  function addTopDownload($dsid) {
+  /**
+   * Increases the top datastream download count by one in the database.
+   *
+   * Count is not increased if user's IP is on exclusion list.
+   *
+   * @param string $dsid
+   *   The datastream id.
+   *
+   * @return string
+   *   Results of the query.
+   */
+  public function addTopDownload($dsid) {
     $result = '';
     $logging = variable_get('islandora_usage_stats_use_access_log', 1);
 
-    // check if user's ip is excluded.
+    // Check if user's ip is excluded.
     if (! $this->IpExcluded()) {
       $result = $this->increaseTopObjectDSDownloadCounter($dsid);
 
@@ -159,10 +170,19 @@ class IslandoraUsageStats {
     }
   }
 
-  function getTopDownloads($dsid) {
+  /**
+   * Retrieves the number of times any object datastream has been downloaded.
+   *
+   * @param string $dsid
+   *   The datastream id.
+   *
+   * @return array
+   *   Records affected by top downloads.
+   */
+  private function getTopDownloads($dsid) {
     $result = db_query("SELECT downloads, time from {islandora_usage_stats_top_downloads} WHERE pid_id = :pid_id AND dsid = :dsid", array(
         ':pid_id' => $this->pid_id,
-        ':dsid' => $dsid
+        ':dsid' => $dsid,
     ));
     $record = $result->fetchAssoc();
 
@@ -177,7 +197,16 @@ class IslandoraUsageStats {
     }
   }
 
-  function increaseTopObjectDSDownloadCounter($dsid) {
+  /**
+   * Increases the top download count for the given object's datastream ID.
+   *
+   * @param string $dsid
+   *   The datastream id.
+   *
+   * @return array
+   *   The number of total downloads
+   */
+  private function increaseTopObjectDSDownloadCounter($dsid) {
     $current_info = $this->getTopDownloads($dsid);
     if ($current_info['downloads']) {
       // Increase view count by one.
@@ -212,7 +241,7 @@ class IslandoraUsageStats {
   }
 
   /**
-   * Increases the download count for the given object's datastream ID
+   * Increases the download count for the given object's datastream ID.
    *
    * @param string $dsid
    *   The datastream id.
