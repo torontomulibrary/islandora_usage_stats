@@ -240,14 +240,16 @@ function islandora_usage_stats_block_view($delta = '') {
           );
         }
         return array(
-          '#markup' => theme('item_list', array(
-            'items' => $items,
-            'attributes' => array(
-              'class' => array(
-                'list-group',
+          'content' => array(
+            '#markup' => theme('item_list', array(
+              'items' => $items,
+              'attributes' => array(
+                'class' => array(
+                  'list-group',
+                ),
               ),
-            ),
-          )),
+            )),
+          ),
         );
       }
       break;
@@ -269,14 +271,16 @@ function islandora_usage_stats_block_view($delta = '') {
           );
         }
         return array(
-          '#markup' => theme('item_list', array(
-            'items' => $items,
-            'attributes' => array(
-              'class' => array(
-                'list-group',
+          'content' => array(
+            '#markup' => theme('item_list', array(
+              'items' => $items,
+              'attributes' => array(
+                'class' => array(
+                  'list-group',
+                ),
               ),
-            ),
-          )),
+            )),
+          ),
         );
       }
       break;
@@ -560,10 +564,11 @@ function islandora_usage_stats_track_search_results($term) {
  * @param AbstractDatastream $datastream
  *   The datastream being downloaded.
  */
-function islandora_usage_stats_track_downloads($datastream) {
+function islandora_usage_stats_track_downloads(AbstractDatastream $datastream) {
+  module_load_include('inc', 'islandora', "includes/datastream");
   $ds_name = $datastream->id;
   $parent_id = $datastream->parent->id;
   $track = new IslandoraUsageStats($parent_id);
   $track->addTopDownload($ds_name);
-  islandora_view_datastream($datastream, TRUE);
+  islandora_download_datastream($datastream);
 }
