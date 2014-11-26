@@ -15,6 +15,8 @@ function islandora_usage_stats_uninstall() {
     'islandora_usage_stats_use_access_log',
     'islandora_usage_stats_alter_pdf_display',
     'islandora_usage_stats_exclude_bots',
+    'islandora_usage_stats_top_downloads_block_display_rows',
+    'islandora_usage_stats_top_search_block_display_rows',
   );
   array_walk($variables, 'variable_del');
 }
@@ -26,6 +28,57 @@ function islandora_usage_stats_uninstall() {
  * @XXX Stats tables look redundant.
  */
 function islandora_usage_stats_schema() {
+  $schema['islandora_usage_stats_datastreams'] = array(
+    'description' => 'Used to log top searches',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'dsid' => array(
+        'description' => 'The datastream identifier',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'pid_id' => array(
+        'description' => 'The pid id forign relations',
+        'type' => 'int',
+        'not NULL' => TRUE,
+      ),
+      'ds_label' => array(
+        'description' => 'The datastream label',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+    ),
+    'foreign keys' => array(
+      'pid_id' => array(
+        'table' => 'islandora_usage_stats_objects',
+        'columns' => array('pid_id' => 'id'),
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  $schema['islandora_usage_stats_top_searches'] = array(
+    'description' => 'Used to log top searches',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'term' => array(
+        'description' => 'Search term',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'search_total' => array(
+        'description' => 'The total times this term has been searched.',
+        'type' => 'int',
+        'not NULL' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
   $schema['islandora_usage_stats_object_views'] = array(
     'description' => 'This table is used to store view count information for fedora objects',
     'fields' => array(
@@ -95,6 +148,62 @@ function islandora_usage_stats_schema() {
     'indexes' => array(
       'dsid' => array(
         'dsid',
+      ),
+    ),
+  );
+
+  // This is nearly a straight copy of
+  // the 'islandora_usage_stats_object_ds_downloads' Table.
+  // done this way so that in the future both tables can be
+  // merged into one, Once we can be sure no strange use
+  // case would require both.
+  $schema['islandora_usage_stats_top_downloads'] = array(
+    'description' => 'This table is used to store datastream download count for all fedora objects',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Unique id for each row',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'pid_id' => array(
+        'description' => 'PID ID of the object.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'ds_id' => array(
+        'description' => 'The ds relation to the datastreams table',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'downloads' => array(
+        'description' => 'The number of views an object has received',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'time' => array(
+        'description' => 'The time in number of seconds of the last download of the object',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array(
+      'id',
+    ),
+    'foreign keys' => array(
+      'ds_id' => array(
+        'table' => 'islandora_usage_stats_datastreams',
+        'columns' => array('ds_id' => 'id'),
+      ),
+      'pid_id' => array(
+        'table' => 'islandora_usage_stats_objects',
+        'columns' => array('pid_id' => 'id'),
+      ),
+    ),
+    'indexes' => array(
+      'ds_id' => array(
+        'ds_id',
       ),
     ),
   );
@@ -436,4 +545,117 @@ function islandora_usage_stats_update_7001(&$sandbox) {
   if ($sandbox['#finished'] >= 1) {
     return t('Updated database to support logging collection and content model events.');
   }
+}
+
+/**
+ * Adds support for top search/top downloads monitoring in islandora.
+ */
+function islandora_usage_stats_update_7002() {
+  $schema['islandora_usage_stats_top_searches'] = array(
+    'description' => 'Used to log top searches',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'term' => array(
+        'description' => 'Search term',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'search_total' => array(
+        'description' => 'The total times this term has been searched.',
+        'type' => 'int',
+        'not NULL' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['islandora_usage_stats_top_downloads'] = array(
+    'description' => 'This table is used to store datastream download count for all fedora objects',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Unique id for each row',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'pid_id' => array(
+        'description' => 'PID ID of the object.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'ds_id' => array(
+        'description' => 'The ds relation to the datastreams table',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'downloads' => array(
+        'description' => 'The number of views an object has received',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'time' => array(
+        'description' => 'The time in number of seconds of the last download of the object',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array(
+      'id',
+    ),
+    'foreign keys' => array(
+      'ds_id' => array(
+        'table' => 'islandora_usage_stats_datastreams',
+        'columns' => array('ds_id' => 'id'),
+      ),
+      'pid_id' => array(
+        'table' => 'islandora_usage_stats_objects',
+        'columns' => array('pid_id' => 'id'),
+      ),
+    ),
+    'indexes' => array(
+      'ds_id' => array(
+        'ds_id',
+      ),
+    ),
+  );
+
+  $schema['islandora_usage_stats_datastreams'] = array(
+    'description' => 'Used to log top searches',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'dsid' => array(
+        'description' => 'The datastream identifier',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'pid_id' => array(
+        'description' => 'The pid id forign relations',
+        'type' => 'int',
+        'not NULL' => TRUE,
+      ),
+      'ds_label' => array(
+        'description' => 'The datastream label',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+    ),
+    'foreign keys' => array(
+      'pid_id' => array(
+        'table' => 'islandora_usage_stats_objects',
+        'columns' => array('pid_id' => 'id'),
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  db_create_table('islandora_usage_stats_top_downloads', $schema['islandora_usage_stats_top_downloads']);
+  db_create_table('islandora_usage_stats_top_searches', $schema['islandora_usage_stats_top_searches']);
+  db_create_table('islandora_usage_stats_datastreams', $schema['islandora_usage_stats_datastreams']);
+  return t('Updated database to support top search logging, and top downloads.');
 }

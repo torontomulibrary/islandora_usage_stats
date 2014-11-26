@@ -102,7 +102,7 @@ class IslandoraUsageStats {
    *   The datastream id.
    * @return NULL string result
    */
-  function addDownload($dsid) {
+  public function addDownload($dsid) {
     $result = '';
 
     $logging = variable_get('islandora_usage_stats_use_access_log', 1);
@@ -112,6 +112,46 @@ class IslandoraUsageStats {
 
       if ($logging) {
         $this->logObjectDownload($dsid);
+      }
+    }
+
+    return $result;
+  }
+
+  /**
+   * Increases the top datastream download count by one in the database.
+   *
+   * Count is not increased if user's IP is on exclusion list.
+   *
+   * @param string $dsid
+   *   The datastream id.
+   *
+   * @return string
+   *   Results of the query.
+   */
+  public function addTopDownload($dsid) {
+    $result = '';
+    $logging = variable_get('islandora_usage_stats_use_access_log', 1);
+
+    // Check if user's ip is excluded.
+    if (!$this->IpExcluded()) {
+      $last_viewed_time = $this->getLastViewTimeForVisitor();
+      // User has never viewed item before.
+      if (!$last_viewed_time) {
+        $this->dBIncreaseViewCounter();
+        if ($logging) {
+          $this->logObjectDownload($dsid);
+        }
+      }
+      else {
+        // Check if user has requested this item in the past X seconds.
+        $cooldown_time = variable_get('islandora_usage_stats_cooldown_seconds', 300);
+        if (($last_viewed_time + $cooldown_time) < REQUEST_TIME) {
+          $result = $this->increaseTopObjectDSDownloadCounter($dsid);
+          if ($logging) {
+            $this->updateLastViewTimeForVisitor();
+          }
+        }
       }
     }
 
@@ -144,7 +184,66 @@ class IslandoraUsageStats {
   }
 
   /**
-   * Increases the download count for the given object's datastream ID
+   * Retrieves the number of times any object datastream has been downloaded.
+   *
+   * @param string $dsid
+   *   The datastream id.
+   *
+   * @return array
+   *   Records affected by top downloads.
+   */
+  private function getTopDownloads($dsid) {
+    module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+
+    $object = islandora_object_load($this->pid);
+    $record = islandora_usage_stats_find_existing_downloads($this->pid_id, $dsid, $object[$dsid]->label);
+
+    if ($record['result']) {
+      return $record;
+    }
+    else {
+      return array(
+        'downloads' => 0,
+        'time' => NULL,
+        'ds_id' => $record['ds_id'],
+        'result' => NULL
+      );
+    }
+  }
+
+  /**
+   * Increases the top download count for the given object's datastream ID.
+   *
+   * @param string $dsid
+   *   The datastream id.
+   *
+   * @return array
+   *   The number of total downloads
+   */
+  private function increaseTopObjectDSDownloadCounter($dsid) {
+    module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+    $current_info = $this->getTopDownloads($dsid);
+    if ($current_info['result']) {
+      islandora_usage_stats_increment_top_object_ds_download_counter(
+        REQUEST_TIME,
+        $this->pid_id,
+        $current_info['result']['ds_id']
+      );
+      return $this->getTopDownloads($dsid);
+    }
+    else {
+      islandora_usage_stats_insert_top_download(REQUEST_TIME, $this->pid_id, $current_info['ds_id']);
+      return array(
+        'downloads' => 1,
+        'time' => NULL,
+        'ds_id' => $current_info['ds_id'],
+      );
+    }
+    return NULL;
+  }
+
+  /**
+   * Increases the download count for the given object's datastream ID.
    *
    * @param string $dsid
    *   The datastream id.
@@ -152,30 +251,35 @@ class IslandoraUsageStats {
    */
   function increaseObjectDSDownloadCounter($dsid) {
     $current_info = $this->getDownloads($dsid);
-
     if ($current_info['downloads']) {
-        // Increase view count by one.
-        $result = db_update('islandora_usage_stats_object_ds_downloads')->expression('downloads', 'downloads + :downloads', array(
-            ':downloads' => 1
-        ))
-            ->expression('time', REQUEST_TIME)
-            ->condition('pid_id', $this->pid_id)
-            ->condition('dsid', $dsid)
-            ->execute();
-
-        return $this->getDownloads($dsid);
-    } else {
-        $result = db_insert('islandora_usage_stats_object_ds_downloads')->fields(array(
-            'pid_id' => $this->pid_id,
-            'dsid' => $dsid,
-            'downloads' => 1,
-            'time' => REQUEST_TIME
-        ))->execute();
-
-        return array(
-            'downloads' => 1,
-            'time' => NULL,
-        );
+      // Increase view count by one.
+      $result = db_update('islandora_usage_stats_object_ds_downloads')
+      ->expression('downloads', 'downloads + :downloads',
+        array(
+          ':downloads' => 1,
+        )
+      )
+      ->expression('time', REQUEST_TIME)
+      ->condition('pid_id', $this->pid_id)
+      ->condition('dsid', $dsid)
+      ->execute();
+      return $this->getDownloads($dsid);
+    }
+    else {
+      $result = db_insert('islandora_usage_stats_object_ds_downloads')
+      ->fields(
+        array(
+          'pid_id' => $this->pid_id,
+          'dsid' => $dsid,
+          'downloads' => 1,
+          'time' => REQUEST_TIME,
+        )
+      )
+      ->execute();
+      return array(
+        'downloads' => 1,
+        'time' => NULL,
+      );
     }
   }
 
@@ -219,6 +323,25 @@ class IslandoraUsageStats {
         'object_access_id' => $object_access_id,
         'collection' => $collection_id,
       ))->execute();
+    }
+  }
+
+  /**
+   * Track the top used search terms.
+   *
+   * @param string $term
+   *   The search text to track.
+   */
+  public static function trackSearchTerm($term) {
+    module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+    $term = strtolower($term);
+    $result = islandora_usage_stats_get_search_term($term);
+    if ($result) {
+      // Term is found, increment by one.
+      islandora_usage_stats_increment_search_term($result['id']);
+    }
+    else {
+      islandora_usage_stats_set_search_term($term);
     }
   }
 

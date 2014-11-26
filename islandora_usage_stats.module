@@ -20,6 +20,12 @@ function islandora_usage_stats_block_info() {
   $blocks['recent_activity'] = array(
     'info' => t('Recently accessed Islandora Items'),
   );
+  $blocks['top_search'] = array(
+    'info' => t('Most Searched Terms'),
+  );
+  $blocks['top_downloads'] = array(
+    'info' => t('Recently downloaded items'),
+  );
 
   return $blocks;
 }
@@ -78,6 +84,31 @@ function islandora_usage_stats_block_configure($delta) {
         );
       }
       break;
+
+    case 'top_downloads':
+      if (user_access('manage usage stats')) {
+        $form['islandora_usage_stats_top_downloads_block_display_rows'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Configure Number of Rows to Display'),
+          '#size' => 5,
+          '#description' => t('Enter the number of rows to display in the block.'),
+          '#default_value' => variable_get('islandora_usage_stats_top_downloads_block_display_rows', 5),
+        );
+      }
+      break;
+
+    case 'top_search':
+      if (user_access('manage usage stats')) {
+        $form['islandora_usage_stats_top_search_block_display_rows'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Configure Number of Rows to Display'),
+          '#size' => 5,
+          '#description' => t('Enter the number of rows to display in the block.'),
+          '#default_value' => variable_get('islandora_usage_stats_top_search_block_display_rows', 5),
+        );
+      }
+      break;
+
   }
 
   return $form;
@@ -97,6 +128,14 @@ function islandora_usage_stats_block_save($delta = '', $edit = array()) {
       variable_set('islandora_usage_stats_recent_activity_block_display_rows', (int) $edit['islandora_usage_stats_recent_activity_block_display_rows']);
       variable_set('islandora_usage_stats_recent_activity_block_exclusion_list', $edit['islandora_usage_stats_recent_activity_block_exclusion_list']);
       break;
+
+    case 'top_downloads':
+      variable_set('islandora_usage_stats_top_downloads_block_display_rows', (int) $edit['islandora_usage_stats_top_downloads_block_display_rows']);
+      break;
+
+    case 'top_search':
+      variable_set('islandora_usage_stats_top_search_block_display_rows', (int) $edit['islandora_usage_stats_top_search_block_display_rows']);
+      break;
   }
 }
 
@@ -104,6 +143,7 @@ function islandora_usage_stats_block_save($delta = '', $edit = array()) {
  * Implements hook_block_view().
  */
 function islandora_usage_stats_block_view($delta = '') {
+  $block = array();
   switch ($delta) {
     case 'top_usage':
       if (user_access('view usage stats block')) {
@@ -122,10 +162,10 @@ function islandora_usage_stats_block_view($delta = '') {
         foreach ($result as $row) {
           // @XXX This object load can fail perms, or not exist.
           $object = islandora_object_load($row->pid);
-          $view_suffix = ((int)$row->views > 1) ? 'views' : 'view';
+          $view_suffix = ((int) $row->views > 1) ? 'views' : 'view';
           $viewcount = "$row->views $view_suffix";
           $items[] = array(
-            'data' => l($object->label, 'islandora/object/' . urlencode($row->pid)) . " <span class='label label-default'>". $viewcount . '</span>',
+            'data' => l($object->label, 'islandora/object/' . urlencode($row->pid)) . " <span class='label label-default'>" . $viewcount . '</span>',
             'class' => array('list-group-item'),
           );
         }
@@ -138,10 +178,11 @@ function islandora_usage_stats_block_view($delta = '') {
                 'attributes' => array('class' => array('list-group')),
               )
             ),
-          )
+          ),
         );
       }
       break;
+
     case 'recent_activity':
       if (user_access('view usage stats block')) {
         module_load_include('inc', 'islandora_usage_stats', 'includes/db');
@@ -156,12 +197,14 @@ function islandora_usage_stats_block_view($delta = '') {
         foreach ($result as $pid) {
           // @XXX This object load can fail perms, or not exist.
           $object = islandora_object_load($pid);
-          $items[] = array(
-            'data' => l($object->label, 'islandora/object/' . urlencode($pid)),
-            'class' => array(
-              'list-group-item',
-            )
-          );
+          if ($object) {
+            $items[] = array(
+              'data' => l($object->label, 'islandora/object/' . urlencode($pid)),
+              'class' => array(
+                'list-group-item',
+              ),
+            );
+          }
         }
         return array(
           'content' => array(
@@ -176,15 +219,79 @@ function islandora_usage_stats_block_view($delta = '') {
                 ),
               )
             ),
-          )
+          ),
         );
       }
       break;
+
+    case 'top_downloads':
+      if (user_access('view usage stats block')) {
+        module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+        $result = islandora_usage_stats_get_top_downloads(
+          variable_get('islandora_usage_stats_top_downloads_block_display_rows', 5)
+        );
+        $items = array();
+        foreach ($result as $pid) {
+          // @XXX This object load can fail perms, or not exist.
+          $object = islandora_object_load($pid);
+          $items[] = array(
+            'data' => l($object->label, 'islandora/object/' . urlencode($pid)),
+            'class' => array(
+              'list-group-item',
+            ),
+          );
+        }
+        return array(
+          'content' => array(
+            '#markup' => theme('item_list', array(
+              'items' => $items,
+              'attributes' => array(
+                'class' => array(
+                  'list-group',
+                ),
+              ),
+            )),
+          ),
+        );
+      }
+      break;
+
+    case 'top_search':
+      if (user_access('view usage stats block')) {
+        module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+        $results = islandora_usage_stats_get_top_searched(
+          variable_get('islandora_usage_stats_top_search_block_display_rows', 5));
+        $items = array();
+        foreach ($results as $result) {
+          $term = $result->term;
+          $options = array('query' => array('type' => 'dismax'));
+          $items[] = array(
+            'data' => l($result->term, "islandora/search/$term", $options),
+            'class' => array(
+              'list-group-item',
+            ),
+          );
+        }
+        return array(
+          'content' => array(
+            '#markup' => theme('item_list', array(
+              'items' => $items,
+              'attributes' => array(
+                'class' => array(
+                  'list-group',
+                ),
+              ),
+            )),
+          ),
+        );
+      }
+      break;
+
   }
 }
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function islandora_usage_stats_menu() {
   $items = array();
@@ -305,7 +412,9 @@ function islandora_usage_stats_islandora_datastream_download($object_array) {
 }
 
 /**
- * Returns the system MIME type mapping of MIME types to extensions, as defined in /etc/mime.types
+ * Returns the system MIME type mapping of MIME types to extensions.
+ *
+ *  MIME types extensions as defined in /etc/mime.types
  * (considering the first extension listed to be canonical).
  */
 function system_mime_type_extensions() {
@@ -330,12 +439,16 @@ function system_mime_type_extensions() {
 }
 
 /**
- * Returns the canonical file extension for the MIME type specified, as defined in /etc/mime.types
+ * Returns the canonical file extension for the MIME type specified.
+ *
+ * MIME type specified as defined in /etc/mime.types
  * (considering the first extension listed to be canonical).
  *
  * @param string $type
  *   The MIME type
- * @return Ambigous <NULL, unknown>
+ *
+ * @return Ambigous
+ *   <NULL, unknown> MIME type extensions result.
  */
 function system_mime_type_extension($type) {
   static $exts;
@@ -423,4 +536,20 @@ function islandora_usage_stats_islandora_object_alter(AbstractObject $object, &$
   if (isset($context['params']['label'])) {
     islandora_usage_stats_update_object_label($object->id, $context['params']['label']);
   }
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function islandora_usage_stats_menu_alter(&$items) {
+  $path = "/includes/callbacks.inc";
+  $items['islandora/search']['page callback'] = 'islandora_usage_stats_track_search_results';
+  $items['islandora/search']['file'] = $path;
+  $items['islandora/search']['module'] = "islandora_usage_stats";
+  $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['page callback']
+    = 'islandora_usage_stats_track_downloads';
+  $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['file']
+    = $path;
+  $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['module']
+    = "islandora_usage_stats";
 }
