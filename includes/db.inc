@@ -144,7 +144,7 @@ function islandora_usage_stats_increment_top_object_ds_download_counter($time, $
         ':downloads' => 1,
       )
     )
-    ->expression('time', REQUEST_TIME)
+    ->expression('time', $time)
     ->condition('pid_id', $pid_id)
     ->condition('ds_id', $dsid)
     ->execute();
