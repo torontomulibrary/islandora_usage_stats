@@ -8,5 +8,6 @@ dependencies[] = islandora
 dependencies[] = views
 dependencies[] = datepicker_views
 dependencies[] = views_autocomplete_filters
+dependencies[] = views_data_export
 dependencies[] = islandora_basic_collection
 configure = admin/islandora/tools/islandora_usage_stats
