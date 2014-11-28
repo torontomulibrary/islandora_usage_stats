@@ -234,5 +234,5 @@ function islandora_usage_stats_views_default_views() {
     t('Attachment'),
   );
 
-  return array($view);
+  return array('islandora_usage_stats_report' => $view);
 }
