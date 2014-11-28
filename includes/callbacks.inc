@@ -10,9 +10,11 @@
  * @param string $term
  *   The search term to track.
  */
-function islandora_usage_stats_track_search_results($term) {
+function islandora_usage_stats_track_search_results($term = NULL) {
   module_load_include('module', 'islandora_solr', "islandora_solr");
-  IslandoraUsageStats::trackSearchTerm($term);
+  if(!empty($term)) {
+    IslandoraUsageStats::trackSearchTerm($term);
+  }
   $output = islandora_solr($term);
   return $output;
 }
