@@ -28,6 +28,7 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['exposed_form']['options']['reset_button'] = TRUE;
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = '10';
   $handler->display->display_options['style_plugin'] = 'responsive_grid';
@@ -203,6 +204,48 @@ function islandora_usage_stats_views_default_views() {
   );
   $handler->display->display_options['attachment_position'] = 'after';
   $handler->display->display_options['inherit_exposed_filters'] = TRUE;
+
+  /* Display: Data export */
+  $handler = $view->new_display('views_data_export', 'Data export', 'views_data_export_1');
+  $handler->display->display_options['pager']['type'] = 'some';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '0';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['style_plugin'] = 'views_data_export_csv';
+  $handler->display->display_options['style_options']['provide_file'] = 0;
+  $handler->display->display_options['style_options']['parent_sort'] = 0;
+  $handler->display->display_options['style_options']['quote'] = 1;
+  $handler->display->display_options['style_options']['trim'] = 0;
+  $handler->display->display_options['style_options']['replace_newlines'] = 0;
+  $handler->display->display_options['style_options']['header'] = 1;
+  $handler->display->display_options['style_options']['keep_html'] = 0;
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Islandora Usage Stats: Label */
+  $handler->display->display_options['fields']['label']['id'] = 'label';
+  $handler->display->display_options['fields']['label']['table'] = 'islandora_usage_stats_objects';
+  $handler->display->display_options['fields']['label']['field'] = 'label';
+  $handler->display->display_options['fields']['label']['relationship'] = 'pid_id';
+  $handler->display->display_options['fields']['label']['label'] = 'Object';
+  $handler->display->display_options['fields']['label']['element_label_colon'] = FALSE;
+  /* Field: COUNT(Islandora Usage Stats: PID ID) */
+  $handler->display->display_options['fields']['pid_id']['id'] = 'pid_id';
+  $handler->display->display_options['fields']['pid_id']['table'] = 'islandora_usage_stats_object_access_log';
+  $handler->display->display_options['fields']['pid_id']['field'] = 'pid_id';
+  $handler->display->display_options['fields']['pid_id']['group_type'] = 'count';
+  $handler->display->display_options['fields']['pid_id']['label'] = 'Page Views';
+  $handler->display->display_options['fields']['pid_id']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['pid_id']['separator'] = '';
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: COUNT(Islandora Usage Stats: PID ID) */
+  $handler->display->display_options['sorts']['pid_id']['id'] = 'pid_id';
+  $handler->display->display_options['sorts']['pid_id']['table'] = 'islandora_usage_stats_object_access_log';
+  $handler->display->display_options['sorts']['pid_id']['field'] = 'pid_id';
+  $handler->display->display_options['sorts']['pid_id']['group_type'] = 'count';
+  $handler->display->display_options['sorts']['pid_id']['order'] = 'DESC';
+  $handler->display->display_options['path'] = 'admin/reports/islandora_usage_stats_report/export';
+  $handler->display->display_options['displays'] = array(
+    'page' => 'page',
+    'default' => 0,
+  );
   $translatables['islandora_usage_stats_report'] = array(
     t('Master'),
     t('Islandora Usage Stats Report'),
@@ -232,6 +275,7 @@ function islandora_usage_stats_views_default_views() {
     t('Collection Title'),
     t('Time Period'),
     t('Attachment'),
+    t('Data export'),
   );
 
   return array('islandora_usage_stats_report' => $view);
