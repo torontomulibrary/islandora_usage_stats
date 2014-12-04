@@ -370,6 +370,7 @@ function islandora_usage_stats_download_ds_form($pid, $dsid) {
 
   $extension = system_mime_type_extension($mime_type);
 
+  $file = '';
   $file = $datastream->getContent($file);
 
   $ds_name = $datastream->id;
