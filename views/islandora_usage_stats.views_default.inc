@@ -100,6 +100,7 @@ function islandora_usage_stats_views_default_views() {
     'label' => 'label',
     'label_2' => 'label_2',
     'id' => 'id',
+    'pid' => 'pid',
   );
   $handler->display->display_options['style_options']['default'] = 'id';
   $handler->display->display_options['style_options']['info'] = array(
@@ -124,6 +125,13 @@ function islandora_usage_stats_views_default_views() {
       'separator' => '',
       'empty_column' => 0,
     ),
+    'pid' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
   );
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
@@ -135,6 +143,13 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['fields']['label']['field'] = 'label';
   $handler->display->display_options['fields']['label']['relationship'] = 'pid_id';
   $handler->display->display_options['fields']['label']['label'] = 'Object';
+  /* Field: Islandora Usage Stats: PID */
+  $handler->display->display_options['fields']['pid']['id'] = 'pid';
+  $handler->display->display_options['fields']['pid']['table'] = 'islandora_usage_stats_objects';
+  $handler->display->display_options['fields']['pid']['field'] = 'pid';
+  $handler->display->display_options['fields']['pid']['relationship'] = 'pid_id';
+  $handler->display->display_options['fields']['pid']['alter']['make_link'] = TRUE;
+  $handler->display->display_options['fields']['pid']['alter']['path'] = 'islandora/object/[pid]';
   /* Field: COUNT(Islandora Usage Stats: Label) */
   $handler->display->display_options['fields']['label_2']['id'] = 'label_2';
   $handler->display->display_options['fields']['label_2']['table'] = 'islandora_usage_stats_objects';
@@ -234,6 +249,11 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['fields']['label']['relationship'] = 'pid_id';
   $handler->display->display_options['fields']['label']['label'] = 'Object';
   $handler->display->display_options['fields']['label']['element_label_colon'] = FALSE;
+  /* Field: Islandora Usage Stats: PID */
+  $handler->display->display_options['fields']['pid']['id'] = 'pid';
+  $handler->display->display_options['fields']['pid']['table'] = 'islandora_usage_stats_objects';
+  $handler->display->display_options['fields']['pid']['field'] = 'pid';
+  $handler->display->display_options['fields']['pid']['relationship'] = 'pid_id';
   /* Field: COUNT(DISTINCT Islandora Usage Stats: Log ID) */
   $handler->display->display_options['fields']['id']['id'] = 'id';
   $handler->display->display_options['fields']['id']['table'] = 'islandora_usage_stats_object_access_log';
@@ -277,6 +297,7 @@ function islandora_usage_stats_views_default_views() {
     t('Label'),
     t('Time'),
     t('Page'),
+    t('PID'),
     t('Page Views'),
     t('Collection Title'),
     t('Time Period'),
