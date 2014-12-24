@@ -12,7 +12,7 @@
  */
 function islandora_usage_stats_track_search_results($term = NULL) {
   module_load_include('module', 'islandora_solr', "islandora_solr");
-  if(!empty($term)) {
+  if (!empty($term)) {
     IslandoraUsageStats::trackSearchTerm($term);
   }
   $output = islandora_solr($term);
