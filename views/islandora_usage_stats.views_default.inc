@@ -28,13 +28,12 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
-  $handler->display->display_options['exposed_form']['options']['reset_button'] = TRUE;
+  $handler->display->display_options['exposed_form']['options']['expose_sort_order'] = FALSE;
   $handler->display->display_options['pager']['type'] = 'full';
-  $handler->display->display_options['pager']['options']['items_per_page'] = '10';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['style_plugin'] = 'responsive_grid';
-  $handler->display->display_options['style_options']['columns'] = '2';
-  $handler->display->display_options['style_options']['alignment'] = 'vertical';
   $handler->display->display_options['row_plugin'] = 'fields';
+  $handler->display->display_options['row_options']['hide_empty'] = TRUE;
   /* Relationship: Islandora Usage Stats: Collection */
   $handler->display->display_options['relationships']['id']['id'] = 'id';
   $handler->display->display_options['relationships']['id']['table'] = 'islandora_usage_stats_object_access_log';
@@ -48,52 +47,32 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['relationships']['collection']['table'] = 'islandora_usage_stats_collection_access_log';
   $handler->display->display_options['relationships']['collection']['field'] = 'collection';
   $handler->display->display_options['relationships']['collection']['relationship'] = 'id';
-  /* Field: COUNT(DISTINCT Islandora Usage Stats: Log ID) */
+  /* Field: COUNT(Islandora Usage Stats: Log ID) */
   $handler->display->display_options['fields']['id']['id'] = 'id';
   $handler->display->display_options['fields']['id']['table'] = 'islandora_usage_stats_object_access_log';
   $handler->display->display_options['fields']['id']['field'] = 'id';
-  $handler->display->display_options['fields']['id']['group_type'] = 'count_distinct';
+  $handler->display->display_options['fields']['id']['group_type'] = 'count';
   $handler->display->display_options['fields']['id']['label'] = 'Total';
-  /* Filter criterion: Islandora Usage Stats: Label */
-  $handler->display->display_options['filters']['label']['id'] = 'label';
-  $handler->display->display_options['filters']['label']['table'] = 'islandora_usage_stats_objects';
-  $handler->display->display_options['filters']['label']['field'] = 'label';
-  $handler->display->display_options['filters']['label']['relationship'] = 'collection';
-  $handler->display->display_options['filters']['label']['operator'] = 'contains';
-  $handler->display->display_options['filters']['label']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['label']['expose']['operator_id'] = 'label_op';
-  $handler->display->display_options['filters']['label']['expose']['label'] = 'Label';
-  $handler->display->display_options['filters']['label']['expose']['use_operator'] = TRUE;
-  $handler->display->display_options['filters']['label']['expose']['operator'] = 'label_op';
-  $handler->display->display_options['filters']['label']['expose']['identifier'] = 'label';
-  $handler->display->display_options['filters']['label']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    3 => 0,
-  );
-  /* Filter criterion: Islandora Usage Stats: Time */
-  $handler->display->display_options['filters']['time']['id'] = 'time';
-  $handler->display->display_options['filters']['time']['table'] = 'islandora_usage_stats_object_access_log';
-  $handler->display->display_options['filters']['time']['field'] = 'time';
-  $handler->display->display_options['filters']['time']['operator'] = 'between';
-  $handler->display->display_options['filters']['time']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['time']['expose']['operator_id'] = 'time_op';
-  $handler->display->display_options['filters']['time']['expose']['label'] = 'Time';
-  $handler->display->display_options['filters']['time']['expose']['use_operator'] = TRUE;
-  $handler->display->display_options['filters']['time']['expose']['operator'] = 'time_op';
-  $handler->display->display_options['filters']['time']['expose']['identifier'] = 'time';
-  $handler->display->display_options['filters']['time']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    3 => 0,
-  );
-  $handler->display->display_options['filters']['time']['form_type'] = 'date_popup';
-  $handler->display->display_options['filters']['time']['date_fields'] = array(
-    'islandora_usage_stats_object_access_log.time' => 'islandora_usage_stats_object_access_log.time',
-  );
+  $handler->display->display_options['fields']['id']['element_default_classes'] = FALSE;
+  /* Field: Islandora Usage Stats: Label */
+  $handler->display->display_options['fields']['label']['id'] = 'label';
+  $handler->display->display_options['fields']['label']['table'] = 'islandora_usage_stats_objects';
+  $handler->display->display_options['fields']['label']['field'] = 'label';
+  $handler->display->display_options['fields']['label']['relationship'] = 'collection';
+  $handler->display->display_options['fields']['label']['label'] = 'Collection Title';
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
+  $handler->display->display_options['defaults']['exposed_form'] = FALSE;
+  $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['exposed_form']['options']['reset_button'] = TRUE;
+  $handler->display->display_options['exposed_form']['options']['expose_sort_order'] = FALSE;
+  $handler->display->display_options['defaults']['pager'] = FALSE;
+  $handler->display->display_options['pager']['type'] = 'full';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '15';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['pager']['options']['id'] = '0';
+  $handler->display->display_options['pager']['options']['quantity'] = '9';
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
   $handler->display->display_options['style_plugin'] = 'table';
   $handler->display->display_options['style_options']['columns'] = array(
@@ -156,12 +135,6 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['fields']['id']['field'] = 'id';
   $handler->display->display_options['fields']['id']['group_type'] = 'count_distinct';
   $handler->display->display_options['fields']['id']['label'] = 'Page Views';
-  /* Field: Islandora Usage Stats: Label */
-  $handler->display->display_options['fields']['label_1']['id'] = 'label_1';
-  $handler->display->display_options['fields']['label_1']['table'] = 'islandora_usage_stats_objects';
-  $handler->display->display_options['fields']['label_1']['field'] = 'label';
-  $handler->display->display_options['fields']['label_1']['relationship'] = 'collection';
-  $handler->display->display_options['fields']['label_1']['exclude'] = TRUE;
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Islandora Usage Stats: Label */
@@ -185,7 +158,7 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['filters']['label']['expose']['autocomplete_filter'] = 1;
   $handler->display->display_options['filters']['label']['expose']['autocomplete_items'] = '10';
   $handler->display->display_options['filters']['label']['expose']['autocomplete_min_chars'] = '0';
-  $handler->display->display_options['filters']['label']['expose']['autocomplete_field'] = 'label_1';
+  $handler->display->display_options['filters']['label']['expose']['autocomplete_field'] = 'label';
   $handler->display->display_options['filters']['label']['expose']['autocomplete_raw_suggestion'] = 1;
   $handler->display->display_options['filters']['label']['expose']['autocomplete_raw_dropdown'] = 1;
   $handler->display->display_options['filters']['label']['expose']['autocomplete_dependent'] = 0;
@@ -222,6 +195,13 @@ function islandora_usage_stats_views_default_views() {
   /* Display: Attachment */
   $handler = $view->new_display('attachment', 'Attachment', 'attachment_1');
   $handler->display->display_options['pager']['type'] = 'some';
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: COUNT(DISTINCT Islandora Usage Stats: Log ID) */
+  $handler->display->display_options['fields']['id']['id'] = 'id';
+  $handler->display->display_options['fields']['id']['table'] = 'islandora_usage_stats_object_access_log';
+  $handler->display->display_options['fields']['id']['field'] = 'id';
+  $handler->display->display_options['fields']['id']['group_type'] = 'count_distinct';
+  $handler->display->display_options['fields']['id']['label'] = 'Total';
   $handler->display->display_options['displays'] = array(
     'page' => 'page',
     'default' => 0,
@@ -295,12 +275,10 @@ function islandora_usage_stats_views_default_views() {
     t('Total'),
     t('.'),
     t(','),
-    t('Label'),
-    t('Time'),
+    t('Collection Title'),
     t('Page'),
     t('PID'),
     t('Page Views'),
-    t('Collection Title'),
     t('Time Period'),
     t('Attachment'),
     t('Data export'),
