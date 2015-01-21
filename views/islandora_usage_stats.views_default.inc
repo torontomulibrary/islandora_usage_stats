@@ -174,6 +174,53 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['fields']['id']['field'] = 'id';
   $handler->display->display_options['fields']['id']['group_type'] = 'count_distinct';
   $handler->display->display_options['fields']['id']['label'] = 'Page Views';
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Islandora Usage Stats: Label */
+  $handler->display->display_options['filters']['label']['id'] = 'label';
+  $handler->display->display_options['filters']['label']['table'] = 'islandora_usage_stats_objects';
+  $handler->display->display_options['filters']['label']['field'] = 'label';
+  $handler->display->display_options['filters']['label']['relationship'] = 'collection';
+  $handler->display->display_options['filters']['label']['operator'] = 'contains';
+  $handler->display->display_options['filters']['label']['group'] = 1;
+  $handler->display->display_options['filters']['label']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['label']['expose']['operator_id'] = 'label_op';
+  $handler->display->display_options['filters']['label']['expose']['label'] = 'Collection Title';
+  $handler->display->display_options['filters']['label']['expose']['use_operator'] = TRUE;
+  $handler->display->display_options['filters']['label']['expose']['operator'] = 'label_op';
+  $handler->display->display_options['filters']['label']['expose']['identifier'] = 'label';
+  $handler->display->display_options['filters']['label']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    3 => 0,
+  );
+  $handler->display->display_options['filters']['label']['expose']['autocomplete_filter'] = 1;
+  $handler->display->display_options['filters']['label']['expose']['autocomplete_items'] = '10';
+  $handler->display->display_options['filters']['label']['expose']['autocomplete_min_chars'] = '0';
+  $handler->display->display_options['filters']['label']['expose']['autocomplete_field'] = 'label';
+  $handler->display->display_options['filters']['label']['expose']['autocomplete_raw_suggestion'] = 1;
+  $handler->display->display_options['filters']['label']['expose']['autocomplete_raw_dropdown'] = 1;
+  $handler->display->display_options['filters']['label']['expose']['autocomplete_dependent'] = 0;
+  /* Filter criterion: Islandora Usage Stats: Time */
+  $handler->display->display_options['filters']['time']['id'] = 'time';
+  $handler->display->display_options['filters']['time']['table'] = 'islandora_usage_stats_object_access_log';
+  $handler->display->display_options['filters']['time']['field'] = 'time';
+  $handler->display->display_options['filters']['time']['operator'] = 'between';
+  $handler->display->display_options['filters']['time']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['time']['expose']['operator_id'] = 'time_op';
+  $handler->display->display_options['filters']['time']['expose']['label'] = 'Time Period';
+  $handler->display->display_options['filters']['time']['expose']['use_operator'] = TRUE;
+  $handler->display->display_options['filters']['time']['expose']['operator'] = 'time_op';
+  $handler->display->display_options['filters']['time']['expose']['identifier'] = 'time';
+  $handler->display->display_options['filters']['time']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    3 => 0,
+  );
+  $handler->display->display_options['filters']['time']['form_type'] = 'date_popup';
+  $handler->display->display_options['filters']['time']['date_fields'] = array(
+    'islandora_usage_stats_object_access_log.time' => 'islandora_usage_stats_object_access_log.time',
+  );
   $handler->display->display_options['path'] = 'admin/reports/islandora_usage_stats_report';
   $handler->display->display_options['menu']['type'] = 'normal';
   $handler->display->display_options['menu']['title'] = 'Islandora Usage Stats';
@@ -326,6 +373,7 @@ function islandora_usage_stats_views_default_views() {
     t('Page'),
     t('PID'),
     t('Page Views'),
+    t('Time Period'),
     t('Data export'),
     t('Attachment'),
     t('Label'),
