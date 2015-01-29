@@ -228,7 +228,9 @@ function islandora_usage_stats_block_view($delta = '') {
       if (user_access('view usage stats block')) {
         module_load_include('inc', 'islandora_usage_stats', 'includes/db');
         $max_results = variable_get('islandora_usage_stats_top_downloads_block_display_rows', 5);
-        $result = islandora_usage_stats_get_top_downloads();
+        // Assumption that we will only look at most at 20 objects to populate this block, as making more request than
+        // that to fedora will decrease performance to the point where it's not usable.
+        $result = islandora_usage_stats_get_top_downloads(20);
         $items = array();
         foreach ($result as $pid) {
           $object = islandora_object_load($pid);
