@@ -111,15 +111,19 @@ function islandora_usage_stats_update_object_label($pid, $label) {
  * @return array
  *   A list of PIDS.
  */
-function islandora_usage_stats_get_top_downloads($count) {
+function islandora_usage_stats_get_top_downloads($count = NULL) {
   $query = db_select('islandora_usage_stats_top_downloads', 'dl');
   $query->join('islandora_usage_stats_objects', 'objects', 'dl.pid_id = objects.id');
-  $query->join('islandora_usage_stats_datastreams', 'ds', 'dl.pid_id = ds.pid_id');
-  $results = $query->fields('objects', array('pid'))
-    ->fields('dl', array('ds_id'))
-    ->orderBy('dl.downloads', 'DESC')
-    ->range(0, $count)
-    ->execute();
+  $query->fields('objects', array('pid'));
+  // Since we are only returning PIDs and not the datastreams we must aggregate all the downloads for each PID
+  // across all datastreams.
+  $query->addExpression('SUM(dl.downloads)', 'total_downloads');
+  $query->groupBy('pid');
+  $query->orderBy('total_downloads', 'DESC');
+  if ($count !== NULL) {
+    $query = $query->range(0, $count);
+  }
+  $results = $query->execute();
   $records = $results->fetchAllAssoc('pid');
   return array_keys($records);
 }

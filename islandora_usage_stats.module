@@ -227,19 +227,23 @@ function islandora_usage_stats_block_view($delta = '') {
     case 'top_downloads':
       if (user_access('view usage stats block')) {
         module_load_include('inc', 'islandora_usage_stats', 'includes/db');
-        $result = islandora_usage_stats_get_top_downloads(
-          variable_get('islandora_usage_stats_top_downloads_block_display_rows', 5)
-        );
+        $max_results = variable_get('islandora_usage_stats_top_downloads_block_display_rows', 5);
+        $result = islandora_usage_stats_get_top_downloads();
         $items = array();
         foreach ($result as $pid) {
-          // @XXX This object load can fail perms, or not exist.
           $object = islandora_object_load($pid);
-          $items[] = array(
-            'data' => l($object->label, 'islandora/object/' . urlencode($pid)),
-            'class' => array(
-              'list-group-item',
-            ),
-          );
+          // Object can fail to load if so don't count it towards results.
+          if ($object) {
+            $items[] = array(
+              'data' => l($object->label, 'islandora/object/' . urlencode($pid)),
+              'class' => array(
+                'list-group-item',
+              ),
+            );
+            if (count($items) >= $max_results) {
+              break;
+            }
+          }
         }
         return array(
           'content' => array(
