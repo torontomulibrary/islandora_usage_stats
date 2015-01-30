@@ -115,8 +115,8 @@ function islandora_usage_stats_get_top_downloads($count) {
   $query = db_select('islandora_usage_stats_top_downloads', 'dl');
   $query->join('islandora_usage_stats_objects', 'objects', 'dl.pid_id = objects.id');
   $query->fields('objects', array('pid'));
-  // Since we are only returning PIDs and not the datastreams we must aggregate all the downloads for each PID
-  // across all datastreams.
+  // Since we are only returning PIDs and not the datastreams we must aggregate
+  // all the downloads for each PID across all datastreams.
   $query->addExpression('SUM(dl.downloads)', 'total_downloads');
   $query->groupBy('pid');
   $query->orderBy('total_downloads', 'DESC');

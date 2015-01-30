@@ -228,8 +228,9 @@ function islandora_usage_stats_block_view($delta = '') {
       if (user_access('view usage stats block')) {
         module_load_include('inc', 'islandora_usage_stats', 'includes/db');
         $max_results = variable_get('islandora_usage_stats_top_downloads_block_display_rows', 5);
-        // Assumption that we will only look at most at 20 objects to populate this block, as making more request than
-        // that to fedora will decrease performance to the point where it's not usable.
+        // Assumption that we will only look at most at 20 objects to populate
+        // this block, as making more request than that to fedora will
+        // decrease performance to the point where it's not usable.
         $result = islandora_usage_stats_get_top_downloads(20);
         $items = array();
         foreach ($result as $pid) {
@@ -363,15 +364,11 @@ function islandora_usage_stats_download_ds_form($pid, $dsid) {
   drupal_set_message(check_plain($sanitized_label));
 
   if (!$datastream) {
-    drupal_set_message(
-      t(
-        'Could not get datastream, id: @pid , dsid: @dsid',
-        array(
-          '@pid' => $pid,
-          '@dsid' => $dsid,
-        )
-      )
-    );
+    drupal_set_message(t('Could not get datastream, id: %pid, dsid: %dsid',
+      array(
+        '%pid' => $pid,
+        '%dsid' => $pid,
+      )));
     return;
   }
 
@@ -384,7 +381,6 @@ function islandora_usage_stats_download_ds_form($pid, $dsid) {
 
   $extension = system_mime_type_extension($mime_type);
 
-  $file = '';
   $file = $datastream->getContent($file);
 
   $ds_name = $datastream->id;
