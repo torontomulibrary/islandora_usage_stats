@@ -360,10 +360,18 @@ function islandora_usage_stats_download_ds_form($pid, $dsid) {
 
   $datastream = $object[$dsid];
 
-  drupal_set_message($sanitized_label);
+  drupal_set_message(check_plain($sanitized_label));
 
   if (!$datastream) {
-    drupal_set_message(t('Could not get datastream, id: ' . $pid . ' , dsid: ' . $dsid));
+    drupal_set_message(
+      t(
+        'Could not get datastream, id: @pid , dsid: @dsid',
+        array(
+          '@pid' => $pid,
+          '@dsid' => $dsid,
+        )
+      )
+    );
     return;
   }
 
@@ -376,6 +384,7 @@ function islandora_usage_stats_download_ds_form($pid, $dsid) {
 
   $extension = system_mime_type_extension($mime_type);
 
+  $file = '';
   $file = $datastream->getContent($file);
 
   $ds_name = $datastream->id;
@@ -392,7 +401,7 @@ function islandora_usage_stats_download_ds_form($pid, $dsid) {
     'ds_name' => $ds_name,
     'mime_type' => $mime_type,
     'extension' => $extension,
-    'tracking' => $result
+    'tracking' => $result,
   );
 
   // Create custom hook that other modules can implement.
@@ -503,8 +512,8 @@ function islandora_usage_stats_preprocess_islandora_pdf(&$variables) {
     $track = new IslandoraUsageStats($id);
     $variables['time_last_viewed'] = $track->getLastViewedTime();
 
-    $currentStats = $track->getViewCount();
-    $variables['times_viewed'] = $currentStats['views'];
+    $stats = $track->getViewCount();
+    $variables['times_viewed'] = $stats['views'];
 
     $downloaded = $track->getDownloads('OBJ');
 
@@ -512,7 +521,7 @@ function islandora_usage_stats_preprocess_islandora_pdf(&$variables) {
     $variables['time_last_downloaded'] = $downloaded['time'];
 
     $variables['islandora_download_link'] = l(
-      '<i class="glyphicon glyphicon-download"> ' . t('Download PDF') . '</i>',
+      t('<em class="glyphicon glyphicon-download">Download PDF</em>'),
       "download_ds/$id/OBJ/$label",
       array(
         'attributes' => array('class' => 'btn btn-primary'),
