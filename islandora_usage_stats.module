@@ -26,6 +26,9 @@ function islandora_usage_stats_block_info() {
   $blocks['top_downloads'] = array(
     'info' => t('Recently downloaded items'),
   );
+  $blocks['usage_stats'] = array(
+    'info' => t('Views Based on Collection'),
+  );
 
   return $blocks;
 }
