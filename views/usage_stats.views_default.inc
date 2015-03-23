@@ -1,9 +1,10 @@
 <?php
+$view = new view();
 $view->name = 'test';
 $view->description = 'Usage Stats for Collections';
 $view->tag = 'default';
 $view->base_table = 'islandora_usage_stats_object_access_log';
-$view->human_name = 'Usage Stats for Collections';
+$view->human_name = 'Islandora Usage Stats for Collections';
 $view->core = 7;
 $view->api_version = '3.0';
 $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
@@ -113,7 +114,7 @@ $handler->display->display_options['arguments']['pid']['summary_options']['items
 $handler->display->display_options['arguments']['pid']['limit'] = '0';
 
 /* Display: Block */
-$handler = $view->new_display('block', 'Block', 'block');
+$handler = $view->new_display('block', 'Block', 'usage_stats');
 $handler->display->display_options['block_description'] = 'Usage Stats for Collections';
 $translatables['test'] = array(
   t('Master'),
