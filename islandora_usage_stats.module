@@ -26,7 +26,7 @@ function islandora_usage_stats_block_info() {
   $blocks['top_downloads'] = array(
     'info' => t('Recently downloaded items'),
   );
-  $blocks['usage_stats'] = array(
+  $blocks['usage_collection'] = array(
     'info' => t('Views Based on Collection'),
   );
 
@@ -111,7 +111,12 @@ function islandora_usage_stats_block_configure($delta) {
         );
       }
       break;
-
+    case 'usage_collection':
+        $view = views_embed_view('usage_collection');
+        $form['islandora_manage_overview_object'] = array(
+          '#type' => 'item',
+          '#markup' => $view,
+        );
   }
 
   return $form;
