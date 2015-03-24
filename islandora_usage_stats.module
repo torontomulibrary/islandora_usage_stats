@@ -106,7 +106,7 @@ function islandora_usage_stats_block_configure($delta) {
           '#default_value' => variable_get('islandora_usage_stats_top_search_block_display_rows', 5),
         );
       }
-    break;
+      break;
   }
   return $form;
 }

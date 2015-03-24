@@ -340,7 +340,6 @@ function islandora_usage_stats_views_default_views() {
 
   $views['islandora_usage_stats_report'] = $view;
 
-
   $view = new view();
   $view->name = 'usage_collection';
   $view->description = 'Usage Stats for Collections';
