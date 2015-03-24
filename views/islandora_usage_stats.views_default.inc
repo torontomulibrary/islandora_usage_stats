@@ -359,54 +359,53 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
-  $handler->display->display_options['pager']['type'] = 'some';
-  $handler->display->display_options['pager']['options']['items_per_page'] = '5';
+  $handler->display->display_options['pager']['type'] = 'full';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '10';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['pager']['options']['id'] = '0';
+  $handler->display->display_options['pager']['options']['quantity'] = '9';
   $handler->display->display_options['style_plugin'] = 'table';
   $handler->display->display_options['style_options']['columns'] = array(
-    'id' => 'id',
-    'pid_id' => 'pid_id',
-    'id_1' => 'id_1',
-    'id_2' => 'id_2',
+    'label' => 'label',
     'pid' => 'pid',
+    'id' => 'id',
   );
-  $handler->display->display_options['style_options']['default'] = '-1';
+  $handler->display->display_options['style_options']['default'] = 'id';
   $handler->display->display_options['style_options']['info'] = array(
-    'id' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'pid_id' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'id_1' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'id_2' => array(
-      'sortable' => 0,
+    'label' => array(
+      'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
     'pid' => array(
-      'sortable' => 0,
+      'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
+    'id' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
   );
+  /* Header: Global: Result summary */
+  $handler->display->display_options['header']['result']['id'] = 'result';
+  $handler->display->display_options['header']['result']['table'] = 'views';
+  $handler->display->display_options['header']['result']['field'] = 'result';
+  $handler->display->display_options['header']['result']['empty'] = TRUE;
+  /* No results behavior: Global: Text area */
+  $handler->display->display_options['empty']['area']['id'] = 'area';
+  $handler->display->display_options['empty']['area']['table'] = 'views';
+  $handler->display->display_options['empty']['area']['field'] = 'area';
+  $handler->display->display_options['empty']['area']['empty'] = TRUE;
+  $handler->display->display_options['empty']['area']['content'] = 'No view counts found.';
+  $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
   /* Relationship: Islandora Usage Stats: Collection */
   $handler->display->display_options['relationships']['id']['id'] = 'id';
   $handler->display->display_options['relationships']['id']['table'] = 'islandora_usage_stats_object_access_log';
@@ -435,12 +434,15 @@ function islandora_usage_stats_views_default_views() {
   $handler->display->display_options['fields']['pid']['table'] = 'islandora_usage_stats_objects';
   $handler->display->display_options['fields']['pid']['field'] = 'pid';
   $handler->display->display_options['fields']['pid']['relationship'] = 'pid_id';
+  $handler->display->display_options['fields']['pid']['alter']['make_link'] = TRUE;
+  $handler->display->display_options['fields']['pid']['alter']['path'] = 'islandora/object/[pid]';
   $handler->display->display_options['fields']['pid']['element_label_colon'] = FALSE;
   /* Field: COUNT(DISTINCT Islandora Usage Stats: Log ID) */
   $handler->display->display_options['fields']['id']['id'] = 'id';
   $handler->display->display_options['fields']['id']['table'] = 'islandora_usage_stats_object_access_log';
   $handler->display->display_options['fields']['id']['field'] = 'id';
   $handler->display->display_options['fields']['id']['group_type'] = 'count_distinct';
+  $handler->display->display_options['fields']['id']['label'] = 'Page Views';
   /* Contextual filter: Islandora Usage Stats: PID */
   $handler->display->display_options['arguments']['pid']['id'] = 'pid';
   $handler->display->display_options['arguments']['pid']['table'] = 'islandora_usage_stats_objects';
@@ -457,7 +459,7 @@ function islandora_usage_stats_views_default_views() {
   /* Display: Block */
   $handler = $view->new_display('block', 'Block', 'usage_stats');
   $handler->display->display_options['block_description'] = 'Usage Stats for Collections';
-  $translatables['test'] = array(
+  $translatables['usage_collection'] = array(
     t('Master'),
     t('Usage Stats'),
     t('more'),
@@ -466,13 +468,22 @@ function islandora_usage_stats_views_default_views() {
     t('Sort by'),
     t('Asc'),
     t('Desc'),
+    t('Items per page'),
+    t('- All -'),
+    t('Offset'),
+    t('« first'),
+    t('‹ previous'),
+    t('next ›'),
+    t('last »'),
+    t('Displaying @start - @end of @total'),
+    t('No view counts found.'),
     t('Collection'),
     t('Object'),
     t('Collection Object'),
     t('Object Collection Access'),
     t('Label'),
     t('PID'),
-    t('Log ID'),
+    t('Page Views'),
     t('.'),
     t(','),
     t('All'),
