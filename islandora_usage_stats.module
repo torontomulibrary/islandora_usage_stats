@@ -563,10 +563,8 @@ function islandora_usage_stats_menu_alter(&$items) {
 }
 /**
  * Implements hook_islandora_overview_object_alter().
- *
  */
-function islandora_usage_stats_islandora_collectioncmodel_islandora_overview_object_alter(AbstractObject &$object, &$output) {
-  // The key here doesn't really matter... Should just try to make sure it's unique (module prefixing helps this).
+function islandora_usage_stats_collections_islandora_overview_object_alter(AbstractObject &$object, &$output) {
   $output['islandora_usage_stats_collection_stats'] = array(
     '#type' => 'item',
     '#markup' => views_embed_view('usage_collection'),
