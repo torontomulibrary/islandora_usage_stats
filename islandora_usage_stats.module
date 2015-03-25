@@ -26,7 +26,6 @@ function islandora_usage_stats_block_info() {
   $blocks['top_downloads'] = array(
     'info' => t('Recently downloaded items'),
   );
-
   return $blocks;
 }
 
@@ -108,9 +107,7 @@ function islandora_usage_stats_block_configure($delta) {
         );
       }
       break;
-
   }
-
   return $form;
 }
 
@@ -563,4 +560,13 @@ function islandora_usage_stats_menu_alter(&$items) {
     = $path;
   $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['module']
     = "islandora_usage_stats";
+}
+/**
+ * Implements hook_islandora_overview_object_alter().
+ */
+function islandora_usage_stats_islandora_collectioncmodel_islandora_overview_object_alter(AbstractObject &$object, &$output) {
+  $output['islandora_usage_stats_collection_stats'] = array(
+    '#type' => 'item',
+    '#markup' => views_embed_view('usage_collection'),
+  );
 }
