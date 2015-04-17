@@ -145,6 +145,7 @@ class IslandoraUsageStats {
         if (($last_viewed_time + $cooldown_time) < REQUEST_TIME) {
           $result = $this->increaseTopObjectDSDownloadCounter($dsid);
           if ($logging) {
+            $this->logObjectDownload($dsid);
             $this->updateLastViewTimeForVisitor();
           }
         }
@@ -351,7 +352,7 @@ class IslandoraUsageStats {
         'time' => REQUEST_TIME,
         'ip' => $ip,
         'dsid' => $dsid,
-        'user' => ($user == NULL) ? $user->name : 'Anonymous',
+        'user' => ($user->uid) ? $user->name : variable_get('anonymous', t('Anonymous')),
     ))->execute();
 
     return $result;
