@@ -31,28 +31,15 @@ function islandora_usage_stats_admin_settings() {
 
   $form['usage']['islandora_usage_stats_cooldown_seconds'] = array(
     '#type' => 'textfield',
-    '#title' => 'Cooldown time (in seconds)',
+    '#title' => t('Cooldown time'),
     '#description' => t('The number of seconds to wait before counting a repeated view request from the same IP'),
     '#default_value' => variable_get('islandora_usage_stats_cooldown_seconds', '300'),
-  );
-  $form['usage']['islandora_usage_stats_alter_pdf_display'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Alter PDF Display'),
-    '#description' => t('Whether or not to alter the PDF display to include usage stats.'),
-    '#default_value' => variable_get('islandora_usage_stats_alter_pdf_display', FALSE),
-  );
-
-  $form['usage']['islandora_usage_stats_use_access_log'] = array(
-    '#type' => 'checkbox',
-    '#title' => 'Enable view and download log *REQUIRED FOR RECENT ACTIVITY BLOCK*',
-    '#description' => t('Keep a log of all object view/download activity'),
-    '#default_value' => variable_get('islandora_usage_stats_use_access_log', '1'),
   );
 
   $form['usage']['islandora_usage_stats_exclude_bots'] = array(
     '#type' => 'checkbox',
-    '#title' => 'Exclude common bots to avoid artifical view count inflation',
-    '#description' => t('Exclude bots who play nicely from view counts'),
+    '#title' => t('Exlude bots'),
+    '#description' => t('Exclude common bots to avoid artifical view count inflation.'),
     '#default_value' => variable_get('islandora_usage_stats_exclude_bots', '1'),
   );
 
@@ -69,13 +56,13 @@ function islandora_usage_stats_admin_settings() {
   $form['clear']['usage']['access_log']['clear_object_access_log_submit'] = array(
     '#type' => 'submit',
     '#name' => 'clearObjectAccessLogSubmit',
-    '#default_value' => t('Clear views access log'),
+    '#default_value' => t('Clear object views access log'),
   );
 
   $form['clear']['usage']['access_log']['clear_ds_access_log_submit'] = array(
     '#type' => 'submit',
     '#name' => 'clearDSAccessLogSubmit',
-    '#default_value' => t('Clear datastream download access log'),
+    '#default_value' => t('Clear datastream download log'),
   );
 
   $form['clear']['usage']['views'] = array(
@@ -92,13 +79,7 @@ function islandora_usage_stats_admin_settings() {
   $form['clear']['usage']['views']['clear_view_by_pid_submit'] = array(
     '#type' => 'submit',
     '#name' => 'clearViewByPIDSubmit',
-    '#default_value' => t('Clear object view count'),
-  );
-
-  $form['clear']['usage']['views']['clear_view_all'] = array(
-    '#type' => 'submit',
-    '#name' => 'clearViewAllSubmit',
-    '#default_value' => t('Clear all object view counts'),
+    '#default_value' => t('Clear object view log'),
   );
 
   $form['clear']['usage']['ds'] = array(
@@ -115,13 +96,7 @@ function islandora_usage_stats_admin_settings() {
   $form['clear']['usage']['ds']['clear_ds_by_pid_submit'] = array(
     '#type' => 'submit',
     '#name' => 'clearDSByPIDSubmit',
-    '#default_value' => t('Clear datastream download count'),
-  );
-
-  $form['clear']['usage']['ds']['clear_ds_all'] = array(
-    '#type' => 'submit',
-    '#name' => 'clearDSAllSubmit',
-    '#default_value' => t('Clear all datastream download counts'),
+    '#default_value' => t('Clear datastream download log'),
   );
 
   return system_settings_form($form);
@@ -150,35 +125,21 @@ function islandora_usage_stats_admin_settings_validate($form, &$form_state) {
 
     case 'edit-clear-view-by-pid-submit':
       $pid = $form_state['values']['clear_view_by_pid'];
-      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_views', $pid);
+      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_access_log', $pid);
       if ($result) {
         drupal_set_message(
-          t("Page tracking for PID '@pid' deleted!", array('@pid' => $pid))
+          t("Object tracking for PID '@pid' deleted!", array('@pid' => $pid))
         );
-      }
-      break;
-
-    case 'edit-clear-view-all':
-      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_views');
-      if ($result) {
-        drupal_set_message(t('All page tracking deleted!'));
       }
       break;
 
     case 'edit-clear-ds-by-pid-submit':
       $pid = $form_state['values']['clear_ds_by_pid'];
-      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_ds_downloads', $pid);
+      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_ds_access_log', $pid);
       if ($result) {
         drupal_set_message(
           t("Datastream tracking for PID '@pid' deleted!", array('@pid' => $pid))
         );
-      }
-      break;
-
-    case 'edit-clear-ds-all':
-      $result = islandora_usage_stats_clear_tracking('islandora_usage_stats_object_ds_downloads');
-      if ($result) {
-        drupal_set_message(t('All datastream tracking deleted!'));
       }
       break;
   }
