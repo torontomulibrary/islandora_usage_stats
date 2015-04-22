@@ -38,7 +38,7 @@ function islandora_usage_stats_admin_settings() {
 
   $form['usage']['islandora_usage_stats_exclude_bots'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Exlude bots'),
+    '#title' => t('Exclude bots'),
     '#description' => t('Exclude common bots to avoid artifical view count inflation.'),
     '#default_value' => variable_get('islandora_usage_stats_exclude_bots', '1'),
   );
