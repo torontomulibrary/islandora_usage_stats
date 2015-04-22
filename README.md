@@ -33,6 +33,7 @@ Configuration options available at `admin/islandora/tools/islandora_usage_stats`
 ## Notes
 
 * Does not respect XACML.
+* This is a server-side tracking solution, as such a caching layer could impact it.  If this is impacting you a [solution](https://github.com/discoverygarden/islandora_ga_reports) using JavaScript may work better.
 
 ## License
 
