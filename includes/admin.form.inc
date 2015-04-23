@@ -44,6 +44,12 @@ function islandora_usage_stats_admin_form() {
     '#default_value' => variable_get('islandora_usage_stats_exclude_bots', '1'),
   );
 
+  $form['usage']['save_configuration'] = array(
+    '#type' => 'submit',
+    '#name' => 'saveConfiguration',
+    '#default_value' => t('Save configuration'),
+  );
+
   $form['clear'] = array(
     '#type' => 'fieldset',
     '#title' => t('Clear values'),
@@ -167,5 +173,10 @@ function islandora_usage_stats_admin_form_submit($form, &$form_state) {
         );
       }
       break;
+    case 'edit-save-configuration':
+      drupal_set_message(
+        t("The configuration options have been saved.")
+      );
+    break;
   }
 }
