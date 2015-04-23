@@ -12,8 +12,6 @@ function islandora_usage_stats_uninstall() {
   $variables = array(
     'islandora_usage_stats_ip_list',
     'islandora_usage_stats_cooldown_seconds',
-    'islandora_usage_stats_use_access_log',
-    'islandora_usage_stats_alter_pdf_display',
     'islandora_usage_stats_exclude_bots',
     'islandora_usage_stats_top_downloads_block_display_rows',
     'islandora_usage_stats_top_search_block_display_rows',
@@ -23,30 +21,27 @@ function islandora_usage_stats_uninstall() {
 
 /**
  * Implements hook_schema().
- *
- * @todo Link to user table by UID don't make a foreign key.
- * @XXX Stats tables look redundant.
  */
 function islandora_usage_stats_schema() {
   $schema['islandora_usage_stats_datastreams'] = array(
-    'description' => 'Used to log top searches',
+    'description' => 'Contains datastream information.',
     'fields' => array(
       'id' => array(
         'type' => 'serial',
         'not null' => TRUE,
       ),
       'dsid' => array(
-        'description' => 'The datastream identifier',
+        'description' => 'The datastream identifier.',
         'type' => 'varchar',
         'length' => 255,
       ),
       'pid_id' => array(
-        'description' => 'The pid id forign relations',
+        'description' => 'The pid id foreign relations.',
         'type' => 'int',
         'not NULL' => TRUE,
       ),
       'ds_label' => array(
-        'description' => 'The datastream label',
+        'description' => 'The datastream label.',
         'type' => 'varchar',
         'length' => 255,
       ),
@@ -58,16 +53,19 @@ function islandora_usage_stats_schema() {
       ),
     ),
     'primary key' => array('id'),
+    'unique keys' => array(
+      'pid_dsid' => array('pid_id', 'dsid'),
+    ),
   );
   $schema['islandora_usage_stats_top_searches'] = array(
-    'description' => 'Used to log top searches',
+    'description' => 'Used to log top searches.',
     'fields' => array(
       'id' => array(
         'type' => 'serial',
         'not null' => TRUE,
       ),
       'term' => array(
-        'description' => 'Search term',
+        'description' => 'Search term.',
         'type' => 'varchar',
         'length' => 255,
       ),
@@ -78,134 +76,6 @@ function islandora_usage_stats_schema() {
       ),
     ),
     'primary key' => array('id'),
-  );
-  $schema['islandora_usage_stats_object_views'] = array(
-    'description' => 'This table is used to store view count information for fedora objects',
-    'fields' => array(
-      'id' => array(
-        'description' => 'Unique id for each row',
-        'type' => 'serial',
-        'not null' => TRUE,
-      ),
-      'pid_id' => array(
-        'description' => 'PID ID of the object.',
-        'type' => 'int',
-        'not null' => TRUE,
-      ),
-      'views' => array(
-        'description' => 'The number of views an object has received',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'time' => array(
-        'description' => 'The time in number of seconds of the last view of the object',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-    ),
-    'primary key' => array(
-      'id',
-    ),
-  );
-
-  $schema['islandora_usage_stats_object_ds_downloads'] = array(
-    'description' => 'This table is used to store datastream download count information for fedora objects',
-    'fields' => array(
-      'id' => array(
-        'description' => 'Unique id for each row',
-        'type' => 'serial',
-        'not null' => TRUE,
-      ),
-      'pid_id' => array(
-        'description' => 'PID ID of the object.',
-        'type' => 'int',
-        'not null' => TRUE,
-      ),
-      'dsid' => array(
-        'description' => 'Datastream ID of the object',
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-      ),
-      'downloads' => array(
-        'description' => 'The number of views an object has received',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'time' => array(
-        'description' => 'The time in number of seconds of the last download of the object',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-    ),
-    'primary key' => array(
-      'id',
-    ),
-    'indexes' => array(
-      'dsid' => array(
-        'dsid',
-      ),
-    ),
-  );
-
-  // This is nearly a straight copy of
-  // the 'islandora_usage_stats_object_ds_downloads' Table.
-  // done this way so that in the future both tables can be
-  // merged into one, Once we can be sure no strange use
-  // case would require both.
-  $schema['islandora_usage_stats_top_downloads'] = array(
-    'description' => 'This table is used to store datastream download count for all fedora objects',
-    'fields' => array(
-      'id' => array(
-        'description' => 'Unique id for each row',
-        'type' => 'serial',
-        'not null' => TRUE,
-      ),
-      'pid_id' => array(
-        'description' => 'PID ID of the object.',
-        'type' => 'int',
-        'not null' => TRUE,
-      ),
-      'ds_id' => array(
-        'description' => 'The ds relation to the datastreams table',
-        'type' => 'int',
-        'not null' => TRUE,
-      ),
-      'downloads' => array(
-        'description' => 'The number of views an object has received',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'time' => array(
-        'description' => 'The time in number of seconds of the last download of the object',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-    ),
-    'primary key' => array(
-      'id',
-    ),
-    'foreign keys' => array(
-      'ds_id' => array(
-        'table' => 'islandora_usage_stats_datastreams',
-        'columns' => array('ds_id' => 'id'),
-      ),
-      'pid_id' => array(
-        'table' => 'islandora_usage_stats_objects',
-        'columns' => array('pid_id' => 'id'),
-      ),
-    ),
-    'indexes' => array(
-      'ds_id' => array(
-        'ds_id',
-      ),
-    ),
   );
 
   $schema['islandora_usage_stats_object_access_log'] = array(
@@ -226,16 +96,16 @@ function islandora_usage_stats_schema() {
         'default' => 0,
       ),
       'ip' => array(
-        'description' => 'IP of user that accessed the object',
+        'description' => 'IP of user that accessed the object.',
         'type' => 'varchar',
         'length' => 64,
         'not null' => TRUE,
       ),
-      'user' => array(
-        'description' => 'Drupal user that accessed the object',
-        'type' => 'varchar',
-        'length' => 64,
+      'uid' => array(
+        'description' => 'Drupal user that accessed the object.',
+        'type' => 'int',
         'not null' => TRUE,
+        'default' => 0,
       ),
     ),
     'primary key' => array(
@@ -250,15 +120,9 @@ function islandora_usage_stats_schema() {
         'type' => 'serial',
         'not null' => TRUE,
       ),
-      'pid_id' => array(
-        'description' => 'PID ID of the object.',
+      'ds_id' => array(
+        'description' => 'Database datastream ID.',
         'type' => 'int',
-        'not null' => TRUE,
-      ),
-      'dsid' => array(
-        'description' => 'Datastream ID',
-        'type' => 'varchar',
-        'length' => 64,
         'not null' => TRUE,
       ),
       'time' => array(
@@ -267,27 +131,32 @@ function islandora_usage_stats_schema() {
         'default' => 0,
       ),
       'ip' => array(
-        'description' => 'IP of user that accessed the object',
+        'description' => 'IP of user that accessed the object.',
         'type' => 'varchar',
         'length' => 64,
         'not null' => TRUE,
       ),
-      'user' => array(
-        'description' => 'Drupal user that accessed the object',
-        'type' => 'varchar',
-        'length' => 64,
+      'uid' => array(
+        'description' => 'Drupal user that accessed the object.',
+        'type' => 'int',
         'not null' => TRUE,
+        'default' => 0,
       ),
     ),
     'primary key' => array(
       'id',
     ),
-    'indexes' => array(
-      'dsid' => array(
-        'dsid',
+    'foreign keys' => array(
+      'ds_id' => array(
+        'table' => 'islandora_usage_stats_datastreams',
+        'columns' => array('ds_id' => 'id'),
       ),
     ),
+    'indexes' => array(
+      'ds_id' => array('ds_id'),
+    ),
   );
+
   $schema['islandora_usage_stats_objects'] = array(
     'description' => 'Used to specify object information in the DB; primarily for views.',
     'fields' => array(
@@ -658,4 +527,104 @@ function islandora_usage_stats_update_7002() {
   db_create_table('islandora_usage_stats_top_searches', $schema['islandora_usage_stats_top_searches']);
   db_create_table('islandora_usage_stats_datastreams', $schema['islandora_usage_stats_datastreams']);
   return t('Updated database to support top search logging, and top downloads.');
+}
+
+/**
+ * Large rework of module. All object and datastream records will be lost.
+ */
+function islandora_usage_stats_update_7003() {
+  db_drop_table('islandora_usage_stats_object_views');
+  db_drop_table('islandora_usage_stats_object_ds_downloads');
+  db_drop_table('islandora_usage_stats_top_downloads');
+
+  db_add_unique_key('islandora_usage_stats_datastreams', 'pid_dsid', array('pid_id', 'dsid'));
+
+  // Just re-create the tables.
+  db_drop_table('islandora_usage_stats_object_ds_access_log');
+  db_drop_table('islandora_usage_stats_object_access_log');
+  $schema = array();
+  $schema['islandora_usage_stats_object_access_log'] = array(
+    'description' => 'This table is used to store the usage information for Fedora objects.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'pid_id' => array(
+        'description' => 'PID ID of the object.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'time' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'ip' => array(
+        'description' => 'IP of user that accessed the object.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'Drupal user that accessed the object.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array(
+      'id',
+    ),
+  );
+
+  $schema['islandora_usage_stats_object_ds_access_log'] = array(
+    'description' => 'This table is used to store the usage information for Fedora datastreams.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'ds_id' => array(
+        'description' => 'Database datastream ID.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'time' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'ip' => array(
+        'description' => 'IP of user that accessed the object.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'Drupal user that accessed the object.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array(
+      'id',
+    ),
+    'foreign keys' => array(
+      'ds_id' => array(
+        'table' => 'islandora_usage_stats_datastreams',
+        'columns' => array('ds_id' => 'id'),
+      ),
+    ),
+    'indexes' => array(
+      'ds_id' => array('ds_id'),
+    ),
+  );
+  db_create_table('islandora_usage_stats_object_ds_access_log', $schema['islandora_usage_stats_object_ds_access_log']);
+  db_create_table('islandora_usage_stats_object_access_log', $schema['islandora_usage_stats_object_access_log']);
+
+  // Now we always log.
+  variable_del('islandora_usage_stats_use_access_log');
+  variable_del('islandora_usage_stats_alter_pdf_display');
 }

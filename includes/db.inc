@@ -41,6 +41,37 @@ function islandora_usage_stats_pid_to_db($pid) {
 }
 
 /**
+ * Get the ds_dsid for a given pid/dsid combo.
+ *
+ * Creates it if it doesn't exist.
+ */
+function islandora_usage_stats_get_ds_dsid($pid, $dsid) {
+  $pid_id = islandora_usage_stats_get_pid_id($pid);
+  $result = db_select('islandora_usage_stats_datastreams')
+    ->fields('islandora_usage_stats_datastreams', array('id'))
+    ->condition('pid_id', $pid_id)
+    ->condition('dsid', $dsid)
+    ->execute();
+  $record = $result->fetchAssoc();
+  $ds_dsid = isset($record['id']) ? $record['id'] : FALSE;
+  if (!$ds_dsid) {
+    // This record does not exist yet, we must add it.
+    $object = islandora_object_load($pid);
+    $ds_dsid = db_insert('islandora_usage_stats_datastreams')
+      ->fields(
+        array(
+          'pid_id' => $pid_id,
+          'dsid' => $dsid,
+          'ds_label' => $object[$dsid]->label,
+        )
+      )
+      ->execute();
+  }
+
+  return $ds_dsid;
+}
+
+/**
  * Get a number of the most recently viewed objects.
  *
  * @param int $count
@@ -112,108 +143,15 @@ function islandora_usage_stats_update_object_label($pid, $label) {
  *   A list of PIDS.
  */
 function islandora_usage_stats_get_top_downloads($count) {
-  $query = db_select('islandora_usage_stats_top_downloads', 'dl');
-  $query->join('islandora_usage_stats_objects', 'objects', 'dl.pid_id = objects.id');
-  $query->fields('objects', array('pid'));
-  // Since we are only returning PIDs and not the datastreams we must aggregate
-  // all the downloads for each PID across all datastreams.
-  $query->addExpression('SUM(dl.downloads)', 'total_downloads');
-  $query->groupBy('pid');
-  $query->orderBy('total_downloads', 'DESC');
-  $query->range(0, $count);
-  $results = $query->execute();
+  $query = db_select('islandora_usage_stats_object_ds_access_log', 'log');
+  $query->join('islandora_usage_stats_datastreams', 'datastreams', 'log.ds_id = datastreams.id');
+  $query->join('islandora_usage_stats_objects', 'objects', 'datastreams.pid_id = objects.id');
+  $results = $query->fields('objects', array('pid'))
+    ->orderBy('log.time', 'DESC')
+    ->range(0, $count)
+    ->execute();
   $records = $results->fetchAllAssoc('pid');
   return array_keys($records);
-}
-
-/**
- * Increment the ds download counter for top downloads.
- *
- * @param int $time
- *   Using REQUEST_TIME, constant available time as int.
- * @param int $pid_id
- *   The pid_id, or id key in islandora_usage_stats_objects.
- * @param int $dsid
- *   The ds_id, or id key in islandora_usage_stats_datastreams.
- *
- * @return array
- *   The query result.
- */
-function islandora_usage_stats_increment_top_object_ds_download_counter($time, $pid_id, $dsid) {
-  $result = db_update('islandora_usage_stats_top_downloads')
-    ->expression('downloads', 'downloads + :downloads',
-      array(
-        ':downloads' => 1,
-      )
-    )
-    ->expression('time', $time)
-    ->condition('pid_id', $pid_id)
-    ->condition('ds_id', $dsid)
-    ->execute();
-  return $result;
-}
-
-/**
- * Insert record to top downloads table.
- *
- * @param int $time
- *   Using REQUEST_TIME, constant available time as int.
- * @param int $pid_id
- *   The pid_id, or id key in islandora_usage_stats_objects.
- * @param int $dsid
- *   The ds_id, or id key in islandora_usage_stats_datastreams.
- *
- * @return array
- *   The query result.
- */
-function islandora_usage_stats_insert_top_download($time, $pid_id, $dsid) {
-  $result = db_insert('islandora_usage_stats_top_downloads')
-    ->fields(
-      array(
-        'pid_id' => $pid_id,
-        'ds_id' => $dsid,
-        'downloads' => 1,
-        'time' => $time,
-      )
-    )
-    ->execute();
-  return $result;
-}
-
-/**
- * Finds top downloads for given information.
- *
- * In addition to finding top downloads, this
- * function will also create an entry in
- * islandora_usage_stats_datastreams if it
- * does not exist.
- */
-function islandora_usage_stats_find_existing_downloads($pid_id, $dsid, $label) {
-  $result = db_select('islandora_usage_stats_datastreams')
-    ->fields('islandora_usage_stats_datastreams', array('id'))
-    ->condition('pid_id', $pid_id)
-    ->condition('dsid', $dsid)
-    ->execute();
-  $record = $result->fetchAssoc();
-  $ds_id = isset($record['id']) ? $record['id'] : FALSE;
-  if (!$ds_id) {
-    // This record does not exist yet, we must add it.
-    $ds_id = db_insert('islandora_usage_stats_datastreams')
-      ->fields(array('pid_id' => $pid_id, 'dsid' => $dsid, 'ds_label' => $label))
-      ->execute();
-    $ds_id = $ds_id['id'];
-  }
-
-  $result = db_query("SELECT downloads, time, ds_id from {islandora_usage_stats_top_downloads} WHERE pid_id = :pid_id AND ds_id = :dsid", array(
-    ':pid_id' => $pid_id,
-    ':dsid' => $ds_id,
-  ));
-  $data = $result->fetchAssoc();
-  $return = array(
-    'result' => $data,
-    'ds_id' => $ds_id,
-  );
-  return $return;
 }
 
 /**
@@ -305,6 +243,7 @@ function islandora_usage_stats_clear_tracking($table, $pid = NULL) {
   $results = array();
   if ($pid == NULL) {
     $results[] = db_truncate($table)->execute();
+    // If the object_access_log we nuke collection and content model as well.
     if ($table == 'islandora_usage_stats_object_access_log') {
       db_truncate('islandora_usage_stats_collection_access_log')->execute();
       db_truncate('islandora_usage_stats_content_model_access_log')->execute();
@@ -318,6 +257,7 @@ function islandora_usage_stats_clear_tracking($table, $pid = NULL) {
     }
     else {
       $pid_id = islandora_usage_stats_pid_id($pid);
+      // If the object_access_log we nuke collection and content model as well.
       if ($table == 'islandora_usage_stats_object_access_log') {
         $in_query = db_select('islandora_usage_stats_object_access_log')
           ->fields('islandora_usage_stats_object_access_log', array('id'))
@@ -328,20 +268,102 @@ function islandora_usage_stats_clear_tracking($table, $pid = NULL) {
         $results[] = db_delete('islandora_usage_stats_content_model_access_log')
           ->condition('object_access_id', $in_query, 'IN')
           ->execute();
+        $pid_id_field = 'pid_id';
       }
-      if ($table == 'islandora_usage_stats_collection_access_log') {
+      elseif ($table == 'islandora_usage_stats_collection_access_log') {
         $pid_id_field = 'collection';
       }
       elseif ($table == 'islandora_usage_stats_content_model_access_log') {
         $pid_id_field = 'content_model';
       }
-      else {
-        $pid_id_field = 'pid_id';
+      if ($table == 'islandora_usage_stats_object_ds_access_log') {
+        $in_query = db_select('islandora_usage_stats_datastreams')
+          ->fields('islandora_usage_stats_datastreams', array('id'))
+          ->condition('pid_id', $pid_id);
+        $results[] = db_delete('islandora_usage_stats_object_ds_access_log')
+          ->condition('ds_id', $in_query, 'IN')
+          ->execute();
       }
-      $results[] = db_delete($table)
-        ->condition($pid_id_field, $pid_id)
-        ->execute();
+      if (isset($pid_id_field)) {
+        $results[] = db_delete($table)
+          ->condition($pid_id_field, $pid_id)
+          ->execute();
+      }
     }
   }
   return $results;
+}
+
+/**
+ * Write an object view to the DB.
+ *
+ * @global $user
+ *
+ * @param int $pid_id
+ *   DB ID for a PID.
+ * @param int $request_time
+ *   Time to log, defaults to REQUEST_TIME.
+ * @param string $ip_address
+ *   IP to log to. Defaults to whatever ip_address() returns.
+ * @param int $uid
+ *   User ID to log to, defaults to global user's.
+ *
+ * @return int
+ *   The DB ID for the log entry.
+ */
+function islandora_usage_stats_object_view_to_db($pid_id, $request_time = NULL, $ip_address = NULL, $uid = NULL) {
+  global $user;
+  return db_insert('islandora_usage_stats_object_access_log')->fields(array(
+    'pid_id' => $pid_id,
+    'time' => ($request_time !== NULL) ? $request_time : REQUEST_TIME,
+    'ip' => ($ip_address !== NULL) ? $ip_address : ip_address(),
+    'uid' => ($uid !== NULL) ? $uid : $user->uid,
+  ))->execute();
+}
+
+/**
+ * Write a content model view to the DB.
+ */
+function islandora_usage_stats_content_model_view_to_db($object_access_id, $model_id) {
+  db_insert('islandora_usage_stats_content_model_access_log')->fields(array(
+    'object_access_id' => $object_access_id,
+    'content_model' => $model_id,
+  ))->execute();
+}
+
+/**
+ * Write a collection view to the DB.
+ */
+function islandora_usage_stats_collection_view_to_db($object_access_id, $collection_id) {
+  db_insert('islandora_usage_stats_collection_access_log')->fields(array(
+    'object_access_id' => $object_access_id,
+    'collection' => $collection_id,
+  ))->execute();
+}
+
+/**
+ * Write a datastream download to the DB.
+ *
+ * @global $user
+ *
+ * @param int $ds_id
+ *   DB ID for a datastream.
+ * @param int $request_time
+ *   Time to log, defaults to REQUEST_TIME.
+ * @param string $ip_address
+ *   IP to log to. Defaults to whatever ip_address() returns.
+ * @param int $uid
+ *   User ID to log to, defaults to global user's.
+ *
+ * @return int
+ *   The DB ID for the log entry.
+ */
+function islandora_usage_stats_datastream_download_to_db($ds_id, $request_time = NULL, $ip_address = NULL, $uid = NULL) {
+  global $user;
+  db_insert('islandora_usage_stats_object_ds_access_log')->fields(array(
+    'ds_id' => $ds_id,
+    'time' => ($request_time !== NULL) ? $request_time : REQUEST_TIME,
+    'ip' => ($ip_address !== NULL) ? $ip_address : ip_address(),
+    'uid' => ($uid !== NULL) ? $uid : $user->uid,
+  ))->execute();
 }

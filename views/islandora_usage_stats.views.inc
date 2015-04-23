@@ -135,9 +135,9 @@ function islandora_usage_stats_views_data() {
         'handler' => 'views_handler_argument_string',
       ),
     ),
-    'user' => array(
-      'title' => t('User'),
-      'help' => t('Name of the Drupal user that accessed the object.'),
+    'uid' => array(
+      'title' => t('User ID'),
+      'help' => t('ID of the Drupal user that accessed the object.'),
       'field' => array(
         'handler' => 'views_handler_field',
         'click sortable' => TRUE,

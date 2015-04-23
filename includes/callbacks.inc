@@ -13,10 +13,10 @@
 function islandora_usage_stats_track_search_results($term = NULL) {
   module_load_include('module', 'islandora_solr', "islandora_solr");
   if (!empty($term)) {
-    IslandoraUsageStats::trackSearchTerm($term);
+    module_load_include('inc', 'islandora_usage_stats', 'includes/utilities');
+    islandora_usage_stats_track_search_term($term);
   }
-  $output = islandora_solr($term);
-  return $output;
+  return islandora_solr($term);
 }
 
 /**
@@ -26,10 +26,8 @@ function islandora_usage_stats_track_search_results($term = NULL) {
  *   The datastream being downloaded.
  */
 function islandora_usage_stats_track_downloads(AbstractDatastream $datastream) {
-  module_load_include('inc', 'islandora', "includes/datastream");
-  $ds_name = $datastream->id;
-  $parent_id = $datastream->parent->id;
-  $track = new IslandoraUsageStats($parent_id);
-  $track->addTopDownload($ds_name);
+  module_load_include('inc', 'islandora', 'includes/datastream');
+  module_load_include('inc', 'islandora_usage_stats', 'includes/utilities');
+  islandora_usage_stats_log_datastream_download($datastream->parent->id, $datastream->id);
   islandora_download_datastream($datastream);
 }
