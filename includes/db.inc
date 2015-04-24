@@ -367,3 +367,47 @@ function islandora_usage_stats_datastream_download_to_db($ds_id, $request_time =
     'uid' => ($uid !== NULL) ? $uid : $user->uid,
   ))->execute();
 }
+
+/**
+ * Helper function to retrieve the amount of views for an object.
+ *
+ * @param string $pid
+ *   The PID of the object to get view count stats for.
+ *
+ * @return string
+ *   The number of views the object has had.
+ */
+function islandora_usage_stats_get_individual_object_view_count($pid) {
+  $query = db_select('islandora_usage_stats_objects', 'objs');
+  $query->condition('pid', $pid, '=');
+  $query->join('islandora_usage_stats_object_access_log', 'logs', 'logs.pid_id = objs.id');
+  return $query->countQuery()
+    ->execute()
+    ->fetchField();
+}
+
+/**
+ * Helper function to retrieve the amount of downloads of datastreams.
+ *
+ * @param string $pid
+ *   The PID of the object to get datastream download stats for.
+ * @param NULL|string $dsid
+ *   The string of the DSID to get stats for, NULL to return all stats.
+ *
+ * @return array
+ *   An array keyed by DSID and the number of views it has had.
+ */
+function islandora_usage_stats_get_datastream_downloads_count($pid, $dsid = NULL) {
+  $query = db_select('islandora_usage_stats_object_ds_access_log', 'ds_log');
+  $query->join('islandora_usage_stats_datastreams', 'dses', 'dses.id = ds_log.ds_id');
+  $query->join('islandora_usage_stats_objects', 'objs', 'objs.id = dses.pid_id');
+  $query->addExpression('COUNT(dses.dsid)');
+  if ($dsid) {
+    $query->condition('dses.dsid', $dsid);
+  }
+  return $query->condition('objs.pid', $pid)
+    ->fields('dses', array('dsid'))
+    ->groupBy('dsid')
+    ->execute()
+    ->fetchAllKeyed();
+}
