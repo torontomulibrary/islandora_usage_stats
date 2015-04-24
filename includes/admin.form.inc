@@ -44,12 +44,6 @@ function islandora_usage_stats_admin_form() {
     '#default_value' => variable_get('islandora_usage_stats_exclude_bots', '1'),
   );
 
-  $form['usage']['save_configuration'] = array(
-    '#type' => 'submit',
-    '#name' => 'saveConfiguration',
-    '#default_value' => t('Save configuration'),
-  );
-
   $form['clear'] = array(
     '#type' => 'fieldset',
     '#title' => t('Clear values'),
@@ -104,6 +98,12 @@ function islandora_usage_stats_admin_form() {
     '#type' => 'submit',
     '#name' => 'clearDSByPIDSubmit',
     '#default_value' => t('Clear datastream download log'),
+  );
+
+  $form['save_configuration'] = array(
+    '#type' => 'submit',
+    '#name' => 'saveConfiguration',
+    '#default_value' => t('Save configuration'),
   );
 
   return $form;
@@ -173,7 +173,11 @@ function islandora_usage_stats_admin_form_submit($form, &$form_state) {
         );
       }
       break;
-    case 'edit-save-configuration':
+
+      default:
+      variable_set('islandora_usage_stats_ip_list', $form_state['values']['islandora_usage_stats_ip_list']);
+      variable_set('islandora_usage_stats_cooldown_seconds', $form_state['values']['islandora_usage_stats_cooldown_seconds']);
+      variable_set('islandora_usage_stats_exclude_bots', $form_state['values']['islandora_usage_stats_exclude_bots']);
       drupal_set_message(
         t("The configuration options have been saved.")
       );
