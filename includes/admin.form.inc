@@ -174,13 +174,13 @@ function islandora_usage_stats_admin_form_submit($form, &$form_state) {
       }
       break;
 
-      default:
+    default:
       variable_set('islandora_usage_stats_ip_list', $form_state['values']['islandora_usage_stats_ip_list']);
       variable_set('islandora_usage_stats_cooldown_seconds', $form_state['values']['islandora_usage_stats_cooldown_seconds']);
       variable_set('islandora_usage_stats_exclude_bots', $form_state['values']['islandora_usage_stats_exclude_bots']);
       drupal_set_message(
         t("The configuration options have been saved.")
       );
-    break;
+      break;
   }
 }
