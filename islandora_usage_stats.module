@@ -297,7 +297,7 @@ function islandora_usage_stats_menu() {
     'title' => 'Islandora Usage Stats Settings',
     'description' => 'Change how usage stats behave.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('islandora_usage_stats_admin_settings'),
+    'page arguments' => array('islandora_usage_stats_admin_form'),
     'access arguments' => array('manage usage stats'),
     'file' => 'includes/admin.form.inc',
   );

@@ -12,9 +12,10 @@
  *
  * @todo break out non-settings elements into their own form.
  *
- * @see system_settings_form()
+ * @return array
+ *   The Drupal form definition.
  */
-function islandora_usage_stats_admin_settings() {
+function islandora_usage_stats_admin_form() {
   $form = array();
 
   $form['usage'] = array(
@@ -99,13 +100,43 @@ function islandora_usage_stats_admin_settings() {
     '#default_value' => t('Clear datastream download log'),
   );
 
-  return system_settings_form($form);
-}
+  $form['save_configuration'] = array(
+    '#type' => 'submit',
+    '#name' => 'saveConfiguration',
+    '#default_value' => t('Save configuration'),
+  );
 
+  return $form;
+}
 /**
- * A pseudo-submit func as system_settings_form prevents a submit handler.
+ * Validation function for the Usage Stats admin form.
+ *
+ * @param array $form
+ *   The Drupal form definition.
+ * @param array $form_state
+ *   The Drupal form state.
  */
-function islandora_usage_stats_admin_settings_validate($form, &$form_state) {
+function islandora_usage_stats_admin_form_validate($form, &$form_state) {
+  if ($form_state['triggering_element']['#id'] === 'edit-clear-view-by-pid-submit') {
+    if (empty($form_state['values']['clear_view_by_pid'])) {
+      form_set_error('clear_view_by_pid', t("Please enter a PID."));
+    }
+  }
+  if ($form_state['triggering_element']['#id'] === 'edit-clear-ds-by-pid-submit') {
+    if (empty($form_state['values']['clear_ds_by_pid'])) {
+      form_set_error('clear_ds_by_pid', t("Please enter a PID."));
+    }
+  }
+}
+/**
+ * Submit handler for the admin form for the islandora_usage_stats.
+ *
+ * @param array $form
+ *   An array representing a form in Drupal.
+ * @param array $form_state
+ *   An array containing the Drupal form state.
+ */
+function islandora_usage_stats_admin_form_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_usage_stats', 'includes/db');
   $button = $form_state['triggering_element']['#id'];
   switch ($button) {
@@ -141,6 +172,15 @@ function islandora_usage_stats_admin_settings_validate($form, &$form_state) {
           t("Datastream tracking for PID '@pid' deleted!", array('@pid' => $pid))
         );
       }
+      break;
+
+    default:
+      variable_set('islandora_usage_stats_ip_list', $form_state['values']['islandora_usage_stats_ip_list']);
+      variable_set('islandora_usage_stats_cooldown_seconds', $form_state['values']['islandora_usage_stats_cooldown_seconds']);
+      variable_set('islandora_usage_stats_exclude_bots', $form_state['values']['islandora_usage_stats_exclude_bots']);
+      drupal_set_message(
+        t("The configuration options have been saved.")
+      );
       break;
   }
 }
