@@ -155,6 +155,7 @@ function islandora_usage_stats_block_view($delta = '') {
       )
     );
     $items = array();
+    $data_pids = "";
     foreach ($result as $row) {
       // @XXX This object load can fail perms, or not exist.
       $object = islandora_object_load($row->pid);
@@ -165,12 +166,8 @@ function islandora_usage_stats_block_view($delta = '') {
         'class' => array(
           'list-group-item',
         ),
-        'attributes' => array(
-          'data-pid' => array(
-            $row->pid,
-          ),
-        ),
       );
+      $data_pids .= " $pid";
     }
     return array(
       'subject' => t('Most Viewed Objects'),
@@ -181,6 +178,9 @@ function islandora_usage_stats_block_view($delta = '') {
         '#attributes' => array(
           'class' => array(
             'list-group',
+          ),
+          'data-pids' => array(
+            $data_pids,
           ),
         ),
       ),
@@ -196,6 +196,7 @@ function islandora_usage_stats_block_view($delta = '') {
       )
     );
     $items = array();
+    $data_pids = "";
     foreach ($result as $pid) {
       // @XXX This object load can fail perms, or not exist.
       $object = islandora_object_load($pid);
@@ -205,12 +206,8 @@ function islandora_usage_stats_block_view($delta = '') {
           'class' => array(
             'list-group-item',
           ),
-          'attributes' => array(
-            'data-pid' => array(
-              $pid,
-            ),
-          ),
         );
+        $data_pids .= " $pid";
       }
     }
     return array(
@@ -222,6 +219,9 @@ function islandora_usage_stats_block_view($delta = '') {
         '#attributes' => array(
           'class' => array(
             'list-group',
+          ),
+          'data-pids' => array(
+            "fuck a doodle dandy",
           ),
         ),
       ),
@@ -235,6 +235,7 @@ function islandora_usage_stats_block_view($delta = '') {
     // decrease performance to the point where it's not usable.
     $result = islandora_usage_stats_get_top_downloads(20);
     $items = array();
+    $data_pids = "";
     if ($result) {
       foreach ($result as $pid) {
         $object = islandora_object_load($pid);
@@ -245,15 +246,11 @@ function islandora_usage_stats_block_view($delta = '') {
             'class' => array(
               'list-group-item',
             ),
-            'attributes' => array(
-              'data-pid' => array(
-                $pid,
-              ),
-            ),
           );
           if (count($items) >= $max_results) {
             break;
           }
+          $data_pids .= " $pid";
         }
       }
     }
@@ -266,6 +263,9 @@ function islandora_usage_stats_block_view($delta = '') {
         '#attributes' => array(
           'class' => array(
             'list-group',
+          ),
+          'data-pids' => array(
+            $data_pids,
           ),
         ),
       ),
