@@ -168,12 +168,13 @@ function islandora_usage_stats_block_view($delta = '') {
     return array(
       'subject' => t('Most Viewed Objects'),
       'content' => array(
-        '#markup' => theme(
-          'item_list',
-          array(
-            'items' => $items,
-            'attributes' => array('class' => array('list-group')),
-          )
+        '#type' => 'item',
+        '#theme' => 'item_list',
+        '#items' => $items,
+        '#attributes' => array(
+          'class' => array(
+            'list-group',
+          ),
         ),
       ),
     );
@@ -203,16 +204,13 @@ function islandora_usage_stats_block_view($delta = '') {
     return array(
       'subject' => t('Recently Viewed Objects'),
       'content' => array(
-        '#markup' => theme(
-          'item_list',
-          array(
-            'items' => $items,
-            'attributes' => array(
-              'class' => array(
-                'list-group',
-              ),
-            ),
-          )
+        '#type' => 'item',
+        '#theme' => 'item_list',
+        '#items' => $items,
+        '#attributes' => array(
+          'class' => array(
+             'list-group',
+           ),
         ),
       ),
     );
@@ -245,14 +243,14 @@ function islandora_usage_stats_block_view($delta = '') {
     return array(
       'subject' => t('Recently Downloaded'),
       'content' => array(
-        '#markup' => theme('item_list', array(
-          'items' => $items,
-          'attributes' => array(
-            'class' => array(
-              'list-group',
-            ),
-          ),
-        )),
+        '#type' => 'item',
+        '#theme' => 'item_list',
+        '#items' => $items,
+        '#attributes' => array(
+          'class' => array(
+             'list-group',
+           ),
+        ),
       ),
     );
   }
@@ -274,14 +272,14 @@ function islandora_usage_stats_block_view($delta = '') {
     return array(
       'subject' => t('Most Searched Terms'),
       'content' => array(
-        '#markup' => theme('item_list', array(
-          'items' => $items,
-          'attributes' => array(
-            'class' => array(
-              'list-group',
-            ),
-          ),
-        )),
+        '#type' => 'item',
+        '#theme' => 'item_list',
+        '#items' => $items,
+        '#attributes' => array(
+          'class' => array(
+             'list-group',
+           ),
+        ),
       ),
     );
   }
