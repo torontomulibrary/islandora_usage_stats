@@ -221,7 +221,7 @@ function islandora_usage_stats_block_view($delta = '') {
             'list-group',
           ),
           'data-pids' => array(
-            "fuck a doodle dandy",
+            $data_pids,
           ),
         ),
       ),
