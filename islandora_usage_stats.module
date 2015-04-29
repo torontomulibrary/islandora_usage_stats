@@ -167,7 +167,7 @@ function islandora_usage_stats_block_view($delta = '') {
           'list-group-item',
         ),
       );
-      $data_pids .= " $pid";
+      $data_pids .= " $row->pid";
     }
     return array(
       'subject' => t('Most Viewed Objects'),
