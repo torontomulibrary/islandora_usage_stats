@@ -165,7 +165,7 @@ function islandora_usage_stats_block_view($delta = '') {
         'class' => array(
           'list-group-item',
         ),
-        'data-pid' => $pid,
+        'data-pid' => $row->pid,
       );
     }
     return array(
