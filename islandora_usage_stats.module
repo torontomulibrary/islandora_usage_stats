@@ -227,7 +227,6 @@ function islandora_usage_stats_block_view($delta = '') {
     // decrease performance to the point where it's not usable.
     $result = islandora_usage_stats_get_top_downloads(20);
     $items = array();
-    $data_pids = "";
     if ($result) {
       foreach ($result as $pid) {
         $object = islandora_object_load($pid);
