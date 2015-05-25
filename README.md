@@ -42,7 +42,7 @@ Having problems or solved a problem? Check out the Islandora google groups for a
 
 ## Maintainers/Sponsors
 
-Work based on code from https://github.com/roblib/islandora_scholar_upei and the scholar_tracking module for Drupal 6. Iterated on by the Ryerson Digital Repository and discoverygarden inc.
+Work based on code from https://github.com/roblib/islandora_scholar_upei and the scholar_tracking module for Drupal 6. Iterated on by Ryerson University Library and Archives (RULA) and discoverygarden inc.
 
 Current maintainers:
 
