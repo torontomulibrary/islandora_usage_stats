@@ -1,10 +1,8 @@
-# Islandora Usage Stats
+# Islandora Usage Stats [![Build Status](https://travis-ci.org/Islandora/islandora_usage_stats.png?branch=7.x)](https://travis-ci.org/Islandora/islandora_usage_stats)
 
 ## Introduction
 
 A module for Drupal 7 to track views and downloads of Islandora items.
-
-Work based on code from https://github.com/roblib/islandora_scholar_upei and the scholar_tracking module for Drupal 6. Iterated on by the Ryerson Digital Repository and discoverygarden inc.
 
 ## Requirements
 
@@ -34,6 +32,29 @@ Configuration options available at `admin/islandora/tools/islandora_usage_stats`
 
 * Does not respect XACML.
 * This is a server-side tracking solution, as such a caching layer could impact it.  If this is impacting you a [solution](https://github.com/discoverygarden/islandora_ga_reports) using JavaScript may work better.
+
+## Troubleshooting/Issues
+
+Having problems or solved a problem? Check out the Islandora google groups for a solution.
+
+* [Islandora Group](https://groups.google.com/forum/?hl=en&fromgroups#!forum/islandora)
+* [Islandora Dev Group](https://groups.google.com/forum/?hl=en&fromgroups#!forum/islandora-dev)
+
+## Maintainers/Sponsors
+
+Work based on code from https://github.com/roblib/islandora_scholar_upei and the scholar_tracking module for Drupal 6. Iterated on by the Ryerson Digital Repository and discoverygarden inc.
+
+Current maintainers:
+
+* [William Panting](https://github.com/willtp87)
+
+Sponsors:
+
+* [FLVC](https://www.flvc.org/)
+
+## Development
+
+If you would like to contribute to this module, please check out our helpful [Documentation for Developers](https://github.com/Islandora/islandora/wiki#wiki-documentation-for-developers) info, as well as our [Developers](http://islandora.ca/developers) section on the Islandora.ca site.
 
 ## License
 
