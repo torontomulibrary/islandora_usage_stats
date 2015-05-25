@@ -50,7 +50,7 @@ Current maintainers:
 
 Sponsors:
 
-* [FLVC](https://www.flvc.org/)
+* [METRO](http://metro.org/)
 
 ## Development
 
