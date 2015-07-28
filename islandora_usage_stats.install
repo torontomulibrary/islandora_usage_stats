@@ -111,6 +111,9 @@ function islandora_usage_stats_schema() {
     'primary key' => array(
       'id',
     ),
+    'indexes' => array(
+      'pid_id_index' => array('pid_id'),
+    ),
   );
 
   $schema['islandora_usage_stats_object_ds_access_log'] = array(
@@ -210,6 +213,10 @@ function islandora_usage_stats_schema() {
       ),
     ),
     'primary key' => array('id'),
+    'indexes' => array(
+      'object_access_id_index' => array('object_access_id'),
+      'collection_index' => array('collection'),
+    ),
   );
   $schema['islandora_usage_stats_content_model_access_log'] = array(
     'description' => 'Used to log the content model(s) when an object is visited.',
@@ -627,4 +634,13 @@ function islandora_usage_stats_update_7003() {
   // Now we always log.
   variable_del('islandora_usage_stats_use_access_log');
   variable_del('islandora_usage_stats_alter_pdf_display');
+}
+
+/**
+ * Adding indexes to speed views.
+ */
+function islandora_usage_stats_update_7004() {
+  db_add_index('islandora_usage_stats_object_access_log', 'pid_id_index', array('pid_id'));
+  db_add_index('islandora_usage_stats_collection_access_log', 'object_access_id_index', array('object_access_id'));
+  db_add_index('islandora_usage_stats_collection_access_log', 'collection_index', array('collection'));
 }
