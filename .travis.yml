@@ -18,11 +18,14 @@ before_install:
   - $HOME/islandora/tests/scripts/travis_setup.sh
   - cd $HOME/drupal-*
   - ln -s $TRAVIS_BUILD_DIR sites/all/modules/islandora_usage_stats
+  - ln -s $HOME/islandora_solution_pack_collection sites/all/modules/islandora_solution_pack_collection
+  - drush dl datepicker views date
+  - drush en --yes --user=1 views datepicker_views
+  - drush en --yes --user=1 islandora_basic_collection
   - drush en --yes islandora_usage_stats
 script:
   - $ISLANDORA_DIR/tests/scripts/line_endings.sh sites/all/modules/islandora_usage_stats
   - drush coder-review --reviews=production,security,style,i18n,potx,sniffer islandora_usage_stats
   - phpcpd --names *.module,*.inc,*.test sites/all/modules/islandora_usage_stats
-  - drush test-run --uri=http://localhost:8081 "Islandora Usage Stats"
 notifications:
   irc: "irc.freenode.org#islandora"
