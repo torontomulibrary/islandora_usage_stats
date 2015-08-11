@@ -26,6 +26,5 @@ before_install:
 script:
   - $ISLANDORA_DIR/tests/scripts/line_endings.sh sites/all/modules/islandora_usage_stats
   - drush coder-review --reviews=production,security,style,i18n,potx,sniffer islandora_usage_stats
-  - phpcpd --names *.module,*.inc,*.test sites/all/modules/islandora_usage_stats
 notifications:
   irc: "irc.freenode.org#islandora"
