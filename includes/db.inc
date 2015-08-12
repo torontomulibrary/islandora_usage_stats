@@ -86,11 +86,15 @@ function islandora_usage_stats_get_most_viewed($count, $exclude = NULL) {
   $query = db_select('islandora_usage_stats_object_access_log', 'log');
   $query->join('islandora_usage_stats_objects', 'objects', 'log.pid_id = objects.id');
   $query->addExpression('COUNT(log.pid_id)', 'views');
-  $results = $query->fields('objects', array('pid'))
+  $query->fields('objects', array('pid'))
     ->groupBy('log.pid_id')
     ->orderBy('views', 'DESC')
-    ->range(0, $count)
-    ->execute();
+    ->range(0, $count);
+  // XXX: This could potentially cause slow down on large data sets.
+  if ($exclude) {
+    $query->condition('pid', $exclude, 'NOT IN');
+  }
+  $results = $query->execute();
   $records = $results->fetchAllAssoc('pid');
   return $records;
 }
@@ -109,10 +113,14 @@ function islandora_usage_stats_get_most_viewed($count, $exclude = NULL) {
 function islandora_usage_stats_get_recently_viewed($count, $exclude = NULL) {
   $query = db_select('islandora_usage_stats_object_access_log', 'log');
   $query->join('islandora_usage_stats_objects', 'objects', 'log.pid_id = objects.id');
-  $results = $query->fields('objects', array('pid'))
+  $query->fields('objects', array('pid'))
     ->orderBy('log.time', 'DESC')
-    ->range(0, $count)
-    ->execute();
+    ->range(0, $count);
+  // XXX: This could potentially cause slow down on large data sets.
+  if ($exclude) {
+    $query->condition('pid', $exclude, 'NOT IN');
+  }
+  $results = $query->execute();
   $records = $results->fetchAllAssoc('pid');
   return array_keys($records);
 }
