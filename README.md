@@ -2,23 +2,7 @@
 
 ## Introduction
 
-A module for Drupal 7 to track views and downloads of Islandora items.
-
-## Requirements
-
-This module requires the following modules/libraries:
-
-* [Tuque](https://github.com/islandora/tuque)
-* [Islandora](https://github.com/islandora/islandora)
-* [Islandora basic collection](https://github.com/Islandora/islandora_solution_pack_collection)
-* [Views (3.x)](https://www.drupal.org/project/views)
-* [Datepicker](https://www.drupal.org/project/datepicker)
-
-## Configuration
-
-Configuration options available at `admin/islandora/tools/islandora_usage_stats`.
-
-## Features
+A module for Drupal 7 to track views and downloads of Islandora items. Features include:
 
 * Toggle to ignore common bots
 * View count uses session variables and defaults to a 5 minute cooldown for repeated requests
@@ -28,10 +12,36 @@ Configuration options available at `admin/islandora/tools/islandora_usage_stats`
 * Report generating interface
 * Object log views integration
 
-## Notes
+Note:
 
-* Does not respect XACML.
+* Does **not** respect XACML. 
 * This is a server-side tracking solution, as such a caching layer could impact it.  If this is impacting you a [solution](https://github.com/discoverygarden/islandora_ga_reports) using JavaScript may work better.
+
+## Requirements
+
+This module requires the following modules/libraries:
+
+* [Tuque](https://github.com/islandora/tuque)
+* [Islandora](https://github.com/islandora/islandora)
+* [Islandora basic collection](https://github.com/Islandora/islandora_solution_pack_collection)
+* [Views (3.x)](https://www.drupal.org/project/views)
+* [Date](https://www.drupal.org/project/date)
+* [Datepicker](https://www.drupal.org/project/datepicker)
+* [Views Data Export](https://www.drupal.org/project/views_data_export)
+
+## Installation
+
+Install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.
+
+## Configuration
+
+Configuration options are available at Islandora » Islandora Utility Modules » Islandora Usage Stats Settings (admin/islandora/tools/islandora_usage_stats).
+
+![Configuration](https://raw.githubusercontent.com/wiki/islandora/islandora_usage_stats/images/usage_stats_configuration.jpg)
+
+## Documentation
+
+Further documentation for this module is available at [our wiki](https://wiki.duraspace.org/display/ISLANDORA/Islandora+Usage+Stats).
 
 ## Troubleshooting/Issues
 
@@ -54,7 +64,7 @@ Sponsors:
 
 ## Development
 
-If you would like to contribute to this module, please check out our helpful [Documentation for Developers](https://github.com/Islandora/islandora/wiki#wiki-documentation-for-developers) info, as well as our [Developers](http://islandora.ca/developers) section on the Islandora.ca site.
+If you would like to contribute to this module, please check out [CONTRIBUTING.md](CONTRIBUTING.md). In addition, we have helpful [Documentation for Developers](https://github.com/Islandora/islandora/wiki#wiki-documentation-for-developers) info, as well as our [Developers](http://islandora.ca/developers) section on the [Islandora.ca](http://islandora.ca) site.
 
 ## License
 
