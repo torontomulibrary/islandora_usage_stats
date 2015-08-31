@@ -14,7 +14,7 @@ A module for Drupal 7 to track views and downloads of Islandora items. Features 
 
 Note:
 
-* Does not respect XACML.
+* Does **not** respect XACML. 
 * This is a server-side tracking solution, as such a caching layer could impact it.  If this is impacting you a [solution](https://github.com/discoverygarden/islandora_ga_reports) using JavaScript may work better.
 
 ## Requirements
@@ -35,13 +35,13 @@ Install as usual, see [this](https://drupal.org/documentation/install/modules-th
 
 ## Configuration
 
-Configuration options are available at Islandora >> Islandora Utility Modules >> Islandora Usage Stats Settings (admin/islandora/tools/islandora_usage_stats).
+Configuration options are available at Islandora » Islandora Utility Modules » Islandora Usage Stats Settings (admin/islandora/tools/islandora_usage_stats).
 
 ![Configuration](https://raw.githubusercontent.com/wiki/islandora/islandora_usage_stats/images/usage_stats_configuration.jpg)
 
 ## Documentation
 
-Further documentation for this module is available at [our wiki](https://wiki.duraspace.org/display/ISLANDORA/Islandora).
+Further documentation for this module is available at [our wiki](https://wiki.duraspace.org/display/ISLANDORA/Islandora+Usage+Stats).
 
 ## Troubleshooting/Issues
 
