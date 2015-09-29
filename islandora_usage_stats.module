@@ -161,13 +161,7 @@ function islandora_usage_stats_block_view($delta = '') {
       $view_suffix = ((int) $row->views > 1) ? 'views' : 'view';
       $viewcount = "$row->views $view_suffix";
       $items[] = array(
-        'data' => t('<a title="@title" href="islandora/object/@pid">@title</a><span class="label label-default"> @viewcount </span>',
-          array(
-            '@pid' => urlencode($row->pid),
-            '@title' => $object->label,
-            '@viewcount' => $viewcount,
-          )
-        ),
+        'data' => l($object->label, "islandora/object/{$row->pid}") . "<span class='label label-default'>$viewcount</span>",
         'class' => array(
           'list-group-item',
         ),
@@ -203,12 +197,7 @@ function islandora_usage_stats_block_view($delta = '') {
       $object = islandora_object_load($pid);
       if ($object) {
         $items[] = array(
-          'data' => t('<a title="@title" href="islandora/object/@pid">@title</a>',
-            array(
-              '@pid' => urlencode($pid),
-              '@title' => $object->label,
-            )
-          ),
+          'data' => l($object->label, "islandora/object/{$pid}"),
           'class' => array(
             'list-group-item',
           ),
