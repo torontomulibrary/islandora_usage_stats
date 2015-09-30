@@ -155,13 +155,14 @@ function islandora_usage_stats_block_view($delta = '') {
       )
     );
     $items = array();
+    drupal_add_css(drupal_get_path('module', 'islandora_usage_stats') . '/css/top_usage.css');
     foreach ($result as $row) {
       // @XXX This object load can fail perms, or not exist.
       $object = islandora_object_load($row->pid);
       $view_suffix = ((int) $row->views > 1) ? 'views' : 'view';
       $viewcount = "$row->views $view_suffix";
       $items[] = array(
-        'data' => l($object->label, 'islandora/object/' . urlencode($row->pid)) . " <span class='label label-default'>" . $viewcount . '</span>',
+        'data' => l($object->label, "islandora/object/{$row->pid}") . "<span class='label label-default'>$viewcount</span>",
         'class' => array(
           'list-group-item',
         ),
@@ -197,7 +198,7 @@ function islandora_usage_stats_block_view($delta = '') {
       $object = islandora_object_load($pid);
       if ($object) {
         $items[] = array(
-          'data' => l($object->label, 'islandora/object/' . urlencode($pid)),
+          'data' => l($object->label, "islandora/object/{$pid}"),
           'class' => array(
             'list-group-item',
           ),
