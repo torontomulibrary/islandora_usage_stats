@@ -155,6 +155,7 @@ function islandora_usage_stats_block_view($delta = '') {
       )
     );
     $items = array();
+    drupal_add_css(drupal_get_path('module', 'islandora_usage_stats') . '/css/top_usage.css');
     foreach ($result as $row) {
       // @XXX This object load can fail perms, or not exist.
       $object = islandora_object_load($row->pid);
