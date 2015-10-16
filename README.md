@@ -14,7 +14,7 @@ A module for Drupal 7 to track views and downloads of Islandora items. Features 
 
 Note:
 
-* Does **not** respect XACML. 
+* Does **not** respect XACML or namespace restrictions.
 * This is a server-side tracking solution, as such a caching layer could impact it.  If this is impacting you a [solution](https://github.com/discoverygarden/islandora_ga_reports) using JavaScript may work better.
 
 ## Requirements
