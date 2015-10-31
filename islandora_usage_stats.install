@@ -66,14 +66,18 @@ function islandora_usage_stats_schema() {
       ),
       'term' => array(
         'description' => 'Search term.',
-        'type' => 'varchar',
-        'length' => 255,
+        'type' => 'text',
+        'size' => 'medium',
       ),
       'search_total' => array(
         'description' => 'The total times this term has been searched.',
         'type' => 'int',
         'not NULL' => TRUE,
       ),
+    ),
+    'indexes' => array(
+      // 767 is maximum index size in worst case.
+      'term_index' => array(array('term', 767)),
     ),
     'primary key' => array('id'),
   );
@@ -643,4 +647,26 @@ function islandora_usage_stats_update_7004() {
   db_add_index('islandora_usage_stats_object_access_log', 'pid_id_index', array('pid_id'));
   db_add_index('islandora_usage_stats_collection_access_log', 'object_access_id_index', array('object_access_id'));
   db_add_index('islandora_usage_stats_collection_access_log', 'collection_index', array('collection'));
+}
+
+/**
+ * Fix to search stats table, increasing the size of search strings allowed.
+ */
+function islandora_usage_stats_update_7005() {
+  db_change_field(
+    'islandora_usage_stats_top_searches',
+    'term',
+    'term',
+    array(
+      'description' => 'Search term.',
+      'type' => 'text',
+      'size' => 'medium',
+    ),
+    array(
+      'indexes' => array(
+        // 767 is maximum index size in worst case.
+        'term_index' => array(array('term', 767)),
+      ),
+    )
+  );
 }
