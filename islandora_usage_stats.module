@@ -2,499 +2,417 @@
 
 /**
  * @file
- * 
+ * Primary hook implementations.
  */
+
+// Permissions.
+define('ISLANDORA_USAGE_STATS_VIEW_REPORTS', 'view islandora usage stats reports');
+define('ISLANDORA_USAGE_STATS_VIEW_OBJECT_OVERVIEW_COLLECTION_STATS', 'view islandora usage stats collection overview stats');
 
 /**
  * Implements hook_block_info().
  */
-function islandora_usage_stats_block_info()
-{
-    $blocks['top_usage'] = array(
-        'info' => t('Most Viewed Islandora Items'),
-        'status' => TRUE,
-        'region' => 'sidebar_first',
-        'weight' => 0,
-        'visibility' => BLOCK_VISIBILITY_NOTLISTED,
-    );
-    
-    $blocks['recent_activity'] = array(
-        'info' => t('Recently accessed Islandora Items'),
-        'status' => TRUE,
-        'region' => 'sidebar_first',
-        'weight' => 0,
-        'visibility' => BLOCK_VISIBILITY_NOTLISTED,
-    );
-    
-    return $blocks;
+function islandora_usage_stats_block_info() {
+  $blocks = array();
+
+  $blocks['top_usage'] = array(
+    'info' => t('Most Viewed Islandora Items'),
+  );
+  $blocks['recent_activity'] = array(
+    'info' => t('Recently Accessed Islandora Items'),
+  );
+  $blocks['top_search'] = array(
+    'info' => t('Most Searched Terms'),
+  );
+  $blocks['top_downloads'] = array(
+    'info' => t('Recently Downloaded'),
+  );
+  return $blocks;
 }
 
 /**
  * Implements hook_block_configure().
- *
- * @param unknown $delta            
  */
-function islandora_usage_stats_block_configure($delta)
-{
-    $form = array();
-    
-    switch ($delta) {
-        case 'top_usage':
-            if (user_access('manage usage stats')) {
-                $form['islandora_usage_stats_block_display_rows'] = array(
-                    '#type' => 'textfield',
-                    '#title' => t('Configure Number of Rows to Display'),
-                    '#size' => 5,
-                    '#description' => t('Enter the number of rows to display in the block.'),
-                    '#default_value' => variable_get('islandora_usage_stats_block_display_rows', 5)
-                );
-                
-                $form['islandora_usage_stats_block_exclusion'] = array(
-                    '#type' => 'fieldset',
-                    '#title' => t('Omit PIDs from block display'),
-                    '#description' => t('Add Islandora PIDs that you want to omit from being displayed in the block')
-                );
-                
-                $form['islandora_usage_stats_block_exclusion']['islandora_usage_stats_exclusion_list'] = array(
-                    '#type' => 'textarea',
-                    '#description' => t('Add Islandora PIDs separated by spaces'),
-                    '#default_value' => variable_get('islandora_usage_stats_block_exclusion_list', 'islandora:root')
-                );
-            }
-            break;
-        case 'recent_activity':
-            if (user_access('manage usage stats')) {
-                $form['islandora_usage_stats_recent_activity_block_display_rows'] = array(
-                    '#type' => 'textfield',
-                    '#title' => t('Configure Number of Rows to Display'),
-                    '#size' => 5,
-                    '#description' => t('Enter the number of rows to display in the block.'),
-                    '#default_value' => variable_get('islandora_usage_stats_recent_activity_block_display_rows', 5)
-                );
-                
-                $form['islandora_usage_stats_recent_activity_block_exclusion'] = array(
-                    '#type' => 'fieldset',
-                    '#title' => t('Omit PIDs from block display'),
-                    '#description' => t('Add Islandora PIDs that you want to omit from being displayed in the block')
-                );
-                
-                $form['islandora_usage_stats_recent_activity_block_exclusion']['islandora_usage_stats_recent_activity_block_exclusion_list'] = array(
-                    '#type' => 'textarea',
-                    '#description' => t('Add Islandora PIDs separated by spaces'),
-                    '#default_value' => variable_get('islandora_usage_stats_recent_activity_block_exclusion_list', 'islandora:root')
-                );
-            }
-            break;
-    }
-    
-    return $form;
+function islandora_usage_stats_block_configure($delta) {
+  $form = array();
+
+  switch ($delta) {
+    case 'top_usage':
+      if (user_access('manage usage stats')) {
+        $form['islandora_usage_stats_block_display_rows'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Configure Number of Rows to Display'),
+          '#size' => 5,
+          '#description' => t('Enter the number of rows to display in the block.'),
+          '#default_value' => variable_get('islandora_usage_stats_block_display_rows', 5),
+        );
+
+        $form['islandora_usage_stats_block_exclusion'] = array(
+          '#type' => 'fieldset',
+          '#title' => t('Omit PIDs from block display'),
+          '#description' => t('Add Islandora PIDs that you want to omit from being displayed in the block'),
+        );
+
+        $form['islandora_usage_stats_block_exclusion']['islandora_usage_stats_exclusion_list'] = array(
+          '#type' => 'textarea',
+          '#description' => t('Add Islandora PIDs separated by spaces'),
+          '#default_value' => variable_get('islandora_usage_stats_block_exclusion_list', 'islandora:root'),
+        );
+      }
+      break;
+
+    case 'recent_activity':
+      if (user_access('manage usage stats')) {
+        $form['islandora_usage_stats_recent_activity_block_display_rows'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Configure Number of Rows to Display'),
+          '#size' => 5,
+          '#description' => t('Enter the number of rows to display in the block.'),
+          '#default_value' => variable_get('islandora_usage_stats_recent_activity_block_display_rows', 5),
+        );
+
+        $form['islandora_usage_stats_recent_activity_block_exclusion'] = array(
+          '#type' => 'fieldset',
+          '#title' => t('Omit PIDs from block display'),
+          '#description' => t('Add Islandora PIDs that you want to omit from being displayed in the block'),
+        );
+
+        $form['islandora_usage_stats_recent_activity_block_exclusion']['islandora_usage_stats_recent_activity_block_exclusion_list'] = array(
+          '#type' => 'textarea',
+          '#description' => t('Add Islandora PIDs separated by spaces'),
+          '#default_value' => variable_get('islandora_usage_stats_recent_activity_block_exclusion_list', 'islandora:root'),
+        );
+      }
+      break;
+
+    case 'top_downloads':
+      if (user_access('manage usage stats')) {
+        $form['islandora_usage_stats_top_downloads_block_display_rows'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Rows to Display'),
+          '#size' => 5,
+          '#description' => t('Enter the number of rows to display in the block.'),
+          '#default_value' => variable_get('islandora_usage_stats_top_downloads_block_display_rows', 5),
+        );
+      }
+      break;
+
+    case 'top_search':
+      if (user_access('manage usage stats')) {
+        $form['islandora_usage_stats_top_search_block_display_rows'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Configure Number of Rows to Display'),
+          '#size' => 5,
+          '#description' => t('Enter the number of rows to display in the block.'),
+          '#default_value' => variable_get('islandora_usage_stats_top_search_block_display_rows', 5),
+        );
+      }
+      break;
+  }
+  return $form;
 }
 
 /**
  * Implements hook_block_save().
- *
- * @param string $delta            
- * @param unknown $edit            
  */
-function islandora_usage_stats_block_save($delta = '', $edit = array())
-{
-    switch ($delta) {
-        case 'top_usage':
-            variable_set('islandora_usage_stats_block_display_rows', (int) $edit['islandora_usage_stats_block_display_rows']);
-            variable_set('islandora_usage_stats_block_exclusion_list', $edit['islandora_usage_stats_exclusion_list']);
-            break;
-        case 'recent_activity':
-            variable_set('islandora_usage_stats_recent_activity_block_display_rows', (int) $edit['islandora_usage_stats_recent_activity_block_display_rows']);
-            variable_set('islandora_usage_stats_recent_activity_block_exclusion_list', $edit['islandora_usage_stats_recent_activity_block_exclusion_list']);
-            break;
-    }
-    return;
+function islandora_usage_stats_block_save($delta = '', $edit = array()) {
+  switch ($delta) {
+    case 'top_usage':
+      variable_set('islandora_usage_stats_block_display_rows', (int) $edit['islandora_usage_stats_block_display_rows']);
+      variable_set('islandora_usage_stats_block_exclusion_list', $edit['islandora_usage_stats_exclusion_list']);
+      break;
+
+    case 'recent_activity':
+      variable_set('islandora_usage_stats_recent_activity_block_display_rows', (int) $edit['islandora_usage_stats_recent_activity_block_display_rows']);
+      variable_set('islandora_usage_stats_recent_activity_block_exclusion_list', $edit['islandora_usage_stats_recent_activity_block_exclusion_list']);
+      break;
+
+    case 'top_downloads':
+      variable_set('islandora_usage_stats_top_downloads_block_display_rows', (int) $edit['islandora_usage_stats_top_downloads_block_display_rows']);
+      break;
+
+    case 'top_search':
+      variable_set('islandora_usage_stats_top_search_block_display_rows', (int) $edit['islandora_usage_stats_top_search_block_display_rows']);
+      break;
+  }
 }
 
 /**
  * Implements hook_block_view().
- *
- * @param string $delta            
  */
-function islandora_usage_stats_block_view($delta = '')
-{
-    switch ($delta) {
-        case 'top_usage':
-            $block['content'] = islandora_usage_stats_block_contents($delta);
-            return $block;
-            break;
-        case 'recent_activity':
-            $block['content'] = islandora_usage_stats_block_contents($delta);
-            return $block;
-            break;
-    }
-}
+function islandora_usage_stats_block_view($delta = '') {
+  $block = array();
+  if ($delta == 'top_usage') {
+    module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+    $connection = islandora_get_tuque_connection();
+    $repository = $connection->repository;
 
-/**
- * Module-defined content generating function
- *
- * @param unknown $delta            
- */
-function islandora_usage_stats_block_contents($delta)
-{
-    global $user;
-    switch ($delta) {
-        case 'top_usage':
-            if (user_access('view usage stats block')) {
-                $connection = islandora_get_tuque_connection($user);
-                $repository = $connection->repository;
-                
-                $excludedPIDlist = explode(' ', variable_get('islandora_usage_stats_block_exclusion_list', 'islandora:root'));
-                $excludeString = "('" . implode("','", $excludedPIDlist) . "')";
-                
-                // TODO: use a placeholder for this query to tighten up injection attacks
-                // NB: tried using a placeholder but drupal wouldn't play nicely
-                $nbr_rows = variable_get('islandora_usage_stats_block_display_rows', 5);
-                $result = db_query_range("SELECT pid, views 
-	                               FROM {islandora_usage_stats_object_views}
-                                 WHERE pid not in $excludeString
-    	                           ORDER BY views DESC", 0, $nbr_rows);
-                $items = array();
-                foreach ($result as $row) {
-                    
-                    $object = islandora_object_load($row->pid);
-                    $view_suffix = ((int)$row->views > 1) ? 'views' : 'view';
-                    $viewcount = "$row->views $view_suffix";
-                    $items[] = array(
-                        'data' => l($object->label, 'islandora/object/' . urlencode($row->pid)) . " <span class='label label-default'>". $viewcount . '</span>',
-                        'class' => array(
-                            'list-group-item'
-                        )
-                    );
-                }
-                return array(
-                    '#markup' => theme('item_list', array(
-                        'items' => $items,
-                        'attributes' => array(
-                            'class' => array(
-                                'list-group'
-                            )
-                        )
-                    ))
-                );
-            }
-            break;
-        case 'recent_activity':
-            if (user_access('view usage stats block')) {
-                $connection = islandora_get_tuque_connection($user);
-                $repository = $connection->repository;
-                
-                $excludedPIDlist = explode(' ', variable_get('islandora_usage_stats_recent_activity_block_exclusion_list', 'islandora:root'));
-                $excludeString = "('" . implode("','", $excludedPIDlist) . "')";
-                
-                // TODO: use a placeholder for this query to tighten up injection attacks
-                // NB: tried using a placeholder but drupal wouldn't play nicely
-                $nbr_rows = variable_get('islandora_usage_stats_recent_activity_block_display_rows', 5);
-                
-                $result = db_query_range("SELECT pid, max(time) as time
-                    FROM {islandora_usage_stats_object_access_log}
-                    WHERE pid not in $excludeString
-                    group by pid
-                    ORDER BY time desc", 0, $nbr_rows);
-                
-                $items = array();
-                foreach ($result as $row) {
-                    $object = islandora_object_load($row->pid);
-                    $items[] = array(
-                        'data' => l($object->label, 'islandora/object/' . urlencode($row->pid)),
-                        'class' => array(
-                            'list-group-item'
-                        )
-                    );
-                }
-                return array(
-                    '#markup' => theme('item_list', array(
-                        'items' => $items,
-                        'attributes' => array(
-                            'class' => array(
-                                'list-group'
-                            )
-                        )
-                    ))
-                );
-            }
-            break;
-    }
-}
-
-
-
-/**
- * Implementation of hook_menu().
- */
-function islandora_usage_stats_menu()
-{
+    $result = islandora_usage_stats_get_most_viewed(
+      variable_get('islandora_usage_stats_block_display_rows', 5),
+      explode(
+        ' ',
+        variable_get('islandora_usage_stats_block_exclusion_list', 'islandora:root')
+      )
+    );
     $items = array();
-    
-    /**
-     * Internal route with 2 wildcard matches
-     */
-    $items['download_ds/%/%'] = array(
-        'title' => 'Download datastream',
-        'page callback' => 'islandora_usage_stats_download_ds_form',
-        'page arguments' => array(
-            1,
-            2
+    drupal_add_css(drupal_get_path('module', 'islandora_usage_stats') . '/css/top_usage.css');
+    foreach ($result as $row) {
+      // @XXX This object load can fail perms, or not exist.
+      $object = islandora_object_load($row->pid);
+      $view_suffix = ((int) $row->views > 1) ? 'views' : 'view';
+      $viewcount = "$row->views $view_suffix";
+      $items[] = array(
+        'data' => l($object->label, "islandora/object/{$row->pid}") . "<span class='label label-default'>$viewcount</span>",
+        'class' => array(
+          'list-group-item',
         ),
-        'access callback' => 'user_access',
-        'access arguments' => array(
-            'access content'
-        ),
-        'type' => MENU_CALLBACK
-    );
-    
-    $items['admin/settings/islandora_usage_stats'] = array(
-        'title' => 'Islandora Usage Stats settings',
-        'description' => 'Change how usage stats behave.',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array(
-            'islandora_usage_stats_admin_settings'
-        ),
-        'access arguments' => array(
-            'manage usage stats'
-        ),
-        'type' => MENU_CALLBACK,
-        'file' => 'islandora_usage_stats.admin.inc'
-    );
-    
-    return $items;
-}
-
-/**
- * Implementation of hook_permission
- * 
- * Sets the permissions required by this module
- * 
- */
-function islandora_usage_stats_permission()
-{
+        'data-pid' => $row->pid,
+      );
+    }
     return array(
-        'manage usage stats' => array(
-            'title' => t('Manage usage tracking'),
-            'description' => t('Manage usage tracking for the Islandora Usage Stats module')
+      'subject' => t('Most Viewed Objects'),
+      'content' => array(
+        '#type' => 'item',
+        '#theme' => 'item_list',
+        '#items' => $items,
+        '#attributes' => array(
+          'class' => array(
+            'list-group',
+          ),
         ),
-        'view usage stats block' => array(
-            'title' => t('View usage tracking stats block'),
-            'description' => t('View usage tracking stats block which includes number of views and downloads')
-        )
+      ),
     );
-}
-
-/**
- * Form called when paths with link 'download_ds/$pid/$dsid' are clicked
- */
-function islandora_usage_stats_download_ds_form($pid, $dsid)
-{
-    global $base_url;
-    
-    $object = islandora_object_load($pid);
-    
-    // $url = $base_url . '/fedora/repository/' . $pid . '/' . $dsid . '/content';
-    
-    if (! $object) {
-        drupal_set_message(t('Object could not be loaded from islandora!'));
-        return;
-    }
-    
-    $sanitized_label = preg_replace('/[^A-Za-z0-9_\-]|\.pdf$/', '_', $object->label);
-    $download_url = 'islandora/object/' . $object->id . '/datastream/OBJ/download/' . $sanitized_label . '.pdf';
-    
-    $datastream = $object[$dsid];
-    
-    drupal_set_message($sanitized_label);
-    
-    if (! $datastream) {
-        drupal_set_message(t('Could not get datastream, id: ' . $pid . ' , dsid: ' . $dsid));
-        return;
-    }
-    
-    $mime_type = $datastream->mimeType;
-    
-    if (! $mime_type) {
-        drupal_set_message(t('Could not get mimetype'));
-        return;
-    }
-    
-    $extension = system_mime_type_extension($mime_type);
-    
-    $file = '';
-    $file = $datastream->getContent($file);
-    
-    $ds_name = $datastream->id;
-    
-    // track the download
-    $track = new IslandoraUsageStats($pid);
-    $result = $track->addDownload($ds_name); // increase data stream tracking number by 1
-    
-    $object_array = array(
-        'object' => $object,
-        'label' => $sanitized_label,
-        'download_url' => $download_url,
-        'datastream' => $datastream,
-        'ds_name' => $ds_name,
-        'mime_type' => $mime_type,
-        'extension' => $extension,
-        'tracking' => $result
+  }
+  elseif ($delta == 'recent_activity') {
+    module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+    $result = islandora_usage_stats_get_recently_viewed(
+      variable_get('islandora_usage_stats_recent_activity_block_display_rows', 5),
+      explode(
+        ' ',
+        variable_get('islandora_usage_stats_recent_activity_block_exclusion_list', 'islandora:root')
+      )
     );
-    
-    // create custom hook that other modules can implement
-    module_invoke_all('islandora_datastream_download', $object_array);
-    
-    // redirect to the file or error
-    if ($file) {
-//         drupal_add_http_header('Content-type', 'application/x-unknown; utf-8');
-        drupal_add_http_header('Content-type', $mime_type);
-        drupal_add_http_header('Content-Disposition', 'attachment; filename' . $sanitized_label);
-        echo $file;
-        exit();
-    } else {
-        drupal_set_message(t('Specified file does not exist!'));
+    $items = array();
+    foreach ($result as $pid) {
+      // @XXX This object load can fail perms, or not exist.
+      $object = islandora_object_load($pid);
+      if ($object) {
+        $items[] = array(
+          'data' => l($object->label, "islandora/object/{$pid}"),
+          'class' => array(
+            'list-group-item',
+          ),
+          'data-pid' => $pid,
+        );
+      }
     }
-}
-
-/**
- * Implements HOOK_islandora_datastream_download
- *
- * @param array $object_array
- *            'object'
- *            'label'
- *            'download_url'
- *            'datastream'
- *            'ds_name'
- *            'mime_type'
- *            'extension'
- *            'tracking'
- */
-function islandora_usage_stats_islandora_datastream_download($object_array)
-{
-    // drupal_set_message('Datastream with object id: ' . $object_array['object']->id . ' downloaded');
-    drupal_set_message($object_array['mime_type']);
-}
-
-/**
- * Returns the system MIME type mapping of MIME types to extensions, as defined in /etc/mime.types
- * (considering the first extension listed to be canonical).
- */
-function system_mime_type_extensions()
-{
-    $out = array();
-    $file = fopen('/etc/mime.types', 'r');
-    while (($line = fgets($file)) !== FALSE) {
-        $line = trim(preg_replace('/#.*/', '', $line));
-        if (! $line)
-            continue;
-        $parts = preg_split('/\s+/', $line);
-        if (count($parts) == 1)
-            continue;
-        $type = array_shift($parts);
-        if (! isset($out[$type]))
-            $out[$type] = array_shift($parts);
+    return array(
+      'subject' => t('Recently Viewed Objects'),
+      'content' => array(
+        '#type' => 'item',
+        '#theme' => 'item_list',
+        '#items' => $items,
+        '#attributes' => array(
+          'class' => array(
+            'list-group',
+          ),
+        ),
+      ),
+    );
+  }
+  elseif ($delta == 'top_downloads') {
+    module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+    $max_results = variable_get('islandora_usage_stats_top_downloads_block_display_rows', 5);
+    // Assumption that we will only look at most at 20 objects to populate
+    // this block, as making more request than that to fedora will
+    // decrease performance to the point where it's not usable.
+    $result = islandora_usage_stats_get_top_downloads(20);
+    $items = array();
+    if ($result) {
+      foreach ($result as $pid) {
+        $object = islandora_object_load($pid);
+        // Object can fail to load if so don't count it towards results.
+        if ($object) {
+          $items[] = array(
+            'data' => l($object->label, 'islandora/object/' . urlencode($pid)),
+            'class' => array(
+              'list-group-item',
+            ),
+            'data-pid' => $pid,
+          );
+          if (count($items) >= $max_results) {
+            break;
+          }
+        }
+      }
     }
-    fclose($file);
-    return $out;
+    return array(
+      'subject' => t('Recently Downloaded'),
+      'content' => array(
+        '#type' => 'item',
+        '#theme' => 'item_list',
+        '#items' => $items,
+        '#attributes' => array(
+          'class' => array(
+            'list-group',
+          ),
+        ),
+      ),
+    );
+  }
+  elseif ($delta == 'top_search') {
+    module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+    $results = islandora_usage_stats_get_top_searched(
+      variable_get('islandora_usage_stats_top_search_block_display_rows', 5));
+    $items = array();
+    foreach ($results as $result) {
+      $term = $result->term;
+      $options = array('query' => array('type' => 'dismax'));
+      $items[] = array(
+        'data' => l($result->term, "islandora/search/$term", $options),
+        'class' => array(
+          'list-group-item',
+        ),
+      );
+    }
+    return array(
+      'subject' => t('Most Searched Terms'),
+      'content' => array(
+        '#type' => 'item',
+        '#theme' => 'item_list',
+        '#items' => $items,
+        '#attributes' => array(
+          'class' => array(
+            'list-group',
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /**
- * Returns the canonical file extension for the MIME type specified, as defined in /etc/mime.types
- * (considering the first extension listed to be canonical).
- *
- * @param string $type
- *            - The MIME type
- * @return Ambigous <NULL, unknown>
+ * Implements hook_menu().
  */
-function system_mime_type_extension($type)
-{
-    static $exts;
-    if (! isset($exts))
-        $exts = system_mime_type_extensions();
-    return isset($exts[$type]) ? $exts[$type] : NULL;
+function islandora_usage_stats_menu() {
+  $items = array();
+
+  $items['admin/islandora/tools/islandora_usage_stats'] = array(
+    'title' => 'Islandora Usage Stats Settings',
+    'description' => 'Change how usage stats behave.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_usage_stats_admin_form'),
+    'access arguments' => array('manage usage stats'),
+    'file' => 'includes/admin.form.inc',
+  );
+
+  return $items;
 }
 
 /**
- * Implements hook_islandora_object_purged
- * 
- * @param unknown $pid
+ * Implements hook_permission().
+ */
+function islandora_usage_stats_permission() {
+  return array(
+    'manage usage stats' => array(
+      'title' => t('Manage usage tracking'),
+      'description' => t('Manage usage tracking for the Islandora Usage Stats module'),
+    ),
+    ISLANDORA_USAGE_STATS_VIEW_REPORTS => array(
+      'title' => t('View Islandora Usage Reports'),
+      'description' => t('View reports generated by Islandora Usage Statistics, this does not respect XACML.'),
+    ),
+    ISLANDORA_USAGE_STATS_VIEW_OBJECT_OVERVIEW_COLLECTION_STATS => array(
+      'title' => t('View Islandora Usage Collection Overview'),
+      'description' => t('View collection stats on the object overview page, this does not respect XACML.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_islandora_datastream_download().
+ */
+function islandora_usage_stats_islandora_datastream_download($object_array) {
+  drupal_set_message($object_array['mime_type']);
+}
+
+/**
+ * Implements hook_islandora_object_purged().
  */
 function islandora_usage_stats_islandora_object_purged($pid) {
-    // remove from views table
-    $viewsTable = 'islandora_usage_stats_object_views';
-    islandora_usage_stats_delete_from_table($viewsTable, $pid);
-    
-    // remove from downloads table
-    $downloadsTable = 'islandora_usage_stats_object_ds_downloads';
-    islandora_usage_stats_delete_from_table($downloadsTable, $pid);
-    
-    // remove from object activity log
-    $accessLog = 'islandora_usage_stats_object_access_log';
-    islandora_usage_stats_delete_from_table($accessLog, $pid);
-    
-    // remove from object datastream download log
-    $downloadLog = 'islandora_usage_stats_object_ds_access_log';
-    islandora_usage_stats_delete_from_table($downloadLog, $pid);
+  module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+  $purge_tables = array(
+    'islandora_usage_stats_object_access_log',
+    'islandora_usage_stats_object_ds_access_log',
+    'islandora_usage_stats_objects',
+    'islandora_usage_stats_datastreams',
+  );
+  foreach ($purge_tables as $table) {
+    islandora_usage_stats_clear_tracking($table, $pid);
+  }
 }
 
 /**
- * Copy of 'islandora_usage_stats_clear_tracking' method 
- * 
- * @param unknown $table
- * @param string $pid
- * @return string
- */
-function islandora_usage_stats_delete_from_table($table, $pid = NULL)
-{
-    $result = '';
-    if ($pid == NULL) {
-        $result = db_truncate($table)->execute();
-    }
-    else {
-        $result = db_delete($table)->condition('pid', $pid)->execute();
-    }
-    return $result;
-}
-
-/**
- * Implements hook_islandora_view_object to track usage stats
+ * Implements hook_islandora_view_object().
  *
- * @param unknown $object
- *            the islandora object          
+ * Tracks usage stats.
  */
-function islandora_usage_stats_islandora_view_object($object)
-{
-    $track = new IslandoraUsageStats($object->id);
-    $track->plusOneView();
+function islandora_usage_stats_islandora_view_object($object) {
+  module_load_include('inc', 'islandora_usage_stats', 'includes/utilities');
+  islandora_usage_stats_log_object_view($object);
 }
 
 /**
- * Sets up tracking variables for the Islandora PDF module
- *
- * @param array $variables
+ * Implements hook_views_api().
  */
-function islandora_usage_stats_preprocess_islandora_pdf(&$variables)
-{
-    $islandora_object = $variables['islandora_object'];
-    $id = $islandora_object->id;
-    $label = $islandora_object->label;
-    
-    $track = new IslandoraUsageStats($id);
-    $variables['time_last_viewed'] = $track->getLastViewedTime();
-    
-    $currentStats = $track->getViewCount();
-    $variables['times_viewed'] = $currentStats['views'];
-    
-    $downloaded = $track->getDownloads('OBJ');
-    
-    $variables['times_downloaded'] = $downloaded['downloads'];
-    $variables['time_last_downloaded'] = $downloaded['time'];
-    
-    $variables['islandora_download_link'] = l('<i class="glyphicon glyphicon-download"> ' . t('Download PDF') . '</i>', 'download_ds/' . $id . '/OBJ/' . $label, array(
-	    'attributes' => array(
-            'class' => 'btn btn-primary'
-        ),
-        'html' => TRUE,
-    ));
+function islandora_usage_stats_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'islandora_usage_stats') . '/views',
+  );
+}
+
+/**
+ * Implements hook_islandora_object_alter().
+ *
+ * Using alter because of the ordering bug in hook_islandora_object_modify().
+ */
+function islandora_usage_stats_islandora_object_alter(AbstractObject $object, &$context) {
+  module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+  if (isset($context['params']['label'])) {
+    islandora_usage_stats_update_object_label($object->id, $context['params']['label']);
+  }
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function islandora_usage_stats_menu_alter(&$items) {
+  $path = "/includes/callbacks.inc";
+  $items['islandora/search']['page callback'] = 'islandora_usage_stats_track_search_results';
+  $items['islandora/search']['file'] = $path;
+  $items['islandora/search']['module'] = "islandora_usage_stats";
+  $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['page callback']
+    = 'islandora_usage_stats_track_downloads';
+  $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['file']
+    = $path;
+  $items['islandora/object/%islandora_object/datastream/%islandora_datastream/download']['module']
+    = "islandora_usage_stats";
+}
+
+/**
+ * Implements hook_islandora_overview_object_alter().
+ *
+ * Shows the collection usage stats on the object overview tab if allowed.
+ */
+function islandora_usage_stats_islandora_collectioncmodel_islandora_overview_object_alter(AbstractObject &$object, &$output) {
+  if (!user_access(ISLANDORA_USAGE_STATS_VIEW_OBJECT_OVERVIEW_COLLECTION_STATS)) {
+    return;
+  }
+  $view = views_get_view('usage_collection');
+  $output['islandora_usage_stats_collection_stats'] = array(
+    '#type' => 'item',
+    '#title' => $view->get_title(),
+    '#markup' => views_embed_view('usage_collection'),
+  );
 }
