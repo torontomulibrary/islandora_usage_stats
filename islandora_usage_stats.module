@@ -298,6 +298,8 @@ function islandora_usage_stats_block_view($delta = '') {
   
     module_load_include('inc', 'islandora_usage_stats', 'includes/db');
     $object = menu_get_object('islandora_object', 2);
+    
+    drupal_add_css(drupal_get_path('module', 'islandora_usage_stats') . '/css/usage_views.css');
 
     // Make sure we are on a object page, otherwise return nothing
     if ( isset($object->id) ) {
