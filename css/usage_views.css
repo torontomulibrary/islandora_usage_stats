@@ -1,3 +1,48 @@
 #block-islandora-usage-stats-usage-views .usage-group {
+  font-size: 11px;
+  font-weight: 700;
   list-style: none;
+}
+
+#block-islandora-usage-stats-usage-views .usage-group .usage-group-item {
+  display: inline-block;
+  margin-left: 5px;
+}
+
+#block-islandora-usage-stats-usage-views .usage-group .usage-group-item:first-child {
+  margin-left: 0;
+}
+
+#block-islandora-usage-stats-usage-views .usage-group .usage-group-item span {
+  background: #fff;
+  border: 1px solid #aaa;
+  padding: 0px 4px 1px;
+  position: relative;
+}
+
+#block-islandora-usage-stats-usage-views .usage-group .usage-group-item span.counter {
+  margin-left: 5px;
+}
+
+#block-islandora-usage-stats-usage-views .usage-group .usage-group-item span.counter:before {
+  position: absolute;
+  top: 27%;
+  right: 100%;
+  content: "";
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-right: 4px solid #aaa;
+}
+#block-islandora-usage-stats-usage-views .usage-group .usage-group-item span.counter:after {
+  position: absolute;
+  top: 27%;
+  right: 95%;
+  content: "";
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-right: 4px solid #FFF;
 }
