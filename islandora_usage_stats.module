@@ -295,10 +295,10 @@ function islandora_usage_stats_block_view($delta = '') {
     );
   }
   elseif ($delta == 'usage_views') {
-    
+  
     module_load_include('inc', 'islandora_usage_stats', 'includes/db');
     $object = menu_get_object('islandora_object', 2);
-    
+
     // Make sure we are on a object page, otherwise return nothing
     if ( isset($object->id) ) {
       $pid = $object->id;
@@ -321,13 +321,13 @@ function islandora_usage_stats_block_view($delta = '') {
     $items = array();
     
     $items[] = array(
-      'data' => "<span class=\"banner\">Views</span><span class\"counter\">{$views}</span>",
+      'data' => "<span class=\"banner\">Views</span><span class=\"counter\">{$views}</span>",
       'class' => array('usage-group-item')
     );
 
     $items[] = array(
       'data' => 'Downloads : '. $downloads['OBJ'],
-      'data' => "<span class=\"banner\">Downloads</span><span class\"counter\">{$downloads['OBJ']}</span>",
+      'data' => "<span class=\"banner\">Downloads</span><span class=\"counter\">{$downloads['OBJ']}</span>",
       'class' => array('usage-group-item')
     );
     
