@@ -29,7 +29,7 @@ function islandora_usage_stats_block_info() {
   );
   
   $blocks['usage_views'] = array(
-	'info' => t('Item Usage'),
+    'info' => t('Islandora Object Views/Download Statistics'),
   )	;
 	
   return $blocks;
