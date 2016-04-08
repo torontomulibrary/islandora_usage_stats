@@ -30,8 +30,8 @@ function islandora_usage_stats_block_info() {
   
   $blocks['usage_views'] = array(
     'info' => t('Islandora Object Views/Download Statistics'),
-  )	;
-	
+  ) ;
+  
   return $blocks;
 }
 
@@ -294,54 +294,51 @@ function islandora_usage_stats_block_view($delta = '') {
       ),
     );
   }
-  elseif($delta == 'usage_views'){
-		
-		
-		module_load_include('inc', 'islandora_usage_stats', 'includes/db');
-		 $object = menu_get_object('islandora_object', 2);
-		
-		//Make sure we are on a object page, otherwise return nothing
-		if(isset($object->id)){
-			$pid = $object->id;
-		}
-		else{
-			return;
-		}
-		
-		//Get the total views from the db
-		$views = islandora_usage_stats_get_individual_object_view_count($pid);
-		$downloads = islandora_usage_stats_get_datastream_downloads_count($pid);
-		
-		//If data is screwy, set it to zero
-		if(!is_array($downloads) || !array_key_exists('OBJ', $downloads) || !is_numeric($downloads['OBJ'])){
-			$downloads['OBJ'] = 0;
-		}
-		
-		$items = array();
-		
-		$items[] = array(
-				'data' => 'Views : '. $views,
-				'class' => array('list-group-item',),
-		);
-		$items[] = array(
-				'data' => 'Downloads : '. $downloads['OBJ'],
-				'class' => array('list-group-item',),
-		);
-		
-		
-		
-		return array(
-			'content' => array(
-				'#type' => 'item',
-				'#theme' => 'item_list',
-				'#items' => $items,
-				'#attributes' => array('class' => array('list-group',),),
-			),
-		);
-	  
-	
-  
-	}
+  elseif ($delta == 'usage_views') {
+    
+    module_load_include('inc', 'islandora_usage_stats', 'includes/db');
+    $object = menu_get_object('islandora_object', 2);
+    
+    // Make sure we are on a object page, otherwise return nothing
+    if ( isset($object->id) ) {
+      $pid = $object->id;
+    }
+    else {
+      return;
+    }
+    
+    // Get the total views from the db
+    $views = islandora_usage_stats_get_individual_object_view_count($pid);
+    $downloads = islandora_usage_stats_get_datastream_downloads_count($pid);
+    
+    // If data is screwy, set it to zero
+    if ( !is_array($downloads) || 
+         !array_key_exists('OBJ', $downloads) || 
+         !is_numeric($downloads['OBJ'])) {
+      $downloads['OBJ'] = 0;
+    }
+    
+    $items = array();
+    
+    $items[] = array(
+      'data' => 'Views : '. $views,
+      'class' => array('list-group-item',),
+    );
+
+    $items[] = array(
+      'data' => 'Downloads : '. $downloads['OBJ'],
+      'class' => array('list-group-item',),
+    );
+    
+    return array(
+      'content' => array(
+        '#type' => 'item',
+        '#theme' => 'item_list',
+        '#items' => $items,
+        '#attributes' => array( 'class' => array('list-group') )
+      )
+    );
+  }
 }
 
 /**
